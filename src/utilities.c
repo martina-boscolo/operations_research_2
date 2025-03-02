@@ -38,6 +38,48 @@ void free_instance(instance *inst) {
 
 }
 
+void basic_TSPLIB_parser(const char *filename, instance *inst) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    
+    char line[256]; // To store a line of the file
+    inst->nnodes = 0; // Safety measure: avoid using uninitialized value 
+    inst->coord = NULL; // Safety measure: avoid using uninitialized value
+    
+    while (fgets(line, sizeof(line), file)) {
+        // Find the dimension
+        if (strstr(line, "DIMENSION")) {
+            sscanf(line, "DIMENSION : %d", &inst->nnodes);
+            
+            // Allocate memory after finding dimension
+            inst->coord = (coordinate *)malloc(inst->nnodes * sizeof(coordinate));
+            if (!inst->coord) {
+                perror("Memory allocation failed");
+                fclose(file);
+                exit(EXIT_FAILURE);
+            }
+        }
+        
+        // Read all coordinates
+        if (strstr(line, "NODE_COORD_SECTION")) {
+            int index = 0;
+            while (index < inst->nnodes && fgets(line, sizeof(line), file)) {
+                if (strstr(line, "EOF")) break;
+                
+                int temp_id;
+                sscanf(line, "%d %lf %lf", &temp_id, &inst->coord[index].x, &inst->coord[index].y);
+                index++;
+            }
+            break; // Exit the main loop once we've read all coordinates
+        }
+    }
+    
+    fclose(file);
+}
+
 //--- solution utilities ---
 
 void plot_solution(instance inst, solution sol) {
@@ -87,6 +129,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
     inst->seed = DEFAULT_SEED;
     inst->timelimit = DEFAULT_TIMELIMIT;
     inst->verbose = DEFAULT_VERBOSE;
+    inst->input_file[0] = EMPTY_STRING;
 
     // flags
     int need_help = 0;
@@ -95,10 +138,11 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
     // parsing
     for (int i = 1; i < argc; i++) {
 
+        if ( strcmp(argv[i],"-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; } 			// input fil
         if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }
-        if (strcmp(argv[i], "-verbose") == 0) { inst->timelimit = atoi(argv[++i]); continue; }
+        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
 
         // if there is an unknown command
@@ -118,7 +162,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
     // asked to see the available commands
     if (help) {
 
-        printf("-f <file's path>          To pass the problem's path\n");
+        printf("-file <file's path>       To pass the problem's path\n");
         printf("-seed <seed>              The seed for random generation\n");
         printf("-timelimit <time>         The time limit in seconds\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
@@ -136,6 +180,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
         printf("Seed: %d\n", inst->seed);
         printf("Timelimit: %d\n", inst->timelimit); 
         printf("Verbose: %d\n", inst->verbose);
+        printf("Input file %s\n", inst->input_file); 
 
         printf("\n\n");
 

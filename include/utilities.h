@@ -31,6 +31,15 @@ void random_instance(instance *inst);
  */
 void free_instance(instance *inst);
 
+/**
+ * Parses a TSPLIB format file to extract only node coordinates.
+ * Assumes a standard TSPLIB format where DIMENSION appears before NODE_COORD_SECTION
+ * 
+ * @param filename Path to the TSPLIB format file to parse
+ * @param inst The instance pointer of the problem
+ */
+void basic_TSPLIB_parser(const char *filename, instance *inst);
+
 
 
 //--- solution utilities ---

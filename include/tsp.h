@@ -10,6 +10,7 @@
 #define DEFAULT_SEED 1
 #define DEFAULT_TIMELIMIT -1 
 #define DEFAULT_VERBOSE 50
+#define EMPTY_STRING '\0'
 
 typedef struct {
 
@@ -34,6 +35,8 @@ typedef struct {
     // how much print: 50 = everything
     // todo: define the level of verbose 
     int verbose;
+    // input file 
+    char input_file[1000];
 
 } instance;
 

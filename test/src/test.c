@@ -5,16 +5,25 @@
 void make_test_instance(instance *inst);
 void make_test_solution(instance *inst, solution *sol);
 
-int main() {
+int main(int argc, const char *argv[]) {
 
     instance inst;
+    parse_command_line(argc, argv, &inst);
 
-    make_test_instance(&inst);
+    if (inst.input_file[0] != EMPTY_STRING ) {
+        // Using input file
+        printf("Input file provided.\n\n");
+        basic_TSPLIB_parser(inst.input_file, &inst);
+    } else {
+        printf("No input file provided. Using random instance\n\n");
+        make_test_instance(&inst);
+    }
 
     if (inst.verbose >= 50) {
 
         // print metadata
         printf("Test instance result: \n\n");
+        printf("Input file: %s\n", inst.input_file);
         printf("Nnodes: %d\n", inst.nnodes);
         printf("Seed: %d\n", inst.seed);
         printf("Timelimit: %d\n", inst.timelimit); 
