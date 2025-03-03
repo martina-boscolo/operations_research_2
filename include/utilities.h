@@ -13,7 +13,7 @@
 
 //--- instance utilities ---
 
-// Maximum value for x and y coordinates
+// Maximum value for x and y coordinates for a random instance
 #define MAX_XCOORD 10000
 #define MAX_YCOORD 10000
 

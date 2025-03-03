@@ -111,6 +111,8 @@ void plot_solution(instance inst, solution sol) {
     //use gnuplot to print the solution
     FILE *gnuplot = open_plot();
 
+    // todo: add plot in a file
+
     // specify the customization
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7"); // notitle with lines");
 

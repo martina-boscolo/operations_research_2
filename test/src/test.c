@@ -2,13 +2,29 @@
 
 #include <windows.h>
 
-void make_test_instance(instance *inst);
 void make_test_solution(instance *inst, solution *sol);
 
 int main(int argc, const char *argv[]) {
 
     instance inst;
     parse_command_line(argc, argv, &inst);
+
+    // force to print everything
+    if (inst.verbose < 50) {
+
+        inst.verbose = 50; 
+
+        printf("Instance metadata:\n\n");
+
+        printf("Nnodes: %d\n", inst.nnodes);
+        printf("Seed: %d\n", inst.seed);
+        printf("Timelimit: %d\n", inst.timelimit); 
+        printf("Verbose: %d\n", inst.verbose);
+        printf("Input file %s\n", inst.input_file); 
+
+        printf("\n\n");
+
+    }
 
     build_instance(&inst);
 
@@ -28,6 +44,7 @@ int main(int argc, const char *argv[]) {
         for (int i=0; i<inst.nnodes; i++) { printf("Node %d: \t x %lf,\ty %lf\n", i, inst.coord[i].x, inst.coord[i].y); }
         
         printf("\n\n");
+    
     }
 
     solution sol;
@@ -52,6 +69,7 @@ int main(int argc, const char *argv[]) {
     Sleep(100000);
 
     return 0;
+
 }
 
 // As solution it takes the nodes in order from 0 to nnodes and then 0 again
