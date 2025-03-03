@@ -14,9 +14,7 @@ int main(int argc, const char *argv[]) {
     double t_parse = seconds();
 
     // build the instance
-    // for now onli random instance is available
-    // todo add tsplib instances
-    random_instance(&inst);
+    build_instance(&inst);
     // time to build the instance
     double t_instance = seconds();
 

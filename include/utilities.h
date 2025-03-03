@@ -18,18 +18,18 @@
 #define MAX_YCOORD 10000
 
 /**
+ * Instanciate a TSP problem 
+ * 
+ * @param inst The instance pointer of the problem
+ */
+void build_instance(instance *inst);
+
+/**
  * Create a random instance
  * 
  * @param inst The instance pointer of the problem
  */
 void random_instance(instance *inst);
-
-/**
- * Deallocates the most space-consuming attributes of instance from memory
- * 
- * @param inst The instance pointer of the problem
- */
-void free_instance(instance *inst);
 
 /**
  * Parses a TSPLIB format file to extract only node coordinates.
@@ -40,7 +40,12 @@ void free_instance(instance *inst);
  */
 void basic_TSPLIB_parser(const char *filename, instance *inst);
 
-
+/**
+ * Deallocates the most space-consuming attributes of instance from memory
+ * 
+ * @param inst The instance pointer of the problem
+ */
+void free_instance(instance *inst);
 
 //--- solution utilities ---
 

@@ -10,14 +10,7 @@ int main(int argc, const char *argv[]) {
     instance inst;
     parse_command_line(argc, argv, &inst);
 
-    if (inst.input_file[0] != EMPTY_STRING ) {
-        // Using input file
-        printf("Input file provided.\n\n");
-        basic_TSPLIB_parser(inst.input_file, &inst);
-    } else {
-        printf("No input file provided. Using random instance\n\n");
-        make_test_instance(&inst);
-    }
+    build_instance(&inst);
 
     if (inst.verbose >= 50) {
 
@@ -59,18 +52,6 @@ int main(int argc, const char *argv[]) {
     Sleep(100000);
 
     return 0;
-}
-
-// Make a random instance 
-void make_test_instance(instance *inst) {
-
-    inst->nnodes = 10;
-    inst->seed = DEFAULT_SEED;
-    inst->timelimit = DEFAULT_TIMELIMIT;
-    inst->verbose = 50;
-
-    random_instance(inst);
-
 }
 
 // As solution it takes the nodes in order from 0 to nnodes and then 0 again

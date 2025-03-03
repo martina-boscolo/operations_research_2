@@ -2,6 +2,30 @@
 
 //--- instance utilities ---
 
+void build_instance(instance *inst) {
+
+    if (inst->input_file[0] != EMPTY_STRING ) {
+
+        // Using input file
+        if (inst->verbose >= 50) {
+            printf("Input file provided.\n\n");
+        }
+
+        basic_TSPLIB_parser(inst->input_file, &inst);
+
+    } else {
+
+        // Create a random instance
+        if (inst->verbose >= 50) {
+            printf("No input file provided. Using random instance\n\n");
+        }
+
+        random_instance(inst);
+
+    }
+
+}
+
 void random_instance(instance *inst) {
 
     if (inst->verbose >= 50) {
@@ -29,12 +53,6 @@ void random_instance(instance *inst) {
     if (inst->verbose >= 50) {
         printf("\n\n");
     }
-
-}
-
-void free_instance(instance *inst) {
-
-    free(inst->coord);
 
 }
 
@@ -78,6 +96,12 @@ void basic_TSPLIB_parser(const char *filename, instance *inst) {
     }
     
     fclose(file);
+}
+
+void free_instance(instance *inst) {
+
+    free(inst->coord);
+
 }
 
 //--- solution utilities ---
@@ -138,11 +162,11 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
     // parsing
     for (int i = 1; i < argc; i++) {
 
-        if ( strcmp(argv[i],"-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; } 			// input fil
-        if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }
-        if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }
-        if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }
-        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }
+        if ( strcmp(argv[i],"-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; }       // input file
+        if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }               // number of nodes
+        if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
+        if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }    // time limit
+        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // how much to print
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
 
         // if there is an unknown command
