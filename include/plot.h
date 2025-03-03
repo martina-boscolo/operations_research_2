@@ -13,9 +13,17 @@
 FILE *open_plot(void);
 
 /**
+ * Save the plot in a png file
+ * 
+ * @param plot The Gnuplot file pointer
+ * @param filename The string name of the png file
+ */
+void plot_in_file(FILE *plot, const char *filename);
+
+/**
  * Add Gnuplot customization
  * 
- * @param plot The Gnuplot file
+ * @param plot The Gnuplot file pointer
  * @param customization The string of customization to add
  */
 void add_plot_customization(FILE *plot, const char *customization);
@@ -23,7 +31,7 @@ void add_plot_customization(FILE *plot, const char *customization);
 /**
  * Plot an edge between the two nodes
  * 
- * @param plot The Gnuplot file
+ * @param plot The Gnuplot file pointer
  * @param node1 The coordinate of first node
  * @param node2 The coordinate of second node
  */
@@ -32,14 +40,14 @@ void plot_edge(FILE *plot, coordinate node1, coordinate node2);
 /**
  * Tells Gnuplot that the input data are ended
  * 
- * @param plot The Gnuplot file
+ * @param plot The Gnuplot file pointer
  */
 void input_end(FILE *plot);
 
 /**
  * Close the Gnuplot file
  * 
- * @param plot The Gnuplot file
+ * @param plot The Gnuplot file pointer
  */
 void free_plot(FILE *plot);
 
