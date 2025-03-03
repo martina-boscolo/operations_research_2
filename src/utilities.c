@@ -4,14 +4,14 @@
 
 void build_instance(instance *inst) {
 
-    if (inst->input_file[0] != EMPTY_STRING ) {
+    if (inst->input_file[0] != EMPTY_STRING) {
 
         // Using input file
         if (inst->verbose >= 50) {
             printf("Input file provided.\n\n");
         }
 
-        basic_TSPLIB_parser(inst->input_file, &inst);
+        basic_TSPLIB_parser(inst->input_file, inst);
 
     } else {
 
@@ -31,6 +31,8 @@ void random_instance(instance *inst) {
     if (inst->verbose >= 50) {
         printf("Creating random instance:\n\n");
     }
+
+    sprintf(inst->input_file, "random_n%d_s%d", inst->nnodes, inst->seed);
 
     // set random seed
     srand(inst->seed);
@@ -112,6 +114,7 @@ void plot_solution(instance inst, solution sol) {
     FILE *gnuplot = open_plot();
 
     // todo: add plot in a file
+    plot_in_file(gnuplot, inst.input_file);
 
     // specify the customization
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7"); // notitle with lines");

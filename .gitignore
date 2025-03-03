@@ -1,4 +1,5 @@
 .vscode/
+plot/
 
 *.o
 *.exe
