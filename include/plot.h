@@ -4,6 +4,7 @@
 #include "tsp.h"
 
 #include <stdio.h>
+#include <sys/stat.h>
 
 /**
  * Open a Gnuplot file
@@ -51,4 +52,4 @@ void input_end(FILE *plot);
  */
 void free_plot(FILE *plot);
 
-#endif
+#endif //PLOT_H

@@ -17,10 +17,10 @@ FILE *open_plot(void) {
 void plot_in_file(FILE *plot, const char *filename) {
 
     // Create the plot directory if does not exists
-    mkdir("../plot", 0777); 
+    mkdir("./plot", 0777); 
     
     fprintf(plot, "set terminal png size 800, 600\n");
-    fprintf(plot, "set output '../plot/%s.png'\n", filename);
+    fprintf(plot, "set output './plot/%s.png'\n", filename);
 
 }
 

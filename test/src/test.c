@@ -1,13 +1,13 @@
 #include "utilities.h"
 
-#include <windows.h>
-
 void make_test_solution(instance *inst, solution *sol);
 
 int main(int argc, const char *argv[]) {
 
     instance inst;
-    parse_command_line(argc, argv, &inst);
+    solution sol;
+
+    parse_command_line(argc, argv, &inst, &sol);
 
     // force to print everything
     if (inst.verbose < 50) {
@@ -21,6 +21,12 @@ int main(int argc, const char *argv[]) {
         printf("Timelimit: %d\n", inst.timelimit); 
         printf("Verbose: %d\n", inst.verbose);
         printf("Input file %s\n", inst.input_file); 
+
+        printf("\n");
+
+        printf("Solution metadata:\n\n");
+
+        printf("Method: %s\n", sol.method);
 
         printf("\n\n");
 
@@ -47,8 +53,6 @@ int main(int argc, const char *argv[]) {
     
     }
 
-    solution sol;
-
     make_test_solution(&inst, &sol);
 
     if (inst.verbose >= 50) {
@@ -65,8 +69,6 @@ int main(int argc, const char *argv[]) {
 
     free_instance(&inst);
     free_solution(&sol);
-
-    Sleep(100000);
 
     return 0;
 

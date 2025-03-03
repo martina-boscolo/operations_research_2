@@ -20,19 +20,19 @@ void build_instance(instance *inst) {
             printf("No input file provided. Using random instance\n\n");
         }
 
-        random_instance(inst);
+        random_instance_generator(inst);
 
     }
 
 }
 
-void random_instance(instance *inst) {
+void random_instance_generator(instance *inst) {
 
     if (inst->verbose >= 50) {
         printf("Creating random instance:\n\n");
     }
 
-    sprintf(inst->input_file, "random_n%d_s%d", inst->nnodes, inst->seed);
+    sprintf(inst->name, "random_n%d_s%d", inst->nnodes, inst->seed);
 
     // set random seed
     srand(inst->seed);
@@ -43,8 +43,8 @@ void random_instance(instance *inst) {
     // generate random coordinate for each node
     for(int i=0; i<inst->nnodes; i++) {
 
-        inst->coord[i].x = rand() % MAX_XCOORD;
-        inst->coord[i].y = rand() % MAX_YCOORD;
+        inst->coord[i].x = random01() * MAX_XCOORD;
+        inst->coord[i].y = random01() * MAX_YCOORD;
 
         if (inst->verbose >= 50) {
             printf("Node %d \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
@@ -113,8 +113,10 @@ void plot_solution(instance inst, solution sol) {
     //use gnuplot to print the solution
     FILE *gnuplot = open_plot();
 
-    // todo: add plot in a file
-    plot_in_file(gnuplot, inst.input_file);
+    // in a file
+    char filename[50];
+    sprintf(filename, "%s_%s", inst.name, sol.method);
+    plot_in_file(gnuplot, filename);
 
     // specify the customization
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7"); // notitle with lines");
@@ -151,14 +153,19 @@ void print_error(const char *err) {
 
 }
 
-void parse_command_line(int argc, const char *argv[], instance *inst){
+void parse_command_line(int argc, const char *argv[], instance *inst, solution *sol){
 
     // set default values
     inst->nnodes = DEFAULT_NNODES;
+    inst->coord = NULL;
     inst->seed = DEFAULT_SEED;
     inst->timelimit = DEFAULT_TIMELIMIT;
     inst->verbose = DEFAULT_VERBOSE;
     inst->input_file[0] = EMPTY_STRING;
+
+    sol->cost = 0;
+    sol->visited_nodes = NULL;
+    strcpy(sol->method, ORDER);
 
     // flags
     int need_help = 0;
@@ -171,7 +178,8 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
         if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }               // number of nodes
         if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
         if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }    // time limit
-        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // how much to print
+        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // verbosity level
+        if (strcmp(argv[i], "-method") == 0) { strcpy(sol->method,argv[++i]); continue; }
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
 
         // if there is an unknown command
@@ -195,6 +203,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
         printf("-seed <seed>              The seed for random generation\n");
         printf("-timelimit <time>         The time limit in seconds\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
+        printf("-method <method>          The method used to solve the problem\n");
 
         exit(0);
 
@@ -211,8 +220,22 @@ void parse_command_line(int argc, const char *argv[], instance *inst){
         printf("Verbose: %d\n", inst->verbose);
         printf("Input file %s\n", inst->input_file); 
 
+        printf("\n");
+
+        printf("Solution metadata:\n\n");
+
+        printf("Method: %s\n", sol->method);
+
         printf("\n\n");
 
     }
+
+}
+
+//--- various utilities ---
+
+double random01() { 
+
+    return ((double) rand() / RAND_MAX); 
 
 }

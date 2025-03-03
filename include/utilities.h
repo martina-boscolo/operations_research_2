@@ -29,7 +29,7 @@ void build_instance(instance *inst);
  * 
  * @param inst The instance pointer of the problem
  */
-void random_instance(instance *inst);
+void random_instance_generator(instance *inst);
 
 /**
  * Parses a TSPLIB format file to extract only node coordinates.
@@ -82,6 +82,16 @@ void print_error(const char *err);
  * @param argv The argv from the main function
  * @param inst The instance pointer of the problem
  */ 
-void parse_command_line(int argc, const char *argv[], instance *inst);
+void parse_command_line(int argc, const char *argv[], instance *inst, solution *sol);
 
-#endif
+
+//--- various utilities ---
+
+/**
+ * Draw a random value between 0 and 1
+ * 
+ * @return The random value
+ */
+double random01();
+
+#endif //UTILITIES_H
