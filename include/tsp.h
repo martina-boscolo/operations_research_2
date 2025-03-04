@@ -8,52 +8,44 @@
 // default values for the instance
 #define DEFAULT_NNODES 150
 #define DEFAULT_SEED 1
-#define DEFAULT_TIMELIMIT -1 
+#define DEFAULT_TIMELIMIT 3600.0
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
+
 // default value for the solution
 #define ORDER "ORDER"
+#define INFINITE_COST 10e38
 
 typedef struct {
 
-    // x coordinate
-    double x;
-    // y coordinate
-    double y;
+    double x;                   // x coordinate
+    double y;                   // y coordinate
 
 } coordinate;
 
 typedef struct {
 
-    // how many nodes the graph has
-    int nnodes;
-    // (x,y) coordinate of the nodes
-    coordinate *coord;
+    double cost;                // cost of the solution
+    int *visited_nodes;         // sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
+    char method[30];            // name of method to compute the solution
 
-    // name of instance
-    char name[10];
-    // random seed used to generate random instance
-    int seed;
-    // numer of seconds to find the solution, if < 0 means no time limit
-    int timelimit;
-    // how much print: 50 = everything
-    // todo: define the level of verbose 
-    int verbose;
-    // input file 
-    char input_file[1000];
-
-} instance;
+} solution;
 
 typedef struct {
 
-    // cost if the solution
-    double cost;
-    // sequence of visited nodes
-    // to complete the cycle first and last nodes must be the same node
-    int *visited_nodes;
-    // name of method to compute the solution
-    char method[30];
+    int nnodes;                 // how many nodes the graph has
+    coordinate *coord;          // (x,y) coordinate of the nodes
+    double *costs;              // array of distances between nodes
+    solution *best_solution;     // best current solution
 
-} solution;
+    char name[10];              // name of instance
+    int seed;                   // random seed used to generate random instance
+    char input_file[1000];      // input file 
+
+    int verbose;                // printing level  (=10 only incumbent, =20 little output, =50-60 good, =70 verbose, >=100 cplex log)
+    double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
+    double t_start;             // initial time
+
+} instance;
 
 #endif //TSP_H
