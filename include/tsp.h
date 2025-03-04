@@ -13,8 +13,10 @@
 #define EMPTY_STRING '\0'
 
 // default value for the solution
-#define ORDER "ORDER"
+#define ORDER "Order"
 #define INFINITE_COST 10e38
+// available methods to solve the tsp
+#define NEAREST_NEIGHBOR "NearestNeighbor"
 
 typedef struct {
 
