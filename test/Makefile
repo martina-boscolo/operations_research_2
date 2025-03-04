@@ -32,4 +32,4 @@ rebuild: clean $(TARGET)
 
 # Run target
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) -n 10
