@@ -4,6 +4,8 @@
 
 void build_instance(instance *inst) {
 
+    name_instance(inst);
+
     if (inst->input_file[0] != EMPTY_STRING) {
 
         // Using input file
@@ -31,8 +33,6 @@ void random_instance_generator(instance *inst) {
     if (inst->verbose >= 50) {
         printf("Creating random instance:\n\n");
     }
-
-    sprintf(inst->name, "random_n%d_s%d", inst->nnodes, inst->seed);
 
     // set random seed
     srand(inst->seed);
@@ -100,32 +100,133 @@ void basic_TSPLIB_parser(const char *filename, instance *inst) {
     fclose(file);
 }
 
+void name_instance(instance *inst) {
+
+    if (inst->input_file[0] != EMPTY_STRING) {
+
+        // file instance
+        char *bar = strrchr(inst->input_file, '/');
+        char *point = strrchr(inst->input_file, '.');
+
+        int bar_pos = -1;
+        int point_pos = strlen(inst->input_file);
+
+        if (bar) {
+            bar_pos = bar - inst->input_file;
+        }
+        if (point) {
+            bar_pos = bar - inst->input_file;
+        }
+
+        strncpy(inst->name, inst->input_file+bar_pos+1, point_pos-bar_pos);
+
+    } else {
+        
+        // random instance
+        sprintf(inst->name, "random_n%d_s%d", inst->nnodes, inst->seed);
+
+    }
+
+}
+
+void compute_all_costs(instance *inst) {
+
+    for(int i=0; i<inst->nnodes; i++) {
+        for(int j=0; j<inst->nnodes; j++) {
+
+            // costs are memorized row wise
+            inst->costs[i*inst->nnodes + j] = dist(inst->coord[i], inst->coord[j]);
+
+        }
+    }
+
+}
+
+double cost(int i, int j, instance *inst) {
+    return inst->costs[i*inst->nnodes + j];
+}
+
+void update_best_sol(instance *inst, solution *sol);
+
+void print_instance(instance *inst) {
+
+    printf("Instance:\n\n");
+
+    printf("Name: %s\n", inst->name);
+    printf("Seed: %d\n", inst->seed);
+    printf("Input file %s\n", inst->input_file);
+    printf("Nnodes: %d\n", inst->nnodes);
+
+    printf("\n");
+
+    printf("Timelimit: %lf\n", inst->timelimit); 
+    printf("Verbose: %d\n", inst->verbose); 
+
+    printf("\n");
+
+    if ( !(inst->coord == NULL) ) {
+
+        printf("Nodes' coordinates:\n");
+
+        for (int i=0; i<inst->nnodes; i++) {
+            printf("Node %d: \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
+        }
+
+    }
+    
+    printf("\n");
+
+    if ( !(inst->costs == NULL) ) {
+
+        printf("Edges' cost:\n");
+
+        for(int i=0; i<inst->nnodes; i++) {
+            for(int j=i+1; j<inst->nnodes; j++) {
+                printf("Edge[%d, %d]: %lf", i, j, inst->costs[i*inst->nnodes + j]);
+            }
+        }
+
+    }
+
+    printf("\n");
+
+    if ( !(inst->best_solution == NULL) ) {
+        print_solution(inst->best_solution, inst->nnodes);
+    }
+
+    printf("\n");
+
+}
+
 void free_instance(instance *inst) {
 
     free(inst->coord);
+    free(inst->costs);
 
 }
 
 //--- solution utilities ---
 
-void plot_solution(instance inst, solution sol) {
+void check_feasibility(instance *inst, solution *sol);
+
+void plot_solution(instance *inst, solution *sol) {
 
     //use gnuplot to print the solution
     FILE *gnuplot = open_plot();
 
     // in a file
     char filename[50];
-    sprintf(filename, "%s_%s", inst.name, sol.method);
+    sprintf(filename, "%s_%s", inst->name, sol->method);
     plot_in_file(gnuplot, filename);
 
     // specify the customization
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7"); // notitle with lines");
 
     // plot edges
-    for(int i=0; i<inst.nnodes; i++) {
+    for(int i=0; i<inst->nnodes; i++) {
 
-        coordinate first = inst.coord[sol.visited_nodes[i]];
-        coordinate second = inst.coord[sol.visited_nodes[i+1]];
+        coordinate first = inst->coord[sol->visited_nodes[i]];
+        coordinate second = inst->coord[sol->visited_nodes[i+1]];
         
         plot_edge(gnuplot, first, second);
 
@@ -134,6 +235,27 @@ void plot_solution(instance inst, solution sol) {
     input_end(gnuplot);
 
     free_plot(gnuplot);
+
+}
+
+void print_solution(solution *sol, int nnodes) {
+
+    printf("Solution:\n\n");
+
+    printf("Cost: %lf\n", sol->cost);
+    printf("Method: %s\n", sol->method);
+
+    if ( !(sol->visited_nodes == NULL) ) {
+
+        printf("Visited nodes:\n");
+
+        for (int i=0; i<nnodes+1; i++) {
+            printf("Node %d\n", sol->visited_nodes[i]);
+        }
+
+    }
+
+    printf("\n");
 
 }
 
@@ -158,12 +280,15 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
     // set default values
     inst->nnodes = DEFAULT_NNODES;
     inst->coord = NULL;
+    inst->costs = NULL;
+    inst->best_solution = NULL;
+    inst->name[0] = EMPTY_STRING;
     inst->seed = DEFAULT_SEED;
     inst->timelimit = DEFAULT_TIMELIMIT;
     inst->verbose = DEFAULT_VERBOSE;
     inst->input_file[0] = EMPTY_STRING;
 
-    sol->cost = 0;
+    sol->cost = INFINITE_COST;
     sol->visited_nodes = NULL;
     strcpy(sol->method, ORDER);
 
@@ -174,7 +299,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
     // parsing
     for (int i = 1; i < argc; i++) {
 
-        if ( strcmp(argv[i],"-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; }       // input file
+        if (strcmp(argv[i], "-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; }       // input file
         if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }               // number of nodes
         if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
         if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }    // time limit
@@ -212,19 +337,11 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
     // if requested print the result of parsing
     if (inst->verbose >= 50) {
 
-        printf("Instance metadata:\n\n");
-
-        printf("Nnodes: %d\n", inst->nnodes);
-        printf("Seed: %d\n", inst->seed);
-        printf("Timelimit: %d\n", inst->timelimit); 
-        printf("Verbose: %d\n", inst->verbose);
-        printf("Input file %s\n", inst->input_file); 
+        print_instance(inst);
 
         printf("\n");
 
-        printf("Solution metadata:\n\n");
-
-        printf("Method: %s\n", sol->method);
+        print_solution(sol, inst->nnodes);
 
         printf("\n\n");
 
@@ -232,10 +349,18 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
 
 }
 
+double seconds(void);
+
 //--- various utilities ---
 
-double random01() { 
+double random01(void) { 
 
     return ((double) rand() / RAND_MAX); 
+
+}
+
+double dist(coordinate point1, coordinate point2) {
+
+    return sqrt(pow((point1.x-point2.x),2) + pow((point1.y-point2.y),2));
 
 }
