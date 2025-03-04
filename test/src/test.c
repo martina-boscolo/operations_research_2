@@ -10,25 +10,15 @@ int main(int argc, const char *argv[]) {
     parse_command_line(argc, argv, &inst, &sol);
 
     // force to print everything
-    if (inst.verbose < 50) {
+    if (inst.verbose < 100) {
 
-        inst.verbose = 50; 
+        inst.verbose = 100; 
 
-        printf("Instance metadata:\n\n");
+        print_instance(&inst);
 
-        printf("Nnodes: %d\n", inst.nnodes);
-        printf("Seed: %d\n", inst.seed);
-        printf("Timelimit: %d\n", inst.timelimit); 
-        printf("Verbose: %d\n", inst.verbose);
-        printf("Input file %s\n", inst.input_file); 
+        print_solution(&sol, inst.nnodes);
 
         printf("\n");
-
-        printf("Solution metadata:\n\n");
-
-        printf("Method: %s\n", sol.method);
-
-        printf("\n\n");
 
     }
 
@@ -38,17 +28,8 @@ int main(int argc, const char *argv[]) {
 
         // print metadata
         printf("Test instance result: \n\n");
-        printf("Input file: %s\n", inst.input_file);
-        printf("Nnodes: %d\n", inst.nnodes);
-        printf("Seed: %d\n", inst.seed);
-        printf("Timelimit: %d\n", inst.timelimit); 
-        printf("Verbose: %d\n", inst.verbose);
+        print_instance(&inst);
 
-        printf("\n\n");
-        
-        // print nodes' coordinate
-        for (int i=0; i<inst.nnodes; i++) { printf("Node %d: \t x %lf,\ty %lf\n", i, inst.coord[i].x, inst.coord[i].y); }
-        
         printf("\n\n");
     
     }
@@ -58,14 +39,12 @@ int main(int argc, const char *argv[]) {
     if (inst.verbose >= 50) {
 
         printf("Test solution result:\n\n");
-
-        for (int i=0; i<inst.nnodes+1; i++) { printf("Visited node %d\n", sol.visited_nodes[i]); }
-        
+        print_solution(&sol, inst.nnodes);
         printf("\n\n");
 
     }
 
-    plot_solution(inst, sol);
+    plot_solution(&inst, &sol);
 
     free_instance(&inst);
     free_solution(&sol);
