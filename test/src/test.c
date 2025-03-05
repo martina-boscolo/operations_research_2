@@ -1,4 +1,5 @@
 #include "utilities.h"
+#include "heuristics.h"
 
 void make_test_solution(instance *inst, solution *sol);
 
@@ -34,7 +35,9 @@ int main(int argc, const char *argv[]) {
     
     }
 
-    make_test_solution(&inst, &sol);
+    //make_test_solution(&inst, &sol);
+
+    nn_main(&inst, &sol);
 
     if (inst.verbose >= 50) {
 
