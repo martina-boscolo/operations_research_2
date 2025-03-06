@@ -2,6 +2,7 @@
 #define HEURISTICS_H
 
 #include "tsp.h"
+#include "utilities.h"
 
 #include <math.h>
 #include <time.h>

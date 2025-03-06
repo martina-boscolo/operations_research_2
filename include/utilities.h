@@ -103,7 +103,29 @@ void free_instance(instance *inst);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void check_feasibility(instance *inst, solution *sol);
+void check_feasibility(instance *inst, solution *sol); //TODO is check_sol the same? 
+
+/**
+ * Check if all nodes are visited exactly once.
+ * Returns 1 if valid, 0 otherwise.
+ */
+int validate_node_visits(solution *sol, instance *inst);
+
+/**
+ * Compute the total cost of the given solution path.
+ */
+double compute_solution_cost(solution *sol, instance *inst);
+
+/**
+ * Main function to check the feasibility of the solution.
+ * Returns 1 if feasible, 0 otherwise.
+ */
+int check_sol(solution *sol, instance *inst, double cost); 
+
+/**
+ * Calls check_sol with a custom message
+ */
+void validate_solution(solution *sol, instance *inst, double cost, const char *context);
 
 /**
  * Plot the solution using gnuplot

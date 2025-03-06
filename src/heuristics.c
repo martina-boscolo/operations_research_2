@@ -1,9 +1,20 @@
 #include "heuristics.h"
 
+/* Allocate memory for a solution */
+void allocate_solution(solution *sol, int nnodes) {
+    sol->visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
+    if (!sol->visited_nodes) {
+        fprintf(stderr, "Memory allocation failed for solution\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 double euclidean_distance(coordinate a, coordinate b) {
     return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
 
+
+//TODO use the functions already existing
 void compute_cost_matrix(instance *inst) {
     inst->costs = (double *)malloc(inst->nnodes * inst->nnodes * sizeof(double));
     for (int i = 0; i < inst->nnodes; i++) {
@@ -22,6 +33,11 @@ void nearest_neighbor(instance *inst, solution *sol, int start) {
     if (sol->visited_nodes != NULL) {
         free(sol->visited_nodes);
     }
+
+
+    /* Allocate memory for a solution */
+    allocate_solution(sol, inst->nnodes);
+
 
     // Allocate memory for visited nodes
     sol->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
@@ -75,6 +91,7 @@ void nearest_neighbor(instance *inst, solution *sol, int start) {
 
     // Free temporary memory
     free(visited);
+    validate_solution(sol, inst, sol->cost, "Nearest Neighbor");
 }
 
 /* Multi-start approach with time limit */
@@ -111,6 +128,7 @@ void multi_start_nn(instance *inst, solution *sol) {
         if (sol->cost < inst->best_solution->cost) {
             inst->best_solution->cost = sol->cost;
             memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
+            validate_solution(inst->best_solution, inst, inst->best_solution->cost, "Best Solution Update");
         }
     }
 }
@@ -145,6 +163,7 @@ void two_opt(instance *inst, solution *sol) {
     }
 
     strcpy(sol->method, "2-opt_refinement");
+    validate_solution(sol, inst, sol->cost, "2-opt Refinement");
 }
 
 
@@ -159,6 +178,7 @@ int nn_main(instance *inst, solution *sol) {
         printf("%d ", inst->best_solution->visited_nodes[i]);
     }
     printf("\n");
+    validate_solution(inst->best_solution, inst, inst->best_solution->cost, "Final Check in nn_main");
 
     return 0;
 }

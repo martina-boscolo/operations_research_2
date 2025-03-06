@@ -209,6 +209,74 @@ void free_instance(instance *inst) {
 
 void check_feasibility(instance *inst, solution *sol);
 
+int validate_node_visits(solution *sol, instance *inst) {
+    int *visited = (int *)calloc(inst->nnodes, sizeof(int));
+    if (!visited) {
+        fprintf(stderr, "Memory allocation failed for validate_node_visits\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < inst->nnodes; i++) {
+        int node = sol->visited_nodes[i];
+
+        if (node < 0 || node >= inst->nnodes) {
+            fprintf(stderr, "Invalid node index in solution: %d\n", node);
+            free(visited);
+            return 0;
+        }
+
+        if (visited[node] == 1) {
+            fprintf(stderr, "Node %d is visited more than once!\n", node);
+            free(visited);
+            return 0;
+        }
+
+        visited[node] = 1;
+    }
+
+    for (int i = 0; i < inst->nnodes; i++) {
+        if (visited[i] == 0) {
+            fprintf(stderr, "Node %d was never visited!\n", i);
+            free(visited);
+            return 0;
+        }
+    }
+
+    free(visited);
+    return 1;  // Valid solution
+}
+
+double compute_solution_cost(solution *sol, instance *inst) {
+    double computed_cost = 0;
+    for (int i = 0; i < inst->nnodes; i++) {
+        int from = sol->visited_nodes[i];
+        int to = sol->visited_nodes[i + 1];
+        computed_cost += inst->costs[from * inst->nnodes + to];
+    }
+    return computed_cost;
+}
+
+int check_sol(solution *sol, instance *inst, double cost) {
+    if (!validate_node_visits(sol, inst)) {
+        return 0;  // Invalid visits
+    }
+
+    double computed_cost = compute_solution_cost(sol, inst);
+    if (fabs(computed_cost - cost) > EPSILON) {  // Floating-point error tolerance
+        fprintf(stderr, "Cost mismatch! Expected: %lf, Computed: %lf\n", cost, computed_cost);
+        return 0;
+    }
+
+    return 1;  // Solution is valid
+}
+
+void validate_solution(solution *sol, instance *inst, double cost, const char *context) {
+    if (!check_sol(sol, inst, cost)) {
+        fprintf(stderr, "Error: Solution is invalid in %s!\n", context);
+        exit(EXIT_FAILURE);
+    }
+}
+
 void plot_solution(instance *inst, solution *sol) {
 
     //use gnuplot to print the solution
