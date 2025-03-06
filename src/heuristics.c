@@ -95,6 +95,7 @@ void multi_start_nn(instance *inst, solution *sol) {
         }
 
         nearest_neighbor(inst, sol, start);
+        two_opt(inst, sol);  // Apply 2-opt refinement
 
         // TODO: remove, this is just for debug
         // Print the path and cost for each start node
@@ -103,6 +104,8 @@ void multi_start_nn(instance *inst, solution *sol) {
         //     printf("%d ", sol->visited_nodes[i]);
         // }
         // printf("\n");
+        // Print intermediate results
+        printf("Start Node: %d, Cost: %.2lf\n", start, sol->cost);
 
         // If the new solution is better, update best_solution
         if (sol->cost < inst->best_solution->cost) {
@@ -111,6 +114,39 @@ void multi_start_nn(instance *inst, solution *sol) {
         }
     }
 }
+
+void two_opt(instance *inst, solution *sol) {
+    int improved = 1; // Flag to track improvements
+    while (improved) {
+        improved = 0;
+
+        for (int i = 1; i < inst->nnodes - 1; i++) {
+            for (int j = i + 1; j < inst->nnodes; j++) {
+                double old_cost = inst->costs[sol->visited_nodes[i-1] * inst->nnodes + sol->visited_nodes[i]] +
+                                  inst->costs[sol->visited_nodes[j] * inst->nnodes + sol->visited_nodes[j+1]];
+                
+                double new_cost = inst->costs[sol->visited_nodes[i-1] * inst->nnodes + sol->visited_nodes[j]] +
+                                  inst->costs[sol->visited_nodes[i] * inst->nnodes + sol->visited_nodes[j+1]];
+
+                if (new_cost < old_cost) {
+                    // Reverse the segment between i and j
+                    for (int k = 0; k < (j - i + 1) / 2; k++) {
+                        int temp = sol->visited_nodes[i + k];
+                        sol->visited_nodes[i + k] = sol->visited_nodes[j - k];
+                        sol->visited_nodes[j - k] = temp;
+                    }
+
+                    // Update cost
+                    sol->cost -= (old_cost - new_cost);
+                    improved = 1; // Indicate improvement found
+                }
+            }
+        }
+    }
+
+    strcpy(sol->method, "2-opt_refinement");
+}
+
 
 int nn_main(instance *inst, solution *sol) {
     

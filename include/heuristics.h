@@ -12,8 +12,8 @@
 /**
  * Function to calculate Euclidean distance 
  *  
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param a first node
+ * @param b second node
  */
 double euclidean_distance(coordinate a, coordinate b);
 
@@ -22,6 +22,7 @@ double euclidean_distance(coordinate a, coordinate b);
  *  
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
+ * @param start Starting node
  */
 void nearest_neighbor(instance *inst,  solution *sol, int start);
 
@@ -33,6 +34,20 @@ void nearest_neighbor(instance *inst,  solution *sol, int start);
  */
 void multi_start_nn(instance *inst,  solution *sol);
 
+/**
+ * Implementation of 2-opt for refinement of the solution
+ *  
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void two_opt(instance *inst, solution *sol); 
+
+/**
+ * main for Nearest Neighbour
+ *  
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
 int nn_main(instance *inst,  solution *sol); 
 
 #endif //HEURISTICS_H
