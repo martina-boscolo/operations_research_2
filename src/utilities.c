@@ -146,7 +146,15 @@ double cost(int i, int j, instance *inst) {
     return inst->costs[i*inst->nnodes + j];
 }
 
-void update_best_sol(instance *inst, solution *sol);
+void update_best_sol(instance *inst, solution *sol)
+{
+    if (sol->cost < inst->best_solution->cost)
+    {
+        inst->best_solution->cost = sol->cost;
+        memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
+        check_sol(inst, sol);
+    }
+}
 
 void print_instance(instance *inst) {
 
@@ -273,20 +281,21 @@ int validate_cost(instance *inst, solution *sol)
     return 1;
 }
 
-int check_sol(instance *inst, solution *sol)
+void check_sol(instance *inst, solution *sol)
 {
     if (inst->verbose >= 50)
     { // only for debug
         if (!validate_node_visits(inst, sol))
         {
-            return 0; // problem in the visit of the nodes
+            exit(EXIT_FAILURE); // problem in the visit of the nodes
         }
         if (!validate_cost(inst, sol))
         {
-            return 0; // mismatch in the cost
+            exit(EXIT_FAILURE); // mismatch in the cost
         }
+        // Solution is valid
     }
-    return 1; // Solution is valid
+    
 }
 
 void plot_solution(instance *inst, solution *sol) {

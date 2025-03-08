@@ -133,7 +133,7 @@ double compute_solution_cost(instance *inst, solution *sol);
  * 
  * @return 1 if valid, 0 otherwise.
  */
-int check_sol(instance *inst, solution *sol); 
+void check_sol(instance *inst, solution *sol); 
 
 /**
  * Plot the solution using gnuplot

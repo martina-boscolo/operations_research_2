@@ -9,6 +9,7 @@ void allocate_solution(solution *sol, int nnodes) {
     }
 }
 
+//this already exists
 double euclidean_distance(coordinate a, coordinate b) {
     return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
 }
@@ -124,11 +125,7 @@ void multi_start_nn(instance *inst, solution *sol) {
         printf("Start Node: %d, Cost: %.2lf\n", start, sol->cost);
 
         // If the new solution is better, update best_solution
-        if (sol->cost < inst->best_solution->cost) {
-            inst->best_solution->cost = sol->cost;
-            memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
-            check_sol(inst, sol);
-        }
+        update_best_sol(inst, sol);
     }
 }
 
