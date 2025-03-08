@@ -89,9 +89,8 @@ void nearest_neighbor(instance *inst, solution *sol, int start) {
     sol->cost = total_cost;
     strcpy(sol->method, "nearest_neighbor");
 
-    // Free temporary memory
     free(visited);
-    validate_solution(sol, inst, sol->cost, "Nearest Neighbor");
+    check_sol(inst, sol);
 }
 
 /* Multi-start approach with time limit */
@@ -128,7 +127,7 @@ void multi_start_nn(instance *inst, solution *sol) {
         if (sol->cost < inst->best_solution->cost) {
             inst->best_solution->cost = sol->cost;
             memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
-            validate_solution(inst->best_solution, inst, inst->best_solution->cost, "Best Solution Update");
+            check_sol(inst, sol);
         }
     }
 }
@@ -163,7 +162,7 @@ void two_opt(instance *inst, solution *sol) {
     }
 
     strcpy(sol->method, "2-opt_refinement");
-    validate_solution(sol, inst, sol->cost, "2-opt Refinement");
+    check_sol(inst, sol);
 }
 
 
@@ -178,7 +177,7 @@ int nn_main(instance *inst, solution *sol) {
         printf("%d ", inst->best_solution->visited_nodes[i]);
     }
     printf("\n");
-    validate_solution(inst->best_solution, inst, inst->best_solution->cost, "Final Check in nn_main");
+    check_sol(inst, sol);
 
     return 0;
 }

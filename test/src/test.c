@@ -37,7 +37,7 @@ int main(int argc, const char *argv[]) {
 
     //make_test_solution(&inst, &sol);
 
-    nn_main(&inst, &sol);
+    nn_main(&inst, &sol);    
 
     if (inst.verbose >= 50) {
 
@@ -65,5 +65,6 @@ void make_test_solution(instance *inst, solution *sol) {
         sol->visited_nodes[i] = i; 
     }
     sol->visited_nodes[inst->nnodes] = 0;
+    check_sol(inst, sol);
 
 }

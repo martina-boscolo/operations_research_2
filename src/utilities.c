@@ -209,72 +209,84 @@ void free_instance(instance *inst) {
 
 void check_feasibility(instance *inst, solution *sol);
 
-int validate_node_visits(solution *sol, instance *inst) {
+int validate_node_visits(instance *inst, solution *sol)
+{
     int *visited = (int *)calloc(inst->nnodes, sizeof(int));
-    if (!visited) {
-        fprintf(stderr, "Memory allocation failed for validate_node_visits\n");
+    if (!visited)
+    {
+        fprintf(stderr, "Memory allocation failed for visited array\n");
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < inst->nnodes; i++) {
-        int node = sol->visited_nodes[i];
-
-        if (node < 0 || node >= inst->nnodes) {
-            fprintf(stderr, "Invalid node index in solution: %d\n", node);
+    // Mark each visited node
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        if (sol->visited_nodes[i] < 0 || sol->visited_nodes[i] >= inst->nnodes)
+        {
             free(visited);
-            return 0;
+            return 0; // Out-of-range node index
         }
-
-        if (visited[node] == 1) {
-            fprintf(stderr, "Node %d is visited more than once!\n", node);
-            free(visited);
-            return 0;
-        }
-
-        visited[node] = 1;
+        visited[sol->visited_nodes[i]] = 1;
     }
 
-    for (int i = 0; i < inst->nnodes; i++) {
-        if (visited[i] == 0) {
-            fprintf(stderr, "Node %d was never visited!\n", i);
+    // Check if all nodes are visited exactly once
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        if (visited[i] != 1)
+        {
+            fprintf(stderr, "Node %d was not visited or visited more than once.\n", i);
             free(visited);
-            return 0;
+            return 0; // A node was missed
         }
+    }
+
+    // Ensure the tour closes properly
+    if (sol->visited_nodes[inst->nnodes] != sol->visited_nodes[0])
+    {
+        fprintf(stderr, "Ending node different from starting node\n");
+        free(visited);
+        return 0; // Cycle not closed properly
     }
 
     free(visited);
-    return 1;  // Valid solution
+    return 1; 
 }
 
-double compute_solution_cost(solution *sol, instance *inst) {
+double compute_solution_cost(instance *inst, solution *sol)
+{
     double computed_cost = 0;
-    for (int i = 0; i < inst->nnodes; i++) {
-        int from = sol->visited_nodes[i];
-        int to = sol->visited_nodes[i + 1];
-        computed_cost += inst->costs[from * inst->nnodes + to];
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        computed_cost += cost(sol->visited_nodes[i], sol->visited_nodes[i + 1], inst);
     }
     return computed_cost;
 }
 
-int check_sol(solution *sol, instance *inst, double cost) {
-    if (!validate_node_visits(sol, inst)) {
-        return 0;  // Invalid visits
-    }
-
-    double computed_cost = compute_solution_cost(sol, inst);
-    if (fabs(computed_cost - cost) > EPSILON) {  // Floating-point error tolerance
-        fprintf(stderr, "Cost mismatch! Expected: %lf, Computed: %lf\n", cost, computed_cost);
+int validate_cost(instance *inst, solution *sol)
+{
+    double computed_cost = compute_solution_cost(inst, sol);
+    if (fabs(computed_cost - sol->cost) > EPSILON)
+    { // Floating-point error tolerance
+        fprintf(stderr, "Cost mismatch! Expected: %lf, Computed: %lf\n", sol->cost, computed_cost);
         return 0;
     }
-
-    return 1;  // Solution is valid
+    return 1;
 }
 
-void validate_solution(solution *sol, instance *inst, double cost, const char *context) {
-    if (!check_sol(sol, inst, cost)) {
-        fprintf(stderr, "Error: Solution is invalid in %s!\n", context);
-        exit(EXIT_FAILURE);
+int check_sol(instance *inst, solution *sol)
+{
+    if (inst->verbose >= 50)
+    { // only for debug
+        if (!validate_node_visits(inst, sol))
+        {
+            return 0; // problem in the visit of the nodes
+        }
+        if (!validate_cost(inst, sol))
+        {
+            return 0; // mismatch in the cost
+        }
     }
+    return 1; // Solution is valid
 }
 
 void plot_solution(instance *inst, solution *sol) {
