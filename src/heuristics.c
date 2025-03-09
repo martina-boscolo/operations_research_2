@@ -3,24 +3,6 @@
 
 //---------------utilities------------------
 
-void allocate_solution(solution *sol, int nnodes) {
-    sol->cost = INF;
-    sol->visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
-}
-
-void allocate_best_solution(instance *inst) {
-    inst->best_solution = (solution *)malloc(sizeof(solution));
-    inst->best_solution->cost = INF;
-    inst->best_solution->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
-}
-
-void initialize_solution(int *visited_nodes, int nnodes) {
-    for (int i = 0; i < nnodes; i++) {
-        visited_nodes[i] = i;
-    }
-}
-
-
 int find_nearest_node(instance *inst, int len, int *visited_nodes) {
     int nearest = -1;
     double min_cost = INF;

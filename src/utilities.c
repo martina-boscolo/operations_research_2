@@ -153,15 +153,6 @@ double cost(int i, int j, instance *inst)
     return inst->costs[i * inst->nnodes + j];
 }
 
-void update_best_sol(instance *inst, solution *sol)
-{
-    if (sol->cost < inst->best_solution->cost)
-    {
-        inst->best_solution->cost = sol->cost;
-        strcpy(inst->best_solution->method, sol->method);
-        memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
-    }
-}
 
 void print_instance(instance *inst) {
 
@@ -221,6 +212,33 @@ void free_instance(instance *inst) {
 }
 
 //--- solution utilities ---
+
+void allocate_solution(solution *sol, int nnodes) {
+    sol->cost = INF;
+    sol->visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
+}
+
+void allocate_best_solution(instance *inst) {
+    inst->best_solution = (solution *)malloc(sizeof(solution));
+    inst->best_solution->cost = INF;
+    inst->best_solution->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
+}
+
+void initialize_solution(int *visited_nodes, int nnodes) {
+    for (int i = 0; i < nnodes; i++) {
+        visited_nodes[i] = i;
+    }
+}
+
+void update_best_sol(instance *inst, solution *sol)
+{
+    if (sol->cost < inst->best_solution->cost)
+    {
+        inst->best_solution->cost = sol->cost;
+        strcpy(inst->best_solution->method, sol->method);
+        memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
+    }
+}
 
 void check_feasibility(instance *inst, solution *sol);
 
@@ -449,13 +467,13 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
 void make_test_solution(instance *inst, solution *sol) {
 
     sol->visited_nodes = (int*) malloc((inst->nnodes + 1) * sizeof(int));
-
+    
     for(int i=0; i<inst->nnodes; i++) { 
         sol->visited_nodes[i] = i; 
     }
     sol->visited_nodes[inst->nnodes] = 0;
-    check_sol(inst, sol);
-
+    allocate_best_solution(inst);
+    update_best_sol(inst,sol );
 }
 
 void solve_with_method(instance *inst, solution *sol) {

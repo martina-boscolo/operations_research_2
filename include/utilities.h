@@ -75,15 +75,6 @@ void compute_all_costs(instance *inst);
 double cost(int i, int j, instance *inst);
 
 /**
- * Check if the given solution is better than the curren one,
- * if so update best solution of the instance
- * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- */
-void update_best_sol(instance *inst, solution *sol);
-
-/**
  * Print the hyperparameter of the instance
  * 
  * @param inst The instance pointer of the problem
@@ -100,6 +91,39 @@ void free_instance(instance *inst);
 
 
 //------------------------------------ solution utilities ------------------------------------
+
+
+/**
+ * Initialize sol, setting cost to INF and allocating visited_nodes 
+ *  
+ * @param sol The solution pointer of the instance
+ * @param nnodes number of nodes
+ */
+void allocate_solution(solution *sol, int nnodes);
+
+/**
+ * Allocate space to save best solution in inst 
+ *  
+ * @param inst The instance pointer of the problem
+ */
+void allocate_best_solution(instance *inst);
+
+/**
+ * Initialize array of nodes ( ordered array) 
+ *  
+ * @param visited_nodes array of nodes
+ * @param nnodes number of nodes
+ */
+void initialize_solution(int *visited_nodes, int nnodes);
+
+/**
+ * Check if the given solution is better than the curren one,
+ * if so update best solution of the instance
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void update_best_sol(instance *inst, solution *sol);
 
 /**
  * Check if the given solution is feasible and coherent

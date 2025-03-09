@@ -14,29 +14,6 @@
 //---------------utilities------------------
 
 /**
- * Initialize sol, setting cost to INF and allocating visited_nodes 
- *  
- * @param sol The solution pointer of the instance
- * @param nnodes number of nodes
- */
-void allocate_solution(solution *sol, int nnodes);
-
-/**
- * Allocate space to save best solution in inst 
- *  
- * @param inst The instance pointer of the problem
- */
-void allocate_best_solution(instance *inst);
-
-/**
- * Initialize array of nodes ( ordered array) 
- *  
- * @param visited_nodes array of nodes
- * @param nnodes number of nodes
- */
-void initialize_solution(int *visited_nodes, int nnodes);
-
-/**
  * Find the next nearest node 
  *  
  * @param inst The instance pointer of the problem

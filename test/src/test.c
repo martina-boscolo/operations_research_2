@@ -45,7 +45,7 @@ int main(int argc, const char *argv[]) {
 
     }
 
-    plot_solution(&inst, &sol);
+    plot_solution(&inst, inst.best_solution);
     free_instance(&inst);
     //should i free also inst.best_solution?
     free_solution(&sol);
