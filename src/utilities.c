@@ -129,21 +129,28 @@ void name_instance(instance *inst) {
 
 }
 
-void compute_all_costs(instance *inst) {
-
-    for(int i=0; i<inst->nnodes; i++) {
-        for(int j=0; j<inst->nnodes; j++) {
-
-            // costs are memorized row wise
-            inst->costs[i*inst->nnodes + j] = dist(inst->coord[i], inst->coord[j]);
-
+void compute_all_costs(instance *inst)
+{
+    inst->costs = (double *)malloc(inst->nnodes * inst->nnodes * sizeof(double)); //is it correct to allocate space here? 
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        for (int j = 0; j < inst->nnodes; j++)
+        {
+            if (i == j)
+            {
+                inst->costs[i * inst->nnodes + j] = INFINITY; // Self-to-self distance set to INF
+            }
+            else
+            {
+                inst->costs[i * inst->nnodes + j] = dist(inst->coord[i], inst->coord[j]);
+            }
         }
     }
-
 }
 
-double cost(int i, int j, instance *inst) {
-    return inst->costs[i*inst->nnodes + j];
+double cost(int i, int j, instance *inst)
+{
+    return inst->costs[i * inst->nnodes + j];
 }
 
 void update_best_sol(instance *inst, solution *sol)
@@ -152,7 +159,6 @@ void update_best_sol(instance *inst, solution *sol)
     {
         inst->best_solution->cost = sol->cost;
         memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
-        check_sol(inst, sol);
     }
 }
 
@@ -438,14 +444,47 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
 
 }
 
+// As solution it takes the nodes in order from 0 to nnodes and then 0 again
+void make_test_solution(instance *inst, solution *sol) {
+
+    sol->visited_nodes = (int*) malloc((inst->nnodes + 1) * sizeof(int));
+
+    for(int i=0; i<inst->nnodes; i++) { 
+        sol->visited_nodes[i] = i; 
+    }
+    sol->visited_nodes[inst->nnodes] = 0;
+    check_sol(inst, sol);
+
+}
+
+void solve_with_method(instance *inst, solution *sol) {
+    if (strcmp(sol->method, "NN") == 0) {
+        printf("Solving with Nearest Neighbor method.\n");
+        ms_2opt_nn_main(inst, sol); 
+
+    } else if (strcmp(sol->method, "BASE") == 0) {
+        printf("Solving with BASE method.\n");
+        make_test_solution(inst, sol);
+
+    } else {
+        fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
+        printf("Valid methods are:\n-NN\n-BASE\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
 double seconds(void);
 
 //--- various utilities ---
 
-double random01(void) { 
+double get_elapsed_time(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER frequency) {
+    return (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
+}
 
-    return ((double) rand() / RAND_MAX); 
+double random01(void)
+{
 
+    return ((double) rand() / RAND_MAX);
 }
 
 double dist(coordinate point1, coordinate point2) {

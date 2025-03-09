@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
 
         printf("\n");
 
-    }
+    } //is this really needed?
 
     build_instance(&inst);
 
@@ -34,37 +34,22 @@ int main(int argc, const char *argv[]) {
         printf("\n\n");
     
     }
-
-    //make_test_solution(&inst, &sol);
-
-    nn_main(&inst, &sol);    
+   
+    solve_with_method(&inst, &sol); 
 
     if (inst.verbose >= 50) {
 
         printf("Test solution result:\n\n");
-        print_solution(&sol, inst.nnodes);
+        print_solution(inst.best_solution, inst.nnodes);
         printf("\n\n");
 
     }
 
     plot_solution(&inst, &sol);
-
     free_instance(&inst);
+    //should i free also inst.best_solution?
     free_solution(&sol);
 
     return 0;
-
-}
-
-// As solution it takes the nodes in order from 0 to nnodes and then 0 again
-void make_test_solution(instance *inst, solution *sol) {
-
-    sol->visited_nodes = (int*) malloc((inst->nnodes + 1) * sizeof(int));
-
-    for(int i=0; i<inst->nnodes; i++) { 
-        sol->visited_nodes[i] = i; 
-    }
-    sol->visited_nodes[inst->nnodes] = 0;
-    check_sol(inst, sol);
 
 }

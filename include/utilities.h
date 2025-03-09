@@ -3,11 +3,15 @@
 
 #include "tsp.h"
 #include "plot.h"
+#include "heuristics.h" //cyclic dependence to allow the selection of the method
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <windows.h>
+
 
 // useful constants
 #define EPSILON 1e-5
@@ -21,7 +25,7 @@
 #define MAX_YCOORD 10000
 
 /**
- * Instanciate a TSP problem 
+ * Instantiate a TSP problem 
  * 
  * @param inst The instance pointer of the problem
  */
@@ -98,7 +102,7 @@ void free_instance(instance *inst);
 //------------------------------------ solution utilities ------------------------------------
 
 /**
- * Check if the given solution is feasible and coerent
+ * Check if the given solution is feasible and coherent
  * 
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
@@ -177,6 +181,17 @@ void print_error(const char *err);
  */ 
 void parse_command_line(int argc, const char *argv[], instance *inst, solution *sol);
 
+// As solution it takes the nodes in order from 0 to nnodes and then 0 again
+void make_test_solution(instance *inst, solution *sol);
+
+/**
+ * Select the method to solve the TSP
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void solve_with_method(instance *inst, solution *sol); 
+
 /**
  * Return the current time in seconds
  * 
@@ -184,6 +199,16 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
  */
 double seconds(void);
 
+/**
+ * Compute the elapsed_time (duration) in seconds
+ * 
+ * @param start starting time
+ * @param end ending time
+ * @param frequency frequency of the performance counter
+ * 
+ * @return The elapsed_time
+ */
+double get_elapsed_time(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER frequency);
 
 
 //------------------------------------ various utilities -------------------------------------

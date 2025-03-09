@@ -1,110 +1,95 @@
 #include "heuristics.h"
 
-/* Allocate memory for a solution */
+
+//---------------utilities------------------
+
 void allocate_solution(solution *sol, int nnodes) {
+    sol->cost = INF;
     sol->visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
-    if (!sol->visited_nodes) {
-        fprintf(stderr, "Memory allocation failed for solution\n");
-        exit(EXIT_FAILURE);
-    }
 }
 
-//this already exists
-double euclidean_distance(coordinate a, coordinate b) {
-    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
-}
-
-
-//TODO use the functions already existing
-void compute_cost_matrix(instance *inst) {
-    inst->costs = (double *)malloc(inst->nnodes * inst->nnodes * sizeof(double));
-    for (int i = 0; i < inst->nnodes; i++) {
-        for (int j = 0; j < inst->nnodes; j++) {
-            if (i == j) {
-                inst->costs[i * inst->nnodes + j] = INF;
-            } else {
-                inst->costs[i * inst->nnodes + j] = euclidean_distance(inst->coord[i], inst->coord[j]);
-            }
-        }
-    }
-}
-
-void nearest_neighbor(instance *inst, solution *sol, int start) {
-    // Free previous allocations if necessary
-    if (sol->visited_nodes != NULL) {
-        free(sol->visited_nodes);
-    }
-
-
-    /* Allocate memory for a solution */
-    allocate_solution(sol, inst->nnodes);
-
-
-    // Allocate memory for visited nodes
-    sol->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
-    if (sol->visited_nodes == NULL) {
-        fprintf(stderr, "Memory allocation failed for visited_nodes\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Allocate and initialize visited array
-    int *visited = (int *)calloc(inst->nnodes, sizeof(int));
-    if (visited == NULL) {
-        fprintf(stderr, "Memory allocation failed for visited array\n");
-        exit(EXIT_FAILURE);
-    }
-
-    sol->visited_nodes[0] = start;
-    visited[start] = 1;
-    double total_cost = 0;
-    int current = start;
-
-    for (int i = 1; i < inst->nnodes; i++) {
-        int nearest = -1;
-        double min_cost = INF;
-
-        for (int j = 0; j < inst->nnodes; j++) {
-            if (!visited[j] && inst->costs[current * inst->nnodes + j] < min_cost) {
-                min_cost = inst->costs[current * inst->nnodes + j];
-                nearest = j;
-            }
-        }
-
-        // Ensure a valid nearest node was found (should always be the case in a connected graph)
-        if (nearest == -1) {
-            fprintf(stderr, "Error: No valid nearest neighbor found\n");
-            exit(EXIT_FAILURE);
-        }
-
-        sol->visited_nodes[i] = nearest;
-        visited[nearest] = 1;
-        total_cost += min_cost;
-        current = nearest;
-    }
-
-    // Complete the cycle
-    sol->visited_nodes[inst->nnodes] = start;  
-    total_cost += inst->costs[current * inst->nnodes + start];  
-
-    // Store solution cost and method name
-    sol->cost = total_cost;
-    strcpy(sol->method, "nearest_neighbor");
-
-    free(visited);
-    check_sol(inst, sol);
-}
-
-/* Multi-start approach with time limit */
-void multi_start_nn(instance *inst, solution *sol) {
-    clock_t start_time = clock();
-    
-    // Allocate memory for the best solution
+void allocate_best_solution(instance *inst) {
     inst->best_solution = (solution *)malloc(sizeof(solution));
     inst->best_solution->cost = INF;
     inst->best_solution->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
+}
+
+void initialize_solution(int *visited_nodes, int nnodes) {
+    for (int i = 0; i < nnodes; i++) {
+        visited_nodes[i] = i;
+    }
+}
+
+
+int find_nearest_node(instance *inst, int len, int *visited_nodes) {
+    int nearest = -1;
+    double min_cost = INF;
+
+    for (int i = len; i < inst->nnodes; i++) {
+        int node = visited_nodes[i];
+        double current_cost = cost(visited_nodes[len-1] , node, inst);
+
+        if (current_cost < min_cost) {
+            min_cost = current_cost;
+            nearest = i;
+        }
+    }
+    return nearest;
+}
+
+void swap_nodes(int *nodes, int i, int j) {
+    int temp = nodes[i];
+    nodes[i] = nodes[j];
+    nodes[j] = temp;
+}
+
+//---------------heuristics------------------
+
+void nearest_neighbor(instance *inst, solution *sol, int start)
+{
+    allocate_solution(sol, inst->nnodes);
+    initialize_solution(sol->visited_nodes, inst->nnodes);
+    swap_nodes(sol->visited_nodes, start, 0);
+    int len = 1;
+    double total_cost = 0;
+    for (int i = 1; i < inst->nnodes; i++)
+    {
+        int nearest_index = find_nearest_node(inst, len, sol->visited_nodes);
+        if (nearest_index == -1)
+        {
+            fprintf(stderr, "Error: No valid nearest neighbor found\n");
+            exit(EXIT_FAILURE);
+        } // almost useless
+
+        int nearest_node = sol->visited_nodes[nearest_index];
+        swap_nodes(sol->visited_nodes, nearest_index, len);
+        total_cost += cost(sol->visited_nodes[len - 1], nearest_node, inst);
+        len++;
+    }
+    // Complete the cycle
+    sol->visited_nodes[inst->nnodes] = start;
+    total_cost += cost(sol->visited_nodes[len - 1], start, inst);
+
+    sol->cost = total_cost;
+    strcpy(sol->method, "nearest_neighbor");
+
+    check_sol(inst, sol);
+}
+
+
+void multi_start_nn(instance *inst, solution *sol) {
+
+    LARGE_INTEGER start_time, end_time, frequency;
+    QueryPerformanceFrequency(&frequency); // Get the frequency of the performance counter
+    QueryPerformanceCounter(&start_time); // Get the start time
+    
+    allocate_best_solution(inst);
 
     for (int start = 0; start < inst->nnodes; start++) {
-        double elapsed_time = (double)(clock() - start_time) / CLOCKS_PER_SEC;
+
+        QueryPerformanceCounter(&end_time);
+        double elapsed_time = get_elapsed_time(start_time, end_time, frequency);
+        printf("Elapsed time: %.6f seconds\n", elapsed_time); //to debug
 
         if (inst->timelimit > 0 && elapsed_time >= inst->timelimit) {
             printf("Time limit reached! Stopping early.\n");
@@ -114,18 +99,12 @@ void multi_start_nn(instance *inst, solution *sol) {
         nearest_neighbor(inst, sol, start);
         two_opt(inst, sol);  // Apply 2-opt refinement
 
-        // TODO: remove, this is just for debug
-        // Print the path and cost for each start node
-        // printf("Start Node: %d, Cost: %.2lf, Path: ", start, sol->cost);
-        // for (int i = 0; i <= inst->nnodes; i++) {
-        //     printf("%d ", sol->visited_nodes[i]);
-        // }
-        // printf("\n");
-        // Print intermediate results
+        // Debug: Print intermediate results
         printf("Start Node: %d, Cost: %.2lf\n", start, sol->cost);
 
-        // If the new solution is better, update best_solution
+        
         update_best_sol(inst, sol);
+        check_sol(inst, sol);
     }
 }
 
@@ -133,39 +112,40 @@ void two_opt(instance *inst, solution *sol) {
     int improved = 1; // Flag to track improvements
     while (improved) {
         improved = 0;
-
-        for (int i = 1; i < inst->nnodes - 1; i++) {
+        for (int i = 1; i < inst->nnodes; i++) {
             for (int j = i + 1; j < inst->nnodes; j++) {
-                double old_cost = inst->costs[sol->visited_nodes[i-1] * inst->nnodes + sol->visited_nodes[i]] +
-                                  inst->costs[sol->visited_nodes[j] * inst->nnodes + sol->visited_nodes[j+1]];
+                // Calculate the cost of the two edges that would be removed
+                double old_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[i], inst) +
+                                 cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
+               
+                // Calculate the cost of the two new edges that would be added
+                double new_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[j], inst) +
+                                 cost(sol->visited_nodes[i], sol->visited_nodes[j+1], inst);
                 
-                double new_cost = inst->costs[sol->visited_nodes[i-1] * inst->nnodes + sol->visited_nodes[j]] +
-                                  inst->costs[sol->visited_nodes[i] * inst->nnodes + sol->visited_nodes[j+1]];
-
-                if (new_cost < old_cost) {
+                if (new_cost < old_cost - EPSILON){
                     // Reverse the segment between i and j
                     for (int k = 0; k < (j - i + 1) / 2; k++) {
                         int temp = sol->visited_nodes[i + k];
                         sol->visited_nodes[i + k] = sol->visited_nodes[j - k];
                         sol->visited_nodes[j - k] = temp;
                     }
-
-                    // Update cost
+                    
+                    // Update the solution cost correctly
                     sol->cost -= (old_cost - new_cost);
                     improved = 1; // Indicate improvement found
                 }
             }
         }
     }
-
     strcpy(sol->method, "2-opt_refinement");
     check_sol(inst, sol);
 }
 
 
-int nn_main(instance *inst, solution *sol) {
+int ms_2opt_nn_main(instance *inst, solution *sol) {
     
-    compute_cost_matrix(inst);
+    compute_all_costs(inst);
+    
     multi_start_nn(inst, sol);
 
     printf("Best Solution Cost: %lf\n", inst->best_solution->cost);
