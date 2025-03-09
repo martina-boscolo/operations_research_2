@@ -158,6 +158,7 @@ void update_best_sol(instance *inst, solution *sol)
     if (sol->cost < inst->best_solution->cost)
     {
         inst->best_solution->cost = sol->cost;
+        strcpy(inst->best_solution->method, sol->method);
         memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
     }
 }

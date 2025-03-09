@@ -93,16 +93,16 @@ void multi_start_nn(instance *inst, solution *sol) {
 
         if (inst->timelimit > 0 && elapsed_time >= inst->timelimit) {
             printf("Time limit reached! Stopping early.\n");
-            break; // Stop if time limit is reached
+            break; // Stop if time limit is reached, otherwise finish the complete computation
         }
 
+        //no check of time limit from now on
         nearest_neighbor(inst, sol, start);
-        two_opt(inst, sol);  // Apply 2-opt refinement
+        two_opt(inst, sol);
 
         // Debug: Print intermediate results
         printf("Start Node: %d, Cost: %.2lf\n", start, sol->cost);
 
-        
         update_best_sol(inst, sol);
         check_sol(inst, sol);
     }
