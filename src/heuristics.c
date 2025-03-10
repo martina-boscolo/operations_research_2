@@ -27,6 +27,16 @@ void swap_nodes(int *nodes, int i, int j) {
 
 //---------------heuristics------------------
 
+void make_base_solution(instance *inst, solution *sol) {
+
+    strcpy(sol->method, BASE);
+
+    initialize_solution(sol->visited_nodes, inst->nnodes);
+
+    update_best_sol(inst,sol);
+
+}
+
 void nearest_neighbor(instance *inst, solution *sol, int start)
 {
     initialize_solution(sol->visited_nodes, inst->nnodes);
@@ -55,7 +65,6 @@ void nearest_neighbor(instance *inst, solution *sol, int start)
 
     check_sol(inst, sol);
 }
-
 
 void multi_start_nn(instance *inst, solution *sol) {
 
@@ -119,7 +128,6 @@ void two_opt(instance *inst, solution *sol) {
     check_sol(inst, sol);
 }
 
-
 int ms_2opt_nn_main(instance *inst, solution *sol) {
 
     strcpy(sol->method, NEAREST_NEIGHBOR);
@@ -135,14 +143,4 @@ int ms_2opt_nn_main(instance *inst, solution *sol) {
     check_sol(inst, sol);
 
     return 0;
-}
-
-void make_base_solution(instance *inst, solution *sol) {
-
-    strcpy(sol->method, BASE);
-
-    initialize_solution(sol->visited_nodes, inst->nnodes);
-
-    update_best_sol(inst,sol);
-
 }

@@ -11,16 +11,18 @@
 #define INF DBL_MAX
 
 // available methods to solve the tsp
-/*enum Heuristic { // add all?
+/*enum Heuristic {
     BASE,               // Ordered nodes
     NEAREST_NEIGHBOR,   // Nearest Neighbor
-    TWO_OPT             // 2-opt refinement
+    TWO_OPT,            // 2-opt refinement
+    ALL                 // Try all methods
 };
 
 // Strings for command line
 const char *command[] = {[BASE] = "BASE", 
                          [NEAREST_NEIGHBOR] = "NN",
-                         [TWO_OPT] = "2OPT"};
+                         [TWO_OPT] = "2OPT"
+                         [ALL] = "ALL"};
 
 // Strings with methods' name
 const char *method[] = {[BASE] = "Base", 
@@ -30,6 +32,7 @@ const char *method[] = {[BASE] = "Base",
 #define BASE "BASE"
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "2OPT"
+#define ALL "ALL"
 
 //----------------------------------- heuristic utilities ------------------------------------
 
