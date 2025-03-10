@@ -259,18 +259,17 @@ void solve_with_method(instance *inst, solution *sol) {
     
     allocate_solution(sol, inst->nnodes);
 
-    if (strcmp(sol->method, BASE) == 0) {
+    if (strcmp(inst->asked_method, BASE) == 0) {
         
         printf("Solving with BASE method.\n");
         make_base_solution(inst, sol);
 
-    } else if (strcmp(sol->method, NEAREST_NEIGHBOR) == 0) {
+    } else if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 
         printf("Solving with Nearest Neighbor method.\n");
         ms_2opt_nn_main(inst, sol); 
 
     } else {
-        char *error;
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
         printf("Valid methods are:\n-%s\n-%s\n", BASE, NEAREST_NEIGHBOR);
         exit(EXIT_FAILURE);
