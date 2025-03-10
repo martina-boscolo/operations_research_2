@@ -29,9 +29,9 @@ void swap_nodes(int *nodes, int i, int j) {
 
 void nearest_neighbor(instance *inst, solution *sol, int start)
 {
-    allocate_solution(sol, inst->nnodes);
     initialize_solution(sol->visited_nodes, inst->nnodes);
     swap_nodes(sol->visited_nodes, start, 0);
+
     int len = 1;
     double total_cost = 0;
     for (int i = 1; i < inst->nnodes; i++)
@@ -39,8 +39,7 @@ void nearest_neighbor(instance *inst, solution *sol, int start)
         int nearest_index = find_nearest_node(inst, len, sol->visited_nodes);
         if (nearest_index == -1)
         {
-            fprintf(stderr, "Error: No valid nearest neighbor found\n");
-            exit(EXIT_FAILURE);
+            print_error("No valid nearest neighbor found\n");
         } // almost useless
 
         int nearest_node = sol->visited_nodes[nearest_index];
@@ -53,7 +52,6 @@ void nearest_neighbor(instance *inst, solution *sol, int start)
     total_cost += cost(sol->visited_nodes[len - 1], start, inst);
 
     sol->cost = total_cost;
-    strcpy(sol->method, "nearest_neighbor");
 
     check_sol(inst, sol);
 }
@@ -64,8 +62,6 @@ void multi_start_nn(instance *inst, solution *sol) {
     LARGE_INTEGER start_time, end_time, frequency;
     QueryPerformanceFrequency(&frequency); // Get the frequency of the performance counter
     QueryPerformanceCounter(&start_time); // Get the start time
-    
-    allocate_best_solution(inst);
 
     for (int start = 0; start < inst->nnodes; start++) {
 
@@ -119,14 +115,14 @@ void two_opt(instance *inst, solution *sol) {
             }
         }
     }
-    strcpy(sol->method, "2-opt_refinement");
+    strcpy(sol->method, TWO_OPT);
     check_sol(inst, sol);
 }
 
 
 int ms_2opt_nn_main(instance *inst, solution *sol) {
-    
-    compute_all_costs(inst);
+
+    strcpy(sol->method, NEAREST_NEIGHBOR);
     
     multi_start_nn(inst, sol);
 
@@ -139,4 +135,14 @@ int ms_2opt_nn_main(instance *inst, solution *sol) {
     check_sol(inst, sol);
 
     return 0;
+}
+
+void make_base_solution(instance *inst, solution *sol) {
+
+    strcpy(sol->method, BASE);
+
+    initialize_solution(sol->visited_nodes, inst->nnodes);
+
+    update_best_sol(inst,sol);
+
 }

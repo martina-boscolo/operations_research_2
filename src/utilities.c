@@ -26,9 +26,14 @@ void build_instance(instance *inst) {
 
     }
 
+    // Compute all edges' cost
+    compute_all_costs(inst);
+
 }
 
 void random_instance_generator(instance *inst) {
+
+    allocate_instance(inst);
 
     if (inst->verbose >= 50) {
         printf("Creating random instance:\n\n");
@@ -36,9 +41,6 @@ void random_instance_generator(instance *inst) {
 
     // set random seed
     srand(inst->seed);
-
-    // allocate memory for nodes' coordinate
-    inst->coord = (coordinate*) malloc(inst->nnodes * sizeof(coordinate));
 
     // generate random coordinate for each node
     for(int i=0; i<inst->nnodes; i++) {
@@ -75,7 +77,7 @@ void basic_TSPLIB_parser(const char *filename, instance *inst) {
             sscanf(line, "DIMENSION : %d", &inst->nnodes);
             
             // Allocate memory after finding dimension
-            inst->coord = (coordinate *)malloc(inst->nnodes * sizeof(coordinate));
+            allocate_instance(inst);
             if (!inst->coord) {
                 perror("Memory allocation failed");
                 fclose(file);
@@ -131,7 +133,6 @@ void name_instance(instance *inst) {
 
 void compute_all_costs(instance *inst)
 {
-    inst->costs = (double *)malloc(inst->nnodes * inst->nnodes * sizeof(double)); //is it correct to allocate space here? 
     for (int i = 0; i < inst->nnodes; i++)
     {
         for (int j = 0; j < inst->nnodes; j++)
@@ -153,83 +154,6 @@ double cost(int i, int j, instance *inst)
     return inst->costs[i * inst->nnodes + j];
 }
 
-
-void print_instance(instance *inst) {
-
-    printf("Instance:\n\n");
-
-    printf("Name: %s\n", inst->name);
-    printf("Seed: %d\n", inst->seed);
-    printf("Input file %s\n", inst->input_file);
-    printf("Nnodes: %d\n", inst->nnodes);
-
-    printf("\n");
-
-    printf("Timelimit: %lf\n", inst->timelimit); 
-    printf("Verbose: %d\n", inst->verbose); 
-
-    printf("\n");
-
-    if ( !(inst->coord == NULL) ) {
-
-        printf("Nodes' coordinates:\n");
-
-        for (int i=0; i<inst->nnodes; i++) {
-            printf("Node %d: \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
-        }
-
-    }
-    
-    printf("\n");
-
-    if ( !(inst->costs == NULL) ) {
-
-        printf("Edges' cost:\n");
-
-        for(int i=0; i<inst->nnodes; i++) {
-            for(int j=i+1; j<inst->nnodes; j++) {
-                printf("Edge[%d, %d]: %lf", i, j, inst->costs[i*inst->nnodes + j]);
-            }
-        }
-
-    }
-
-    printf("\n");
-
-    if ( !(inst->best_solution == NULL) ) {
-        print_solution(inst->best_solution, inst->nnodes);
-    }
-
-    printf("\n");
-
-}
-
-void free_instance(instance *inst) {
-
-    free(inst->coord);
-    free(inst->costs);
-
-}
-
-//--- solution utilities ---
-
-void allocate_solution(solution *sol, int nnodes) {
-    sol->cost = INF;
-    sol->visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
-}
-
-void allocate_best_solution(instance *inst) {
-    inst->best_solution = (solution *)malloc(sizeof(solution));
-    inst->best_solution->cost = INF;
-    inst->best_solution->visited_nodes = (int *)malloc((inst->nnodes + 1) * sizeof(int));
-}
-
-void initialize_solution(int *visited_nodes, int nnodes) {
-    for (int i = 0; i < nnodes; i++) {
-        visited_nodes[i] = i;
-    }
-}
-
 void update_best_sol(instance *inst, solution *sol)
 {
     if (sol->cost < inst->best_solution->cost)
@@ -240,7 +164,119 @@ void update_best_sol(instance *inst, solution *sol)
     }
 }
 
-void check_feasibility(instance *inst, solution *sol);
+void print_instance(instance *inst) {
+
+    printf("Name: %s\n", inst->name);
+    printf("Seed: %d\n", inst->seed);
+    printf("Input file %s\n", inst->input_file);
+    printf("Nnodes: %d\n", inst->nnodes);
+    printf("Asked method: %s\n", inst->asked_method);
+
+    printf("\n");
+
+    printf("Timelimit: %lf\n", inst->timelimit); 
+    printf("Verbose: %d\n", inst->verbose); 
+
+    printf("\n");
+
+    if (inst->coord != NULL) {
+
+        printf("Nodes' coordinates:\n");
+
+        for (int i=0; i<inst->nnodes; i++) {
+            printf("Node %d: \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
+        }
+        
+        printf("\n");
+
+    }
+
+    if (inst->costs != NULL) {
+
+        printf("Edges' cost:\n");
+
+        for(int i=0; i<inst->nnodes; i++) {
+            for(int j=i+1; j<inst->nnodes; j++) {
+                printf("Edge[%d, %d]: %lf", i, j, inst->costs[i*inst->nnodes + j]);
+            }
+        }
+
+        printf("\n");
+
+    }
+
+    if (inst->best_solution != NULL) {
+        print_solution(inst->best_solution, inst->nnodes);
+
+        printf("\n");
+    }
+
+}
+
+void allocate_instance(instance *inst) {
+
+    // allocate memory for nodes' coordinate
+    inst->coord = (coordinate*) calloc(inst->nnodes, sizeof(coordinate));
+
+    // allocate memory for edges' cost
+    inst->costs = (double *) calloc(inst->nnodes * inst->nnodes, sizeof(double));
+
+    // allocate memory for the best solution
+    inst->best_solution = (solution *) malloc(sizeof(solution));
+    allocate_solution(inst->best_solution, inst->nnodes);
+
+}
+
+void free_instance(instance *inst) {
+
+    if (inst->coord != NULL) {
+        free(inst->coord);
+        inst->coord = NULL;
+    }
+
+    if (inst->costs != NULL) {
+        free(inst->costs);
+        inst->costs = NULL;
+    }
+    
+    if (inst->best_solution != NULL) {
+        free_solution(inst->best_solution);
+        inst->best_solution = NULL;
+    }
+
+}
+
+//--- solution utilities ---
+
+void initialize_solution(int *visited_nodes, int nnodes) {
+    for (int i = 0; i < nnodes; i++) {
+        visited_nodes[i] = i;
+    }
+    visited_nodes[nnodes] = 0;
+}
+
+void solve_with_method(instance *inst, solution *sol) {
+    
+    allocate_solution(sol, inst->nnodes);
+
+    if (strcmp(sol->method, BASE) == 0) {
+        
+        printf("Solving with BASE method.\n");
+        make_base_solution(inst, sol);
+
+    } else if (strcmp(sol->method, NEAREST_NEIGHBOR) == 0) {
+
+        printf("Solving with Nearest Neighbor method.\n");
+        ms_2opt_nn_main(inst, sol); 
+
+    } else {
+        char *error;
+        fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
+        printf("Valid methods are:\n-%s\n-%s\n", BASE, NEAREST_NEIGHBOR);
+        exit(EXIT_FAILURE);
+    }
+    
+}
 
 int validate_node_visits(instance *inst, solution *sol)
 {
@@ -354,12 +390,12 @@ void plot_solution(instance *inst, solution *sol) {
 
 void print_solution(solution *sol, int nnodes) {
 
-    printf("Solution:\n\n");
-
     printf("Cost: %lf\n", sol->cost);
     printf("Method: %s\n", sol->method);
 
-    if ( !(sol->visited_nodes == NULL) ) {
+    printf("\n");
+
+    if (sol->visited_nodes != NULL) {
 
         printf("Visited nodes:\n");
 
@@ -367,15 +403,27 @@ void print_solution(solution *sol, int nnodes) {
             printf("Node %d\n", sol->visited_nodes[i]);
         }
 
+        printf("\n");
+
     }
 
-    printf("\n");
+}
+
+void allocate_solution(solution *sol, int nnodes) {
+
+    free_solution(sol);
+
+    sol->cost = INF;
+    sol->visited_nodes = (int *) calloc((nnodes + 1), sizeof(int));
 
 }
 
 void free_solution(solution *sol) {
 
-    free(sol->visited_nodes);
+    if (sol->visited_nodes != NULL) {
+        free(sol->visited_nodes);
+        sol->visited_nodes = NULL;
+    }
 
 }
 
@@ -383,13 +431,13 @@ void free_solution(solution *sol) {
 
 void print_error(const char *err) {
 
-    printf("Error: %s", err);
+    fprintf(stderr,"Error: %s", err);
     fflush(NULL);
-    exit(1);
+    exit(EXIT_FAILURE);
 
 }
 
-void parse_command_line(int argc, const char *argv[], instance *inst, solution *sol){
+void parse_command_line(int argc, const char *argv[], instance *inst) {
 
     // set default values
     inst->nnodes = DEFAULT_NNODES;
@@ -402,9 +450,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
     inst->verbose = DEFAULT_VERBOSE;
     inst->input_file[0] = EMPTY_STRING;
 
-    sol->cost = INFINITE_COST;
-    sol->visited_nodes = NULL;
-    strcpy(sol->method, ORDER);
+    strcpy(inst->asked_method, BASE);
 
     // flags
     int need_help = 0;
@@ -418,7 +464,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
         if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
         if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }    // time limit
         if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // verbosity level
-        if (strcmp(argv[i], "-method") == 0) { strcpy(sol->method,argv[++i]); continue; }
+        if (strcmp(argv[i], "-method") == 0) { strcpy(inst->asked_method,argv[++i]); continue; }
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
 
         // if there is an unknown command
@@ -453,48 +499,22 @@ void parse_command_line(int argc, const char *argv[], instance *inst, solution *
 
         print_instance(inst);
 
-        printf("\n");
-
-        print_solution(sol, inst->nnodes);
-
         printf("\n\n");
 
     }
 
 }
 
-// As solution it takes the nodes in order from 0 to nnodes and then 0 again
-void make_test_solution(instance *inst, solution *sol) {
-
-    sol->visited_nodes = (int*) malloc((inst->nnodes + 1) * sizeof(int));
-    
-    for(int i=0; i<inst->nnodes; i++) { 
-        sol->visited_nodes[i] = i; 
-    }
-    sol->visited_nodes[inst->nnodes] = 0;
-    allocate_best_solution(inst);
-    update_best_sol(inst,sol );
-}
-
-void solve_with_method(instance *inst, solution *sol) {
-    if (strcmp(sol->method, "NN") == 0) {
-        printf("Solving with Nearest Neighbor method.\n");
-        ms_2opt_nn_main(inst, sol); 
-
-    } else if (strcmp(sol->method, "BASE") == 0) {
-        printf("Solving with BASE method.\n");
-        make_test_solution(inst, sol);
-
-    } else {
-        fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-NN\n-BASE\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
-double seconds(void);
-
 //--- various utilities ---
+
+time_t seconds(void) {
+
+    time_t curr_time;
+    time(&curr_time);
+
+    return curr_time;
+
+}
 
 double get_elapsed_time(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER frequency) {
     return (double)(end.QuadPart - start.QuadPart) / frequency.QuadPart;
@@ -502,7 +522,6 @@ double get_elapsed_time(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER fr
 
 double random01(void)
 {
-
     return ((double) rand() / RAND_MAX);
 }
 

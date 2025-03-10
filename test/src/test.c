@@ -1,14 +1,11 @@
 #include "utilities.h"
 #include "heuristics.h"
 
-void make_test_solution(instance *inst, solution *sol);
-
 int main(int argc, const char *argv[]) {
 
     instance inst;
-    solution sol;
 
-    parse_command_line(argc, argv, &inst, &sol);
+    parse_command_line(argc, argv, &inst);
 
     // force to print everything
     if (inst.verbose < 100) {
@@ -16,8 +13,6 @@ int main(int argc, const char *argv[]) {
         inst.verbose = 100; 
 
         print_instance(&inst);
-
-        print_solution(&sol, inst.nnodes);
 
         printf("\n");
 
@@ -35,6 +30,9 @@ int main(int argc, const char *argv[]) {
     
     }
    
+    
+    solution sol;
+
     solve_with_method(&inst, &sol); 
 
     if (inst.verbose >= 50) {

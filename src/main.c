@@ -5,13 +5,11 @@ int main(int argc, const char *argv[]) {
 
     // problem instance
     instance inst;
-    // solution of the instance
-    solution sol;
     // initial time
-    double t0 = seconds();
+    time_t t0 = seconds();
 
     // parse the command line
-    parse_command_line(argc, argv, &inst, &sol);
+    parse_command_line(argc, argv, &inst);
     // time to parse the command line
     double t_parse = seconds();
 
@@ -21,13 +19,16 @@ int main(int argc, const char *argv[]) {
     double t_instance = seconds();
     inst.t_start = t_instance;
 
+    
+    // solution of the instance
+    solution sol;
     // compute the solution
-    // todo compute solution
+    solve_with_method(&inst, &sol); 
     // time to compute the solution
-    //double t_solution = seconds();
+    time_t t_solution = seconds();
 
     // plot the solution
-    //plot_solution(&inst, &sol);
+    plot_solution(&inst, &sol);
 
     // free the instance and its solution
     free_instance(&inst);

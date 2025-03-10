@@ -11,12 +11,11 @@
 #include <string.h>
 #include <math.h>
 #include <windows.h>
+#include <time.h>
 
 
 // useful constants
 #define EPSILON 1e-5
-
-
 
 //------------------------------------ instance utilities ------------------------------------
 
@@ -75,11 +74,27 @@ void compute_all_costs(instance *inst);
 double cost(int i, int j, instance *inst);
 
 /**
+ * Check if the given solution is better than the curren one,
+ * if so update best solution of the instance
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void update_best_sol(instance *inst, solution *sol);
+
+/**
  * Print the hyperparameter of the instance
  * 
  * @param inst The instance pointer of the problem
  */
 void print_instance(instance *inst);
+
+/**
+ * Allocates the memory for the most space-consuming attributes of instance
+ * 
+ * @param inst The instance pointer of the problem
+ */
+void allocate_instance(instance *inst);
 
 /**
  * Deallocates the most space-consuming attributes of instance from memory
@@ -92,24 +107,8 @@ void free_instance(instance *inst);
 
 //------------------------------------ solution utilities ------------------------------------
 
-
 /**
- * Initialize sol, setting cost to INF and allocating visited_nodes 
- *  
- * @param sol The solution pointer of the instance
- * @param nnodes number of nodes
- */
-void allocate_solution(solution *sol, int nnodes);
-
-/**
- * Allocate space to save best solution in inst 
- *  
- * @param inst The instance pointer of the problem
- */
-void allocate_best_solution(instance *inst);
-
-/**
- * Initialize array of nodes ( ordered array) 
+ * Initialize array of nodes (ordered array) 
  *  
  * @param visited_nodes array of nodes
  * @param nnodes number of nodes
@@ -117,21 +116,12 @@ void allocate_best_solution(instance *inst);
 void initialize_solution(int *visited_nodes, int nnodes);
 
 /**
- * Check if the given solution is better than the curren one,
- * if so update best solution of the instance
+ * Select the method to solve the TSP
  * 
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void update_best_sol(instance *inst, solution *sol);
-
-/**
- * Check if the given solution is feasible and coherent
- * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- */
-void check_feasibility(instance *inst, solution *sol); //TODO is check_sol the same? 
+void solve_with_method(instance *inst, solution *sol); 
 
 /**
  * Check if all nodes are visited exactly once.
@@ -179,6 +169,14 @@ void plot_solution(instance *inst, solution *sol);
 void print_solution(solution *sol, int nnodes);
 
 /**
+ * Initialize sol, setting cost to INF and allocating visited_nodes 
+ *  
+ * @param sol The solution pointer of the instance
+ * @param nnodes number of nodes
+ */
+void allocate_solution(solution *sol, int nnodes);
+
+/**
  * Deallocates the most space-consuming attributes of solution from memory
  * 
  * @param inst The solution pointer of the problem
@@ -190,7 +188,7 @@ void free_solution(solution *sol);
 //-------------------------------------- main utilities --------------------------------------
 
 /**
- * Print the error
+ * Print the error and exit the program
  * 
  * @param err The error string
  */
@@ -203,25 +201,18 @@ void print_error(const char *err);
  * @param argv The argv from the main function
  * @param inst The instance pointer of the problem
  */ 
-void parse_command_line(int argc, const char *argv[], instance *inst, solution *sol);
+void parse_command_line(int argc, const char *argv[], instance *inst);
 
-// As solution it takes the nodes in order from 0 to nnodes and then 0 again
-void make_test_solution(instance *inst, solution *sol);
 
-/**
- * Select the method to solve the TSP
- * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- */
-void solve_with_method(instance *inst, solution *sol); 
+
+//------------------------------------ various utilities -------------------------------------
 
 /**
- * Return the current time in seconds
+ * Calculates the seconds since a reference time.
  * 
- * @return The current time
+ * @return The seconds
  */
-double seconds(void);
+time_t seconds(void);
 
 /**
  * Compute the elapsed_time (duration) in seconds
@@ -233,9 +224,6 @@ double seconds(void);
  * @return The elapsed_time
  */
 double get_elapsed_time(LARGE_INTEGER start, LARGE_INTEGER end, LARGE_INTEGER frequency);
-
-
-//------------------------------------ various utilities -------------------------------------
 
 /**
  * Draw a random value between 0 and 1
