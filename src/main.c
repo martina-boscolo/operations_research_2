@@ -1,5 +1,7 @@
 #include "tsp.h"
 #include "utilities.h"
+#include "utilities_instance.h"
+#include "utilities_solution.h"
 
 int main(int argc, const char *argv[]) {
 

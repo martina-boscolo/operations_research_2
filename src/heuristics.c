@@ -68,14 +68,9 @@ void nearest_neighbor(instance *inst, solution *sol, int start)
 
 void multi_start_nn(instance *inst, solution *sol) {
 
-    LARGE_INTEGER start_time, end_time, frequency;
-    QueryPerformanceFrequency(&frequency); // Get the frequency of the performance counter
-    QueryPerformanceCounter(&start_time); // Get the start time
-
     for (int start = 0; start < inst->nnodes; start++) {
 
-        QueryPerformanceCounter(&end_time);
-        double elapsed_time = get_elapsed_time(start_time, end_time, frequency);
+        double elapsed_time = get_elapsed_time(inst->t_start);
         printf("Elapsed time: %.6f seconds\n", elapsed_time); //to debug
 
         if (inst->timelimit > 0 && elapsed_time >= inst->timelimit) {

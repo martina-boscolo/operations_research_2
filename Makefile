@@ -9,7 +9,7 @@ OBJ_FILES = $(SRC_FILES:.c=.o)
 # Compiler
 CC = gcc
 # Compiler flags
-CFLAGS = -Wall -Wextra -O2 -I$(INCLUDE_DIR)
+CFLAGS = -Wall -Wextra -O3 -I$(INCLUDE_DIR)
 
 # Executable name
 TARGET = tsp.exe

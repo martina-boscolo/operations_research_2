@@ -3,6 +3,8 @@
 
 #include "tsp.h"
 #include "utilities.h"
+#include "utilities_instance.h"
+#include "utilities_solution.h"
 
 #include <math.h>
 #include <time.h>
@@ -33,6 +35,8 @@ const char *method[] = {[BASE] = "Base",
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "2OPT"
 #define ALL "ALL"
+
+
 
 //----------------------------------- heuristic utilities ------------------------------------
 
@@ -89,19 +93,21 @@ void nearest_neighbor(instance *inst,  solution *sol, int start);
 void multi_start_nn(instance *inst, solution *sol);
 
 /**
- * Implementation of 2-opt for refinement of the solution
- *  
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- */
-void two_opt(instance *inst, solution *sol); 
-
-/**
  * main for Nearest Neighbour
  *  
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
 int ms_2opt_nn_main(instance *inst, solution *sol); 
+
+//--- 2-opt refinement ---
+
+/**
+ * Implementation of 2-opt for refinement of the solution
+ *  
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void two_opt(instance *inst, solution *sol); 
 
 #endif //HEURISTICS_H
