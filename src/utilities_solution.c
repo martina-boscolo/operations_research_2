@@ -2,7 +2,7 @@
 
 void initialize_solution(solution *sol) {
 
-    sol->cost = INF;
+    sol->cost = INFINITY;
     sol->visited_nodes = NULL;
     sol->method[0] = EMPTY_STRING;
 
@@ -17,8 +17,8 @@ void initialize_tour(int *visited_nodes, int nnodes) {
 
 void solve_with_method(instance *inst, solution *sol) {
     
-    allocate_solution(sol, inst->nnodes);
     initialize_solution(sol);
+    allocate_solution(sol, inst->nnodes);
 
     if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 

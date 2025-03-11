@@ -4,7 +4,7 @@
 
 int find_nearest_node(instance *inst, int len, int *visited_nodes) {
     int nearest = -1;
-    double min_cost = INF;
+    double min_cost = INFINITY;
 
     for (int i = len; i < inst->nnodes; i++) {
         int node = visited_nodes[i];

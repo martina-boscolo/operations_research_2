@@ -84,8 +84,7 @@ double get_elapsed_time(time_t start) {
     // get current time
     time_t curr_time;
     time(&curr_time);
-
-    return difftime(start, curr_time);
+    return difftime(curr_time, start );
 
 }
 

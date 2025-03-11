@@ -218,11 +218,11 @@ void print_instance(instance *inst) {
 
     }
 
-    if (inst->best_solution != NULL) {
-        print_solution(inst->best_solution, inst->nnodes);
+    // if (inst->best_solution != NULL) {
+    //     print_solution(inst->best_solution, inst->nnodes);
 
-        printf("\n");
-    }
+    //     printf("\n");
+    // }
 
 }
 

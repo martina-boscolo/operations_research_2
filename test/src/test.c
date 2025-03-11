@@ -19,7 +19,7 @@ int main(int argc, const char *argv[]) {
     } //is this really needed?
 
     build_instance(&inst);
-
+    time(&inst.t_start);
     if (inst.verbose >= 50) {
 
         // print metadata
