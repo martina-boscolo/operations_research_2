@@ -1,6 +1,14 @@
 #include "utilities_solution.h"
 
-void initialize_solution(int *visited_nodes, int nnodes) {
+void initialize_solution(solution *sol) {
+
+    sol->cost = INF;
+    sol->visited_nodes = NULL;
+    sol->method[0] = EMPTY_STRING;
+
+}
+
+void initialize_tour(int *visited_nodes, int nnodes) {
     for (int i = 0; i < nnodes; i++) {
         visited_nodes[i] = i;
     }
@@ -10,20 +18,16 @@ void initialize_solution(int *visited_nodes, int nnodes) {
 void solve_with_method(instance *inst, solution *sol) {
     
     allocate_solution(sol, inst->nnodes);
+    initialize_solution(sol);
 
-    if (strcmp(inst->asked_method, BASE) == 0) {
-        
-        printf("Solving with BASE method.\n");
-        make_base_solution(inst, sol);
-
-    } else if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
+    if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 
         printf("Solving with Nearest Neighbor method.\n");
         ms_2opt_nn_main(inst, sol); 
 
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n-%s\n", BASE, NEAREST_NEIGHBOR);
+        printf("Valid methods are:\n-%s\n", NEAREST_NEIGHBOR);
         exit(EXIT_FAILURE);
     }
     
@@ -164,7 +168,6 @@ void allocate_solution(solution *sol, int nnodes) {
 
     free_solution(sol);
 
-    sol->cost = INF;
     sol->visited_nodes = (int *) calloc((nnodes + 1), sizeof(int));
 
 }

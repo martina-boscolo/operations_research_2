@@ -16,6 +16,13 @@
 // default value for the solution
 #define INFINITE_COST 10e38
 
+// verbose levels
+#define ONLY_INCUMBMENT 10 
+#define LITTLE_OUTPUT 20
+#define GOOD 50
+#define HIGH 70 
+#define DEBUG 100
+
 typedef struct {
 
     double x;                   // x coordinate
@@ -43,7 +50,7 @@ typedef struct {
     char input_file[1000];      // input file 
     char asked_method[30];      // method to compute the solution
 
-    int verbose;                // printing level  (=10 only incumbent, =20 little output, =50-60 good, =70 verbose, >=100 cplex log)
+    int verbose;                // printing level
     double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
     time_t t_start;             // initial time
 

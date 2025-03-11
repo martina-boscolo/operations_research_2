@@ -12,31 +12,9 @@
 
 #define INF DBL_MAX
 
-// available methods to solve the tsp
-/*enum Heuristic {
-    BASE,               // Ordered nodes
-    NEAREST_NEIGHBOR,   // Nearest Neighbor
-    TWO_OPT,            // 2-opt refinement
-    ALL                 // Try all methods
-};
-
-// Strings for command line
-const char *command[] = {[BASE] = "BASE", 
-                         [NEAREST_NEIGHBOR] = "NN",
-                         [TWO_OPT] = "2OPT"
-                         [ALL] = "ALL"};
-
-// Strings with methods' name
-const char *method[] = {[BASE] = "Base", 
-                        [NEAREST_NEIGHBOR] = "Nearest Neighbor",
-                        [TWO_OPT] = "2-opt refinement"};*/
-
-#define BASE "BASE"
+// available heuristics
 #define NEAREST_NEIGHBOR "NN"
-#define TWO_OPT "2OPT"
-#define ALL "ALL"
-
-
+#define TWO_OPT "TWO_OPT"
 
 //----------------------------------- heuristic utilities ------------------------------------
 
@@ -61,17 +39,6 @@ void swap_nodes(int *nodes, int i, int j);
 
 
 //---------------------------------------- heuristics ----------------------------------------
-
-//--- BASE ---
-
-/**
- * The solution is the ordered sequence of nodes
- * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- */
-void make_base_solution(instance *inst, solution *sol);
-
 
 //--- NEAREST NEIGHBOR ---
 
@@ -99,6 +66,7 @@ void multi_start_nn(instance *inst, solution *sol);
  * @param sol The solution pointer of the instance
  */
 int ms_2opt_nn_main(instance *inst, solution *sol); 
+
 
 //--- 2-opt refinement ---
 

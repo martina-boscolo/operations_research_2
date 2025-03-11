@@ -1,6 +1,5 @@
 #include "heuristics.h"
 
-
 //---------------utilities------------------
 
 int find_nearest_node(instance *inst, int len, int *visited_nodes) {
@@ -27,19 +26,9 @@ void swap_nodes(int *nodes, int i, int j) {
 
 //---------------heuristics------------------
 
-void make_base_solution(instance *inst, solution *sol) {
-
-    strcpy(sol->method, BASE);
-
-    initialize_solution(sol->visited_nodes, inst->nnodes);
-
-    update_best_sol(inst,sol);
-
-}
-
 void nearest_neighbor(instance *inst, solution *sol, int start)
 {
-    initialize_solution(sol->visited_nodes, inst->nnodes);
+    initialize_tour(sol->visited_nodes, inst->nnodes);
     swap_nodes(sol->visited_nodes, start, 0);
 
     int len = 1;
@@ -119,13 +108,13 @@ void two_opt(instance *inst, solution *sol) {
             }
         }
     }
-    strcpy(sol->method, TWO_OPT);
+    strcpy(sol->method, "TWO_OPT");
     check_sol(inst, sol);
 }
 
 int ms_2opt_nn_main(instance *inst, solution *sol) {
 
-    strcpy(sol->method, NEAREST_NEIGHBOR);
+    strcpy(sol->method, "NEAREST_NEIGHBOR");
     
     multi_start_nn(inst, sol);
 

@@ -13,17 +13,7 @@ void print_error(const char *err) {
 void parse_command_line(int argc, const char *argv[], instance *inst) {
 
     // set default values
-    inst->nnodes = DEFAULT_NNODES;
-    inst->coord = NULL;
-    inst->costs = NULL;
-    inst->best_solution = NULL;
-    inst->name[0] = EMPTY_STRING;
-    inst->seed = DEFAULT_SEED;
-    inst->timelimit = DEFAULT_TIMELIMIT;
-    inst->verbose = DEFAULT_VERBOSE;
-    inst->input_file[0] = EMPTY_STRING;
-
-    strcpy(inst->asked_method, BASE);
+    initialize_instance(inst);
 
     // flags
     int need_help = 0;

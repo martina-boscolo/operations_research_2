@@ -1,5 +1,20 @@
 #include "utilities_instance.h"
 
+void initialize_instance(instance *inst) {
+
+    inst->nnodes = DEFAULT_NNODES;
+    inst->coord = NULL;
+    inst->costs = NULL;
+    inst->best_solution = NULL;
+    inst->name[0] = EMPTY_STRING;
+    inst->seed = DEFAULT_SEED;
+    inst->timelimit = DEFAULT_TIMELIMIT;
+    inst->verbose = DEFAULT_VERBOSE;
+    inst->input_file[0] = EMPTY_STRING;
+    inst->asked_method[0] = EMPTY_STRING;
+
+}
+
 void build_instance(instance *inst) {
 
     name_instance(inst);
@@ -221,6 +236,7 @@ void allocate_instance(instance *inst) {
 
     // allocate memory for the best solution
     inst->best_solution = (solution *) malloc(sizeof(solution));
+    initialize_solution(inst->best_solution);
     allocate_solution(inst->best_solution, inst->nnodes);
 
 }

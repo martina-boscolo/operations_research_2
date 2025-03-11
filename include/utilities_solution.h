@@ -12,12 +12,20 @@
 #include <stdbool.h>
 
 /**
+ * Initialize the solution with default values.
+ * Note: this function doesn't allocate the memory.
+ * 
+ * @param sol The solution pointer
+ */
+void initialize_solution(solution *sol);
+
+/**
  * Initialize array of nodes (ordered array) 
  *  
  * @param visited_nodes array of nodes
  * @param nnodes number of nodes
  */
-void initialize_solution(int *visited_nodes, int nnodes);
+void initialize_tour(int *visited_nodes, int nnodes);
 
 /**
  * Select the method to solve the TSP

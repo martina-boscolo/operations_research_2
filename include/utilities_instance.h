@@ -13,6 +13,14 @@
 #define MAX_YCOORD 10000
 
 /**
+ * Initialize the instance with default values.
+ * Note: this function doesn't allocate the memory.
+ * 
+ * @param inst The instance pointer
+ */
+void initialize_instance(instance *inst);
+
+/**
  * Instantiate a TSP problem 
  * 
  * @param inst The instance pointer of the problem
@@ -79,7 +87,8 @@ void update_best_sol(instance *inst, solution *sol);
 void print_instance(instance *inst);
 
 /**
- * Allocates the memory for the most space-consuming attributes of instance
+ * Allocates the memory for the most space-consuming attributes of instance. 
+ * Note: this function also initialize the solution
  * 
  * @param inst The instance pointer of the problem
  */
