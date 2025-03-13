@@ -25,9 +25,14 @@ void solve_with_method(instance *inst, solution *sol) {
         printf("Solving with Nearest Neighbor method.\n");
         ms_2opt_nn_main(inst, sol); 
 
+    } else if (strcmp(inst->asked_method, VNS) == 0) {
+
+        printf("Solving with VNS method.\n");
+        vns(inst, sol);
+        
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n", NEAREST_NEIGHBOR);
+        printf("Valid methods are:\n-%s\n-%s", NEAREST_NEIGHBOR, VNS);
         exit(EXIT_FAILURE);
     }
     

@@ -6,12 +6,15 @@ void initialize_instance(instance *inst) {
     inst->coord = NULL;
     inst->costs = NULL;
     inst->best_solution = NULL;
+
     inst->name[0] = EMPTY_STRING;
     inst->seed = DEFAULT_SEED;
-    inst->timelimit = DEFAULT_TIMELIMIT;
-    inst->verbose = DEFAULT_VERBOSE;
     inst->input_file[0] = EMPTY_STRING;
     inst->asked_method[0] = EMPTY_STRING;
+
+    inst->verbose = DEFAULT_VERBOSE;
+    inst->timelimit = DEFAULT_TIMELIMIT;
+    inst->t_start = seconds();
 
 }
 

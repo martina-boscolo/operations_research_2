@@ -4,6 +4,7 @@
 #include "tsp.h"
 #include "plot.h"
 #include "heuristics.h"
+#include "vns.h"
 
 
 #include <stdio.h>
@@ -77,6 +78,7 @@ void plot_solution(instance *inst, solution *sol);
  * Print the hyperparameter of the solution
  * 
  * @param sol The solution pointer of the problem
+ * @param nnodes The number of nodes
  */
 void print_solution(solution *sol, int nnodes);
 
@@ -84,7 +86,7 @@ void print_solution(solution *sol, int nnodes);
  * Initialize sol, setting cost to INF and allocating visited_nodes 
  *  
  * @param sol The solution pointer of the instance
- * @param nnodes number of nodes
+ * @param nnodes The number of nodes
  */
 void allocate_solution(solution *sol, int nnodes);
 

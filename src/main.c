@@ -14,10 +14,10 @@ int main(int argc, const char *argv[]) {
     // build the instance
     build_instance(&inst);
 
-    
     // solution of the instance
     solution sol;
-    // starting time
+
+    // starting solving time
     inst.t_start = seconds();
     // compute the solution
     solve_with_method(&inst, &sol); 

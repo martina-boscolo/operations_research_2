@@ -12,7 +12,7 @@
 
 #define INF DBL_MAX
 
-// available heuristics
+// heuristics in the file
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "TWO_OPT"
 
@@ -36,6 +36,25 @@ int find_nearest_node(instance *inst, int len, int *visited_nodes);
  */
 void swap_nodes(int *nodes, int i, int j);
 
+/**
+ * Reverse the segment between the two indeces
+ * 
+ * @param sol The solution pointer 
+ * @param i The first index 
+ * @param j The second index
+ */
+void reverse_segment(solution *sol, int i, int j);
+
+/**
+ * Shift segment between index i and index j, after index k
+ * Note: assumption k < i < j
+ * 
+ * @param sol The solution pointer 
+ * @param i The first index
+ * @param j The second index
+ * @param k The third index
+ */
+void shift_segment(solution *sol, int i, int j, int k);
 
 
 //---------------------------------------- heuristics ----------------------------------------

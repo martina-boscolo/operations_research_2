@@ -24,6 +24,26 @@ void swap_nodes(int *nodes, int i, int j) {
     nodes[j] = temp;
 }
 
+void reverse_segment(solution *sol, int i, int j) {
+    for (int k = 0; k < (j - i + 1) / 2; k++) {
+        int temp = sol->visited_nodes[i + k];
+        sol->visited_nodes[i + k] = sol->visited_nodes[j - k];
+        sol->visited_nodes[j - k] = temp;
+    }
+}
+
+void shift_segment(solution *sol, int i, int j, int k) {
+    int *shifted = (int*) malloc((j-k) * sizeof(int));
+    for (int h=0; h<(j-i); h++) {
+        shifted[h] = sol->visited_nodes[i+h+1];
+    }
+    for (int h=0; h<(i-k); h++) {
+        shifted[(j-i)+h] = sol->visited_nodes[k+h+1];
+    }
+    memcpy(sol->visited_nodes+k+1, shifted, (j-k) * sizeof(int));
+    free(shifted);
+}
+
 //---------------heuristics------------------
 
 void nearest_neighbor(instance *inst, solution *sol, int start)
@@ -81,25 +101,21 @@ void multi_start_nn(instance *inst, solution *sol) {
 
 void two_opt(instance *inst, solution *sol) {
     int improved = 1; // Flag to track improvements
-    while (improved) {
+    while (improved && (get_elapsed_time(inst->t_start) < inst->timelimit)) {
         improved = 0;
         for (int i = 1; i < inst->nnodes; i++) {
             for (int j = i + 1; j < inst->nnodes; j++) {
                 // Calculate the cost of the two edges that would be removed
                 double old_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[i], inst) +
-                                 cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
+                                  cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
                
                 // Calculate the cost of the two new edges that would be added
                 double new_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[j], inst) +
-                                 cost(sol->visited_nodes[i], sol->visited_nodes[j+1], inst);
+                                  cost(sol->visited_nodes[i], sol->visited_nodes[j+1], inst);
                 
                 if (new_cost < old_cost - EPSILON){
                     // Reverse the segment between i and j
-                    for (int k = 0; k < (j - i + 1) / 2; k++) {
-                        int temp = sol->visited_nodes[i + k];
-                        sol->visited_nodes[i + k] = sol->visited_nodes[j - k];
-                        sol->visited_nodes[j - k] = temp;
-                    }
+                    reverse_segment(sol, i, j);
                     
                     // Update the solution cost correctly
                     sol->cost -= (old_cost - new_cost);

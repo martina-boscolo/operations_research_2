@@ -20,6 +20,7 @@ int main(int argc, const char *argv[]) {
 
     build_instance(&inst);
     time(&inst.t_start);
+    
     if (inst.verbose >= 50) {
 
         // print metadata
@@ -45,7 +46,6 @@ int main(int argc, const char *argv[]) {
 
     plot_solution(&inst, inst.best_solution);
     free_instance(&inst);
-    //should i free also inst.best_solution?
     free_solution(&sol);
 
     return 0;

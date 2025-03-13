@@ -31,4 +31,4 @@ rebuild: clean $(TARGET)
 
 # Run target
 run: $(TARGET)
-	./$(TARGET) -n 10
+	./$(TARGET) -n 50 -timelimit 10 -method VNS
