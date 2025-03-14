@@ -1,6 +1,7 @@
 .vscode/
 plot/
 test/plot/
+test/results/
 
 *.o
 *.exe

@@ -4,7 +4,7 @@ void vns(instance *inst, solution *sol) {
 
     // obtain first solution
     nearest_neighbor(inst, sol, rand() % inst->nnodes);
-
+    mkdir("./results", 0777); 
     FILE* f = fopen("results/VNSResults.csv", "w+");
     int iteration = 0;
     while (get_elapsed_time(inst->t_start) < inst->timelimit) {
@@ -28,6 +28,7 @@ void vns(instance *inst, solution *sol) {
     strcpy(inst->best_solution->method, "VNS");
 
     //to be moved in a function? 
+  
     FILE *plot = open_plot();
     char filename[50];
     sprintf(filename, "VNSIterationsPlot");
