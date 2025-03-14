@@ -38,6 +38,8 @@ void add_plot_customization(FILE *plot, const char *customization);
  */
 void plot_edge(FILE *plot, coordinate node1, coordinate node2);
 
+void plot_stats(FILE *plot, char* filename);
+
 /**
  * Tells Gnuplot that the input data are ended
  * 

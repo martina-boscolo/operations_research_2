@@ -5,6 +5,8 @@ void vns(instance *inst, solution *sol) {
     // obtain first solution
     nearest_neighbor(inst, sol, rand() % inst->nnodes);
 
+    FILE* f = fopen("results/VNSResults.dat", "w+");
+    int iteration = 0;
     while (get_elapsed_time(inst->t_start) < inst->timelimit) {
 
         // go to local optima
@@ -12,14 +14,28 @@ void vns(instance *inst, solution *sol) {
 
         // update current best solution
         update_best_sol(inst, sol);
+        fprintf(f, "%d,%f\n", iteration, sol->cost);
         if (inst->verbose >=50){
             printf("Time left: %lf \n", inst->timelimit -get_elapsed_time(inst->t_start) );
         }
         // escape local minima
         kick(inst, sol);
+        
+        
+        iteration++;
     }
 
     strcpy(inst->best_solution->method, "VNS");
+
+    FILE *plot = open_plot();
+    char filename[50];
+    sprintf(filename, "VNSIterationsPlot");
+    plot_in_file(plot, filename);
+    
+    plot_stats(plot, "results/VNSResults.dat");
+    input_end(plot);
+
+    free_plot(plot);
 
 }
 
