@@ -104,7 +104,13 @@ void two_opt(instance *inst, solution *sol) {
     while (improved && (get_elapsed_time(inst->t_start) < inst->timelimit)) {
         improved = 0;
         for (int i = 1; i < inst->nnodes; i++) {
+            if (get_elapsed_time(inst->t_start) >= inst->timelimit) {
+                break; 
+            }
             for (int j = i + 1; j < inst->nnodes; j++) {
+                if (get_elapsed_time(inst->t_start) >= inst->timelimit) {
+                    break; 
+                }
                 // Calculate the cost of the two edges that would be removed
                 double old_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[i], inst) +
                                   cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
