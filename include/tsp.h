@@ -9,7 +9,7 @@
 // default values for the instance
 #define DEFAULT_NNODES 150
 #define DEFAULT_SEED 1
-#define DEFAULT_TIMELIMIT 3600.0
+#define DEFAULT_TIMELIMIT 60.0
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
 

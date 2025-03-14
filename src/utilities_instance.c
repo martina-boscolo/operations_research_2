@@ -172,7 +172,7 @@ double cost(int i, int j, instance *inst)
 
 void update_best_sol(instance *inst, solution *sol)
 {
-    if (sol->cost < inst->best_solution->cost)
+    if (sol->cost < (inst->best_solution->cost - EPSILON))
     {
         inst->best_solution->cost = sol->cost;
         strcpy(inst->best_solution->method, sol->method);
