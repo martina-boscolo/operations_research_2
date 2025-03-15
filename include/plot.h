@@ -38,7 +38,21 @@ void add_plot_customization(FILE *plot, const char *customization);
  */
 void plot_edge(FILE *plot, coordinate node1, coordinate node2);
 
-void plot_stats(FILE *plot, char* filename);
+/**
+ * Plot stats of the cost based on number of solutions
+ * 
+ * @param plot The Gnuplot file pointer
+ * @param filepath path to csv file for data
+ */
+void plot_stats(FILE *plot, char* filepath);
+
+/**
+ * Plot stats in a file
+ * 
+ * @param filename name of the file
+ */
+void plot_stats_in_file(char* filename);
+
 
 /**
  * Tells Gnuplot that the input data are ended

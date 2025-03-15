@@ -51,6 +51,17 @@ void plot_stats(FILE *plot, char* filepath) {
        filepath, filepath);
 }
 
+void plot_stats_in_file(char* filename){
+    
+    FILE *plot = open_plot();
+    plot_in_file(plot, filename);
+    char filepath[50];
+    sprintf(filepath, "results/%s.csv", filename);
+    printf(filepath);
+    plot_stats(plot, filepath);
+    free_plot(plot);
+}
+
 void input_end(FILE *plot) {
 
     fprintf(plot, "e");  

@@ -19,6 +19,7 @@ void solve_with_method(instance *inst, solution *sol) {
     
     initialize_solution(sol);
     allocate_solution(sol, inst->nnodes);
+    mkdir("./results", 0777);
 
     if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 
