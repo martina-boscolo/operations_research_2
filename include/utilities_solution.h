@@ -5,6 +5,7 @@
 #include "plot.h"
 #include "heuristics.h"
 #include "vns.h"
+#include "tabu_search.h"
 
 
 #include <stdio.h>
