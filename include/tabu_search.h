@@ -22,30 +22,63 @@ typedef struct {
     int current_iter;       // Current iteration
 } tabu_params;
 
-// Initialize tabu search parameters
+
+/**
+ * Initialize tabu search parameters
+ *  
+ * @param params 
+ * @param nnodes 
+ * @param min_tenure 
+ * @param max_tenure 
+ */
 void init_tabu_params(tabu_params *params, int nnodes, int min_tenure, int max_tenure);
-// Free tabu search parameters
+
+/**
+ * Free tabu search parameters
+ *  
+ * @param params 
+ */
 void free_tabu_params(tabu_params *params);
 
-// Get a random number between min and max
+/**
+ * Get a random number between min and max
+ *  
+ * @param params 
+ * @param node 
+ */
 int get_random_tenure(int min, int max);
-// Check if a node is tabu
+
+/**
+ * Check if a node is tabu
+ *  
+ * @param params 
+ * @param node 
+ */
 int is_tabu(tabu_params *params, int node, int current_iter);
-// Update tabu status for a node
+
+/**
+ * Update tabu status for a node
+ *  
+ * @param params 
+ * @param node 
+ */
 void update_tabu_status(tabu_params *params, int node);
-// Copy solution
-void copy_solution(solution *dest, solution *src, int nnodes);
 
-// Calculate solution cost
-double calculate_solution_cost(instance *inst, int *tour);
-// Generate an initial solution using nearest neighbor heuristic
-void generate_initial_solution(instance *inst, solution *sol);
-
-// Perform a swap move between positions i and j in the tour
-void swap_nodes(int *tour, int i, int j);
+/**
+ * Find best neighbor using swap operator and considering tabu status
+ *  
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
 void find_best_neighbor(instance *inst, solution *current, tabu_params *params);
 
-// Main tabu search procedure
+
+/**
+ * Main tabu search procedure
+ *  
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
 void tabu_search(instance *inst, solution *sol);
 
 
