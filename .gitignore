@@ -1,6 +1,8 @@
 .vscode/
 plot/
+results/
 test/plot/
+test/results/
 test/results/
 
 *.o

@@ -25,7 +25,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; }       // input file
         if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }               // number of nodes
         if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
-        if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atoi(argv[++i]); continue; }    // time limit
+        if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atof(argv[++i]); continue; }    // time limit
         if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // verbosity level
         if (strcmp(argv[i], "-method") == 0) { strcpy(inst->asked_method,argv[++i]); continue; }
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 

@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) {
     solve_with_method(&inst, &sol); 
 
     // plot the solution
-    plot_solution(&inst, &sol);
+    plot_solution(&inst, inst.best_solution);
 
     // free the instance and its solution
     free_instance(&inst);

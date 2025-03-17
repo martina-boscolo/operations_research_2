@@ -14,8 +14,9 @@ void vns(instance *inst, solution *sol) {
 
         // update current best solution
         update_best_sol(inst, sol);
+        
         fprintf(f, "%d,%f\n", iteration, sol->cost);
-        if (inst->verbose >=50){
+        if (inst->verbose >= DEBUG){
             printf("Time left: %lf \n", inst->timelimit -get_elapsed_time(inst->t_start) );
         }
         // escape local minima
