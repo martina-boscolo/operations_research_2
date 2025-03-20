@@ -13,6 +13,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#define VNS_REPS 5
+
 /**
  * Initialize the solution with default values.
  * Note: this function doesn't allocate the memory.

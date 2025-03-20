@@ -29,7 +29,7 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
-        vns(inst, sol);
+        vns(inst, sol, VNS_REPS);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
 

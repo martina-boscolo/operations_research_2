@@ -10,7 +10,7 @@ int main(int argc, const char *argv[]) {
     // force to print everything
     if (inst.verbose < 100) {
 
-        inst.verbose = 100; 
+        inst.verbose = DEBUG-10; 
 
         print_instance(&inst);
 

@@ -210,7 +210,7 @@ void print_instance(instance *inst) {
 
     }
 
-    if (inst->costs != NULL) {
+    if (inst->costs != NULL && inst->verbose >= DEBUG) {
 
         printf("Edges' cost:\n");
 

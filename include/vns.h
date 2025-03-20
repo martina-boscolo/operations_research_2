@@ -12,7 +12,7 @@
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void vns(instance *inst, solution *sol);
+void vns(instance *inst, solution *sol, const int reps);
 
 /**
  * Algorithm to modify the solution to escape the current local optima
@@ -20,7 +20,7 @@ void vns(instance *inst, solution *sol);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void kick(instance *inst, solution *sol);
+void kick(instance *inst, solution *sol, const int reps);
 
 /**
  * Select three random different indices and return them sorted

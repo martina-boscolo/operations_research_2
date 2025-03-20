@@ -1,6 +1,6 @@
 #include "vns.h"
 
-void vns(instance *inst, solution *sol) {
+void vns(instance *inst, solution *sol, const int reps) {
 
     // obtain first solution
     nearest_neighbor(inst, sol, rand() % inst->nnodes);
@@ -20,7 +20,8 @@ void vns(instance *inst, solution *sol) {
             printf("Time left: %lf \n", inst->timelimit -get_elapsed_time(inst->t_start) );
         }
         // escape local minima
-        kick(inst, sol);
+        kick(inst, sol, reps);
+        fprintf(f, "%d,%f\n", iteration, sol->cost);
         
         iteration++;
     }
@@ -49,7 +50,7 @@ void select_three_indices(int n, int *idx1, int *idx2, int *idx3) {
         if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
         if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
         if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
-}
+    }
 
 // Perform a 3-opt move by rearranging tour segments
 // A -> C -> B (reorder from A-B-C to A-C-B)
@@ -107,8 +108,7 @@ void perform_3opt_move(instance *inst, solution *sol, int idx1, int idx2, int id
 }
 
 
-void kick(instance *inst, solution *sol) {
-    const int reps = 3;
+void kick(instance *inst, solution *sol, const int reps) { //aggiungere int reps 
     int n = inst->nnodes;
     
     for (int i = 0; i < reps; i++) {
