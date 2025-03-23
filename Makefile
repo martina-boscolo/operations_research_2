@@ -6,6 +6,9 @@ SRC_DIR = ./src
 SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
 OBJ_FILES = $(SRC_FILES:.c=.o)
 
+# Header files
+HEADER_FILES = $(wildcard $(INCLUDE_DIR)/*.h)
+
 # Compiler
 CC = gcc
 # Compiler flags
@@ -19,7 +22,7 @@ $(TARGET): $(OBJ_FILES)
 	$(CC) $(OBJ_FILES) -o $(TARGET)
 
 # Rule to build .o files from .c files
-%.o: %.c
+%.o: %.c $(HEADER_FILES)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Clean up generated files
