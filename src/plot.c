@@ -39,16 +39,23 @@ void plot_edge(FILE *plot, coordinate node1, coordinate node2) {
 
 }
 
-void plot_stats(FILE *plot, char* filepath) {
-    
+void plot_cost_evolution(FILE *plot, char* filepath) {
+
     fprintf(plot, "set style data line\n");
     fprintf(plot, "set datafile separator \",\"\n");
+
+    // Stats for both current cost (column 2) and best cost (column 3)
     fprintf(plot, "stats '%s' using 1:2 prefix \"B\" nooutput\n", filepath);
-    fprintf(plot, "plot '%s' using 1:2 title \"  Data\" lw 1, \
-        B_slope * x + B_intercept with lines title \"  Linear fit\", \
-        '%s' using (column(1)):(abs(column(2) - B_min_y) < 1e-4 ? column(2) : 1/0) \
-        with points pt 7 lc \"red\" title \"Minimum: \" . gprintf(\"%%.2f\", B_min_y) \n", 
-       filepath, filepath);
+    fprintf(plot, "stats '%s' using 1:3 prefix \"Best\" nooutput\n", filepath);
+
+    // Plot data
+    fprintf(plot,
+        "plot '%s' using 1:2 title \"Current Cost\" lw 1, "
+        "'%s' using 1:3 title \"Best Cost\" lw 2 lc \"blue\", "
+        "B_slope * x + B_intercept with lines title \"Current Linear Fit\", "
+        "'%s' using (column(1)):(abs(column(2) - B_min_y) < 1e-4 ? column(2) : 1/0) "
+        "with points pt 7 lc \"red\" title \"Min Current: \" . gprintf(\"%%.2f\", B_min_y)\n",
+        filepath, filepath, filepath);
 }
 
 void plot_stats_in_file(char* filename){
@@ -57,8 +64,7 @@ void plot_stats_in_file(char* filename){
     plot_in_file(plot, filename);
     char filepath[50];
     sprintf(filepath, "results/%s.csv", filename);
-    printf(filepath);
-    plot_stats(plot, filepath);
+    plot_cost_evolution(plot, filepath);
     free_plot(plot);
 }
 

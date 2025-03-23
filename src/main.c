@@ -19,8 +19,14 @@ int main(int argc, const char *argv[]) {
 
     // starting solving time
     inst.t_start = seconds();
+    
     // compute the solution
     solve_with_method(&inst, &sol); 
+
+    // print solution
+    printf("\n\n*********SOLUTION*********\n\n");
+    print_solution(inst.best_solution, inst.nnodes);
+    printf("\n\n");
 
     // plot the solution
     plot_solution(&inst, inst.best_solution);

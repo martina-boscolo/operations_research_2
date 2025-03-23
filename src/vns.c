@@ -5,7 +5,7 @@ void vns(instance *inst, solution *sol, const int reps) {
     // obtain first solution
     nearest_neighbor(inst, sol, rand() % inst->nnodes);
 
-    FILE* f = fopen("results/VNSResults.csv", "w+");
+    FILE* f = fopen("results/VNS.csv", "w+");
     int iteration = 0;
     while (get_elapsed_time(inst->t_start) < inst->timelimit) {
 
@@ -15,22 +15,21 @@ void vns(instance *inst, solution *sol, const int reps) {
         // update current best solution
         update_best_sol(inst, sol);
         
-        fprintf(f, "%d,%f\n", iteration, sol->cost);
+        fprintf(f, "%d,%f,%f\n", iteration, sol->cost, inst->best_solution->cost);
+
         if (inst->verbose >= DEBUG){
             printf("Time left: %lf \n", inst->timelimit -get_elapsed_time(inst->t_start) );
         }
         // escape local minima
         kick(inst, sol, reps);
-        fprintf(f, "%d,%f\n", iteration, sol->cost);
+
+        fprintf(f, "%d,%f,%f\n", iteration, sol->cost, inst->best_solution->cost);
         
         iteration++;
     }
 
     strcpy(inst->best_solution->method, "VNS");
-
-    char filename[50];
-    sprintf(filename, "VNSResults");
-    plot_stats_in_file(filename);
+    plot_stats_in_file(inst->best_solution->method);
 
 }
 

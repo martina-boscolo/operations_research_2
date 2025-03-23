@@ -90,7 +90,7 @@ void tabu_search(instance *inst, solution *sol) {
     int min_tenure = 10;                              // Min number of iterations node remains tabu
     int max_tenure = (int)(0.3 * nnodes);            // Max number of iterations node remains tabu
     init_tabu_params(&params, nnodes, min_tenure, max_tenure);
-    
+    FILE* f = fopen("results/TS.csv", "w+");
  
     // Main loop
 
@@ -99,18 +99,18 @@ void tabu_search(instance *inst, solution *sol) {
         // Find best neighbor
         find_best_neighbor(inst, sol, &params);
         
-        
         // Update best solution if needed
         update_best_sol(inst, sol);
+        fprintf(f, "%d,%f,%f\n", params.current_iter, sol->cost, inst->best_solution->cost);
+
         check_sol(inst, sol);
         params.current_iter++;
         
-
     }
-    printf("Time out!");
     
-    strcpy(inst->best_solution->method, "Tabu_Search");
-       
+    strcpy(inst->best_solution->method, "TS");
+    plot_stats_in_file(inst->best_solution->method);   
+
     // Free memory
     free_tabu_params(&params);
 }
