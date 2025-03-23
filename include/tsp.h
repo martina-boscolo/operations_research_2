@@ -45,7 +45,7 @@ typedef struct {
     double *costs;              // array of distances between nodes
     solution *best_solution;    // best current solution
 
-    char name[10];              // name of instance
+    char name[50];              // name of instance
     int seed;                   // random seed used to generate random instance
     char input_file[1000];      // input file 
     char asked_method[30];      // method to compute the solution
