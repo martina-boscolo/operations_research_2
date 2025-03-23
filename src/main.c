@@ -13,7 +13,7 @@ int main(int argc, const char *argv[]) {
 
     // build the instance
     build_instance(&inst);
-
+    
     // solution of the instance
     solution sol;
 

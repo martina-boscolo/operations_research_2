@@ -36,6 +36,11 @@ void solve_with_method(instance *inst, solution *sol) {
         printf("Solving with TABU_SEARCH method.\n");
         tabu_search(inst, sol);
         
+    } else if (strcmp(inst->asked_method, COMPARE) == 0) {
+        
+        printf("Comparing available algorithms.\n");
+        compare(inst);
+        
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
         printf("Valid methods are:\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH);

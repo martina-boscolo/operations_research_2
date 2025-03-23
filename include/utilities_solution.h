@@ -6,6 +6,7 @@
 #include "heuristics.h"
 #include "vns.h"
 #include "tabu_search.h"
+#include "compare.h"
 
 
 #include <stdio.h>
