@@ -133,10 +133,10 @@ void name_instance(instance *inst) {
             bar_pos = bar - inst->input_file;
         }
         if (point) {
-            bar_pos = bar - inst->input_file;
+            point_pos = point - inst->input_file;
         }
 
-        strncpy(inst->name, inst->input_file+bar_pos+1, point_pos-bar_pos);
+        strncpy(inst->name, inst->input_file + bar_pos + 1, point_pos - bar_pos - 1);
 
     } else {
         
