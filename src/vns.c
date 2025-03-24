@@ -2,9 +2,6 @@
 
 void vns(instance *inst, solution *sol, const int reps) {
 
-    // obtain first solution
-    nearest_neighbor(inst, sol, rand() % inst->nnodes);
-
     FILE* f = fopen("results/VNS.csv", "w+");
     int iteration = 0;
     while (get_elapsed_time(inst->t_start) < inst->timelimit) {
@@ -51,62 +48,6 @@ void select_three_indices(int n, int *idx1, int *idx2, int *idx3) {
         if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
     }
 
-// Perform a 3-opt move by rearranging tour segments
-// A -> C -> B (reorder from A-B-C to A-C-B)
-void perform_3opt_move(instance *inst, solution *sol, int idx1, int idx2, int idx3) {
-    int n = inst->nnodes;
-    
-    // Calculate segment sizes
-    int segment1_size = (idx2+1) - (idx1+1);
-    int segment2_size = (idx3+1) - (idx2+1);
-    int segment3_size = n - (idx3+1) + (idx1+1);
-    
-    // Allocate memory for segments
-    int *segment1 = (int *)malloc(segment1_size * sizeof(int));
-    int *segment2 = (int *)malloc(segment2_size * sizeof(int));
-    int *segment3 = (int *)malloc(segment3_size * sizeof(int));
-    
-    // Copy segments
-    for (int j = 0; j < segment1_size; j++) {
-        segment1[j] = sol->visited_nodes[(idx1+1+j) % n];
-    }
-    
-    for (int j = 0; j < segment2_size; j++) {
-        segment2[j] = sol->visited_nodes[(idx2+1+j) % n];
-    }
-    
-    for (int j = 0; j < segment3_size; j++) {
-        segment3[j] = sol->visited_nodes[(idx3+1+j) % n];
-    }
-    
-    // Rearrange segments
-    int pos = (idx1+1) % n;
-    
-    // Place segment2
-    for (int j = 0; j < segment2_size; j++) {
-        sol->visited_nodes[pos] = segment2[j];
-        pos = (pos + 1) % n;
-    }
-    
-    // Place segment1
-    for (int j = 0; j < segment1_size; j++) {
-        sol->visited_nodes[pos] = segment1[j];
-        pos = (pos + 1) % n;
-    }
-    
-    // Place segment3
-    for (int j = 0; j < segment3_size; j++) {
-        sol->visited_nodes[pos] = segment3[j];
-        pos = (pos + 1) % n;
-    }
-    
-    // Free allocated memory
-    free(segment1);
-    free(segment2);
-    free(segment3);
-}
-
-
 void kick(instance *inst, solution *sol, const int reps) { //aggiungere int reps 
     int n = inst->nnodes;
     
@@ -131,7 +72,7 @@ void kick(instance *inst, solution *sol, const int reps) { //aggiungere int reps
         double original_cost = sol->cost;
         
         // Perform the move
-        perform_3opt_move(inst, sol, idx1, idx2, idx3);
+        shift_segment(inst, sol, idx1, idx2, idx3);
         
         // Update the solution cost
         sol->cost = original_cost + (new_cost - old_cost);

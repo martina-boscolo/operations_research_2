@@ -46,15 +46,16 @@ void swap_nodes(int *nodes, int i, int j);
 void reverse_segment(solution *sol, int i, int j);
 
 /**
- * Shift segment between index i and index j, after index k
- * Note: assumption k < i < j
+ * Perform a 3-opt move by rearranging tour segments following this pattern:
+ * A -> C -> B (reorder from A-B-C to A-C-B)
  * 
- * @param sol The solution pointer 
- * @param i The first index
- * @param j The second index
- * @param k The third index
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ * @param idx1 First index
+ * @param idx2 Second index
+ * @param idx3 Third index
  */
-void shift_segment(solution *sol, int i, int j, int k);
+void shift_segment(instance *inst, solution *sol, int idx1, int idx2, int idx3);
 
 
 //---------------------------------------- heuristics ----------------------------------------

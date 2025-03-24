@@ -29,11 +29,13 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
+        nearest_neighbor(inst, sol, 0);
         vns(inst, sol, VNS_REPS);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
 
         printf("Solving with TABU_SEARCH method.\n");
+        nearest_neighbor(inst, sol, 0);
         tabu_search(inst, sol);
         
     } else if (strcmp(inst->asked_method, COMPARE) == 0) {

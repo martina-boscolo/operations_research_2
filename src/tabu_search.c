@@ -79,10 +79,7 @@ void find_best_neighbor(instance *inst, solution *current, tabu_params *params) 
 
 
 void tabu_search(instance *inst, solution *sol) {
-
-    // obtain first solution
-    nearest_neighbor(inst, sol, rand() % inst->nnodes);
-
+    
     int nnodes = inst->nnodes;
     
     // Initialize tabu parameters

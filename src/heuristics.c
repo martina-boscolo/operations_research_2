@@ -32,16 +32,57 @@ void reverse_segment(solution *sol, int i, int j) {
     }
 }
 
-void shift_segment(solution *sol, int i, int j, int k) {
-    int *shifted = (int*) malloc((j-k) * sizeof(int));
-    for (int h=0; h<(j-i); h++) {
-        shifted[h] = sol->visited_nodes[i+h+1];
+void shift_segment(instance *inst, solution *sol, int idx1, int idx2, int idx3) {
+    int n = inst->nnodes;
+    
+    // Calculate segment sizes
+    int segment1_size = (idx2+1) - (idx1+1);
+    int segment2_size = (idx3+1) - (idx2+1);
+    int segment3_size = n - (idx3+1) + (idx1+1);
+    
+    // Allocate memory for segments
+    int *segment1 = (int *)malloc(segment1_size * sizeof(int));
+    int *segment2 = (int *)malloc(segment2_size * sizeof(int));
+    int *segment3 = (int *)malloc(segment3_size * sizeof(int));
+    
+    // Copy segments
+    for (int j = 0; j < segment1_size; j++) {
+        segment1[j] = sol->visited_nodes[(idx1+1+j) % n];
     }
-    for (int h=0; h<(i-k); h++) {
-        shifted[(j-i)+h] = sol->visited_nodes[k+h+1];
+    
+    for (int j = 0; j < segment2_size; j++) {
+        segment2[j] = sol->visited_nodes[(idx2+1+j) % n];
     }
-    memcpy(sol->visited_nodes+k+1, shifted, (j-k) * sizeof(int));
-    free(shifted);
+    
+    for (int j = 0; j < segment3_size; j++) {
+        segment3[j] = sol->visited_nodes[(idx3+1+j) % n];
+    }
+    
+    // Rearrange segments
+    int pos = (idx1+1) % n;
+    
+    // Place segment2
+    for (int j = 0; j < segment2_size; j++) {
+        sol->visited_nodes[pos] = segment2[j];
+        pos = (pos + 1) % n;
+    }
+    
+    // Place segment1
+    for (int j = 0; j < segment1_size; j++) {
+        sol->visited_nodes[pos] = segment1[j];
+        pos = (pos + 1) % n;
+    }
+    
+    // Place segment3
+    for (int j = 0; j < segment3_size; j++) {
+        sol->visited_nodes[pos] = segment3[j];
+        pos = (pos + 1) % n;
+    }
+    
+    // Free allocated memory
+    free(segment1);
+    free(segment2);
+    free(segment3);    
 }
 
 //---------------heuristics------------------
