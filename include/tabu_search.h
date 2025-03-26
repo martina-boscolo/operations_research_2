@@ -26,35 +26,35 @@ typedef struct {
 /**
  * Initialize tabu search parameters
  *  
- * @param params 
- * @param nnodes 
- * @param min_tenure 
- * @param max_tenure 
+ * @param params The tabu search parameters
+ * @param nnodes The number of nodes
+ * @param min_tenure Minimum tabu tenure
+ * @param max_tenure Maximum tabu tenure
  */
 void init_tabu_params(tabu_params *params, int nnodes, int min_tenure, int max_tenure);
 
 /**
  * Free tabu search parameters
  *  
- * @param params 
+ * @param params The tabu search parameters
  */
 void free_tabu_params(tabu_params *params);
 
 /**
  * Get a random number between min and max
  *  
- * @param params 
- * @param node 
+ * @param min The minimum value
+ * @param max The maximum value
  */
 int get_random_tenure(int min, int max);
 
 /**
  * Check if a node is tabu
  *  
- * @param params 
- * @param node 
+ * @param params The tabu search parameters
+ * @param node The node to check
  */
-int is_tabu(tabu_params *params, int node, int current_iter);
+int is_tabu(tabu_params *params, int node);
 
 /**
  * Update tabu status for a node
@@ -65,10 +65,28 @@ int is_tabu(tabu_params *params, int node, int current_iter);
 void update_tabu_status(tabu_params *params, int node);
 
 /**
+ * Check if tabu list is almost full
+ *  
+ * @param params The tabu search parameters
+ * @param nnodes Number of nodes
+ */
+int is_tabu_list_full(tabu_params *params, int nnodes);
+
+
+/**
+ * Reset tabu list if full
+ *  
+ * @param params The tabu search parameters
+ * @param inst The instance pointer of the problem
+ */
+void reset_tabu_list_if_full(tabu_params *params, instance *inst);
+
+/**
  * Find best neighbor using swap operator and considering tabu status
  *  
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
+ * @param params The tabu search parameters
  */
 void find_best_neighbor(instance *inst, solution *current, tabu_params *params);
 
