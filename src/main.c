@@ -23,13 +23,17 @@ int main(int argc, const char *argv[]) {
     // compute the solution
     solve_with_method(&inst, &sol); 
 
-    // print solution
-    printf("\n\n*********SOLUTION*********\n\n");
-    print_solution(inst.best_solution, inst.nnodes);
-    printf("\n\n");
+    if (inst.verbose >= HIGH) {
+        // print solution
+        printf("\n\n*********SOLUTION*********\n\n");
+        print_solution(inst.best_solution, inst.nnodes);
+        printf("\n\n");
+    }
 
     // plot the solution
     plot_solution(&inst, inst.best_solution);
+
+    printf("$STAT;%s;%d;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost);
 
     // free the instance and its solution
     free_instance(&inst);
