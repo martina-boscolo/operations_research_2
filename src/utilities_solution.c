@@ -206,6 +206,11 @@ void allocate_solution(solution *sol, const int nnodes) {
 
     sol->visited_nodes = (int *) calloc((nnodes + 1), sizeof(int));
 
+    if (sol->visited_nodes == NULL) {
+        printf("Cannot allocate memory");
+        exit(EXIT_FAILURE);
+    }
+
 }
 
 void free_solution(solution *sol) {
