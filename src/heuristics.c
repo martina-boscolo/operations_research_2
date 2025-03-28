@@ -98,16 +98,16 @@ double delta2(const instance *inst, const solution *sol, const int i, const int 
 }
 
 double delta3(const instance *inst, const solution *sol, const int idx1, const int idx2, const int idx3) {
-    int n = inst->nnodes;
+    
     // compute the cost of the three edges that would be removed
-    double old_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx1+1) % n], inst) +
-                      cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx2+1) % n], inst) +
-                      cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx3+1) % n], inst);
+    double old_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[idx1+1], inst) +
+                      cost(sol->visited_nodes[idx2], sol->visited_nodes[idx2+1], inst) +
+                      cost(sol->visited_nodes[idx3], sol->visited_nodes[idx3+1], inst);
         
     // compute the cost of the three new edges that would be added
-    double new_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx2+1) % n], inst) +
-                      cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx3+1) % n], inst) +
-                      cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx1+1) % n], inst);
+    double new_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[idx2+1], inst) +
+                      cost(sol->visited_nodes[idx2], sol->visited_nodes[idx3+1], inst) +
+                      cost(sol->visited_nodes[idx3], sol->visited_nodes[idx1+1], inst);
         
     return new_cost - old_cost;
 }

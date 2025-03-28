@@ -124,10 +124,10 @@ void tabu_search(instance *inst, solution *sol, time_t t_start) {
     tabu_params params;
     int min_tenure = (int)(1 + 0.1 * nnodes);            // Min number of iterations node remains tabu
     int max_tenure = (int)(1 + 0.2 * nnodes);            // Max number of iterations node remains tabu
-    init_tabu_params(&params, nnodes, min_tenure, max_tenure, inst->param);
+    init_tabu_params(&params, nnodes, min_tenure, max_tenure, inst->param1);
     char filename[50];
     char filename_results[50];
-    sprintf(filename, "TS_n%d_s%d_p%d", inst->nnodes, inst->seed, inst->param); 
+    sprintf(filename, "TS_n%d_s%d_p%d", inst->nnodes, inst->seed, inst->param1); 
     sprintf(filename_results, "results/%s.csv",filename); 
     FILE* f = fopen( filename_results, "w+");
 

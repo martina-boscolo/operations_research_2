@@ -47,7 +47,8 @@ typedef struct {
     int seed;                   // random seed used to generate random instance
     char input_file[1000];      // input file 
     char asked_method[30];      // method to compute the solution
-    int param;                  // parameter for the method
+    int param1;                  // parameter for the method
+    int param2;                 // second parameter for the method
 
     int verbose;                // printing level
     double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit

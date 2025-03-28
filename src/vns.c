@@ -16,10 +16,8 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
-        printf("\n\nBEFORE TWO_OPT\n");/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // go to local optima
         two_opt(inst, &temp_sol, (timelimit-elapsed_time));
-        printf("AFTER TWO_OPT\n");/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         // update local best solution
         update_sol(inst, &temp_best_sol, &temp_sol);
@@ -37,7 +35,8 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         iteration++;
     }
 
-    strcpy(temp_best_sol.method, VNS);
+    sprintf(temp_best_sol.method, "%s_k%d_r%d", VNS, k, reps);
+    //strcpy(temp_best_sol.method, VNS);
     update_sol(inst, sol, &temp_best_sol);
     plot_stats_in_file(sol->method);
 
@@ -48,6 +47,11 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
     switch (k) {
         default: // default case takes 3opt move as kick
         case 3:
+
+            if (inst->verbose >= GOOD) {
+                printf("Kick with 3-opt move, with %d repetitions\n", reps);
+            }
+
             for (int i = 0; i < reps; i++) {
 
                 int idx1, idx2, idx3;
@@ -63,9 +67,15 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                     check_sol(inst, sol);
                 }
             }
+
             break;
 
         case 5:
+        
+            if (inst->verbose >= GOOD) {
+                printf("Kick with 5-opt move, with %d repetitions\n", reps);
+            }
+
             for (int i = 0; i < reps; i++) {
 
                 int idx1, idx2, idx3, idx4, idx5;
@@ -81,6 +91,7 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                     check_sol(inst, sol);
                 }
             }
+
             break;
     }
 
@@ -117,8 +128,6 @@ void fixed_five_opt_move(solution *sol, const int nnodes, int idx1, int idx2, in
 }
 
 double delta5(const instance *inst, const solution *sol, const int idx1, const int idx2, const int idx3, const int idx4, const int idx5) {
-    
-    int n = inst->nnodes;
 
     // compute the cost of the three edges that would be removed
     // (idx1, idx1+1), (idx2, idx2+1), (idx3, idx3+1), (idx4, idx4+1), (idx4, idx4+1)

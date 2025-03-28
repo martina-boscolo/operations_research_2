@@ -6,6 +6,9 @@
 
 #define VNS "VNS"
 
+#define DEAULT_K 3 
+#define DEFAULT_REPS 1
+
 /**
  * VNS algorithm 
  *  

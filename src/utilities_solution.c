@@ -30,7 +30,8 @@ void solve_with_method(instance *inst, solution *sol) {
 
         printf("Solving with VNS method.\n");
         nearest_neighbor(inst, sol, 0);
-        vns(inst, sol, inst->timelimit, 3, VNS_REPS); //todo: sistemare questione kick
+        if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
+        vns(inst, sol, inst->timelimit, inst->param1, inst->param2);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
         time_t t_start = inst->t_start; //TODO logic on time should be managed outside
@@ -134,7 +135,7 @@ void update_sol(const instance *inst, solution *sol1, const solution *sol2)
     if (sol2->cost < (sol1->cost - EPSILON))
     {
         if(inst->verbose >= ONLY_INCUMBMENT) {
-            printf("%s incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol2->method, sol1->cost, sol2->cost);
+            printf("Incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol1->cost, sol2->cost);
         }
         sol1->cost = sol2->cost;
         strcpy(sol1->method, sol2->method);
