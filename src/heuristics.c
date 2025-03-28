@@ -32,8 +32,7 @@ void reverse_segment(solution *sol, const int i, const int j) {
     }
 }
 
-void shift_segment(const instance *inst, solution *sol, const int idx1, const int idx2, const int idx3) {
-    int n = inst->nnodes;
+void shift_segment(solution *sol, const int n, const int idx1, const int idx2, const int idx3) {
     
     // Calculate segment sizes
     int segment1_size = (idx2+1) - (idx1+1);

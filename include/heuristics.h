@@ -15,7 +15,7 @@
 // heuristics in the file
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "TWO_OPT"
-#define NN_TWOOPT "NN_with_2OPT"
+#define NN_TWOOPT "NN_2OPT"
 
 //----------------------------------- heuristic utilities ------------------------------------
 
@@ -51,14 +51,15 @@ void reverse_segment(solution *sol, const int i, const int j);
 /**
  * Rearrange tour segments in the solution following this pattern:
  * A -> C -> B (reorder from A-B-C to A-C-B)
+ * Note: assuming 0 <= idx1 < idx2 < idx3 < nnodes
  * 
- * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
+ * @param n The number of nodes in the instance
  * @param idx1 First index
  * @param idx2 Second index
  * @param idx3 Third index
  */
-void shift_segment(const instance *inst, solution *sol, const int idx1, const int idx2, const int idx3);
+void shift_segment(solution *sol, const int n, const int idx1, const int idx2, const int idx3);
 
 /**
  * Compute the delta cost after the 2-opt move: 
