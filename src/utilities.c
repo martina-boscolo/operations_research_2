@@ -2,15 +2,7 @@
 
 //--- main utilities ---
 
-void print_error(const char *err) {
-
-    fprintf(stderr,"Error: %s", err);
-    fflush(NULL);
-    exit(EXIT_FAILURE);
-
-}
-
-void parse_command_line(int argc, const char *argv[], instance *inst) {
+void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
     // set default values
     initialize_instance(inst);
@@ -22,13 +14,20 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
     // parsing
     for (int i = 1; i < argc; i++) {
 
-        if (strcmp(argv[i], "-file") == 0 ) { strcpy(inst->input_file,argv[++i]); continue; }       // input file
-        if (strcmp(argv[i], "-n") == 0) { inst->nnodes = atoi(argv[++i]); continue; }               // number of nodes
-        if (strcmp(argv[i], "-seed") == 0) { inst->seed = atoi(argv[++i]); continue; }              // random seed
-        if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atof(argv[++i]); continue; }    // time limit
-        if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // verbosity level
-        if (strcmp(argv[i], "-method") == 0) { strcpy(inst->asked_method,argv[++i]); continue; }
-        if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
+        if (strcmp(argv[i], "-file") == 0 )                                                                     // input file
+            { strcpy(inst->input_file,argv[++i]); continue; }
+        if (strcmp(argv[i], "-n") == 0)                                                                         // number of nodes
+            { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; } continue; }          
+        if (strcmp(argv[i], "-seed") == 0)                                                                      // random seed
+            { inst->seed = atoi(argv[++i]); continue; }              
+        if (strcmp(argv[i], "-timelimit") == 0)                                                                 // time limit
+            { inst->timelimit = atof(argv[++i]); if (inst->timelimit < EPSILON) { need_help = 1; } continue; }    
+        if (strcmp(argv[i], "-verbose") == 0)                                                                   // verbosity level
+            { inst->verbose = atoi(argv[++i]); continue; }
+        if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
+            { strcpy(inst->asked_method,argv[++i]); continue; }
+        if (strcmp(argv[i], "--help") == 0)                                                                     // help
+            { help = 1; continue; } 
 
         // if there is an unknown command
         need_help = 1;
@@ -48,8 +47,9 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
     if (help) {
 
         printf("-file <file's path>       To pass the problem's path\n");
+        printf("-n <nnodes>               The number of nodes in the graph, must be at least %d\n", MIN_NNODES);
         printf("-seed <seed>              The seed for random generation\n");
-        printf("-timelimit <time>         The time limit in seconds\n");
+        printf("-timelimit <time>         The time limit in seconds, must be positive\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
 
@@ -70,7 +70,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
 
 //--- various utilities ---
 
-time_t seconds(void) {
+double seconds(void) {
 
     time_t curr_time;
     time(&curr_time);
@@ -79,7 +79,7 @@ time_t seconds(void) {
 
 }
 
-double get_elapsed_time(time_t start) {
+double get_elapsed_time(const time_t start) {
 
     // get current time
     time_t curr_time;
@@ -93,7 +93,7 @@ double random01(void)
     return ((double) rand() / RAND_MAX);
 }
 
-double dist(coordinate point1, coordinate point2) {
+double dist(const coordinate point1, const coordinate point2) {
 
     double deltax = point1.x-point2.x;
     double deltay = point1.y-point2.y;

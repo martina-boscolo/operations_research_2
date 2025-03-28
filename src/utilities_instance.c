@@ -51,7 +51,7 @@ void random_instance_generator(instance *inst) {
 
     allocate_instance(inst);
 
-    if (inst->verbose >= 50) {
+    if (inst->verbose >= GOOD) {
         printf("Creating random instance:\n\n");
     }
 
@@ -123,6 +123,8 @@ void name_instance(instance *inst) {
     if (inst->input_file[0] != EMPTY_STRING) {
 
         // file instance
+
+        // search for the name of the file without path and extension
         char *bar = strrchr(inst->input_file, '/');
         char *point = strrchr(inst->input_file, '.');
 
@@ -165,12 +167,12 @@ void compute_all_costs(instance *inst)
     }
 }
 
-double cost(int i, int j, instance *inst)
+double cost(const int i, const int j, const instance *inst)
 {
     return inst->costs[i * inst->nnodes + j];
 }
 
-void update_best_sol(instance *inst, solution *sol)
+void update_best_sol(instance *inst, const solution *sol)
 {
     if (sol->cost < (inst->best_solution->cost - EPSILON))
     {
@@ -216,19 +218,13 @@ void print_instance(instance *inst) {
 
         for(int i=0; i<inst->nnodes; i++) {
             for(int j=i+1; j<inst->nnodes; j++) {
-                printf("Edge[%d, %d]: %lf", i, j, inst->costs[i*inst->nnodes + j]);
+                printf("Edge[%d, %d]: %lf\t\t", i, j, inst->costs[i*inst->nnodes + j]);
             }
         }
 
         printf("\n");
 
     }
-
-    // if (inst->best_solution != NULL) {
-    //     print_solution(inst->best_solution, inst->nnodes);
-
-    //     printf("\n");
-    // }
 
 }
 

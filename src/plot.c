@@ -7,7 +7,8 @@ FILE *open_plot(void) {
 
     // if cannot open file
     if (!plot) {
-        print_error("Open Gnuplot");
+        printf("Open Gnuplot");
+        exit(EXIT_FAILURE);
     }
 
     return plot;
@@ -30,7 +31,7 @@ void add_plot_customization(FILE *plot, const char *customization) {
 
 }
 
-void plot_edge(FILE *plot, coordinate node1, coordinate node2) {
+void plot_edge(FILE *plot, const coordinate node1, const coordinate node2) {
 
     // Plot edge using format: "x1 y1\nx2 y2\n\n"
     // The last '\n' is needed to separate the edges for Gnuplot
@@ -39,7 +40,7 @@ void plot_edge(FILE *plot, coordinate node1, coordinate node2) {
 
 }
 
-void plot_cost_evolution(FILE *plot, char* filepath) {
+void plot_cost_evolution(FILE *plot, const char* filepath) {
 
     fprintf(plot, "set style data line\n");
     fprintf(plot, "set datafile separator \",\"\n");
@@ -56,9 +57,10 @@ void plot_cost_evolution(FILE *plot, char* filepath) {
         "'%s' using (column(1)):(abs(column(2) - B_min_y) < 1e-4 ? column(2) : 1/0) "
         "with points pt 7 lc \"red\" title \"Min Current: \" . gprintf(\"%%.2f\", B_min_y)\n",
         filepath, filepath, filepath);
+        
 }
 
-void plot_stats_in_file(char* filename){
+void plot_stats_in_file(const char* filename){
     
     FILE *plot = open_plot();
     plot_in_file(plot, filename);
@@ -66,11 +68,13 @@ void plot_stats_in_file(char* filename){
     sprintf(filepath, "results/%s.csv", filename);
     plot_cost_evolution(plot, filepath);
     free_plot(plot);
+
 }
 
 void input_end(FILE *plot) {
 
     fprintf(plot, "e");  
+
 }
 
 void free_plot(FILE *plot) {

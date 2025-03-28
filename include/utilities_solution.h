@@ -29,7 +29,7 @@ void initialize_solution(solution *sol);
  * @param visited_nodes array of nodes
  * @param nnodes number of nodes
  */
-void initialize_tour(int *visited_nodes, int nnodes);
+void initialize_tour(int *visited_nodes, const int nnodes);
 
 /**
  * Select the method to solve the TSP
@@ -45,9 +45,9 @@ void solve_with_method(instance *inst, solution *sol);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  * 
- * @return true if valid, false otherwise.
+ * @return true if valid, false otherwise
  */
-bool validate_node_visits(instance *inst, solution *sol);
+bool validate_node_visits(const instance *inst, const solution *sol);
 
 /**
  * Compute the total cost of the given solution path.
@@ -57,17 +57,45 @@ bool validate_node_visits(instance *inst, solution *sol);
  * 
  * @return the cost of the solution
  */
-double compute_solution_cost(instance *inst, solution *sol);
+double compute_solution_cost(const instance *inst, const solution *sol);
 
 /**
- * Main function to check the feasibility of the solution.
+ * Check if the cost in the solution is the expected one
  * 
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  * 
- * @return 1 if valid, 0 otherwise.
+ * @return true if valid, false otherwise
  */
-void check_sol(instance *inst, solution *sol); 
+bool validate_cost(const instance *inst, const solution *sol);
+
+/**
+ * Main function to check the feasibility of the solution
+ * If the solution is not feasible exit
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ */
+void check_sol(const instance *inst, solution *sol); 
+
+/**
+ * Check if the second solution is better than the first one,
+ * if so update the first solution
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol1 The first solution pointer of the instance
+ * @param sol2 The second solution pointer of the instance
+ */
+void update_sol(const instance *inst, solution *sol1, const solution *sol2);
+
+/**
+ * Copy the second solution into the first solution
+ * 
+ * @param sol1 The first solution pointer
+ * @param sol2 The second solution pointer
+ * @param nnodes The number of nodes in the instance
+ */
+void copy_sol(solution *sol1, const solution *sol2, const int nnodes);
 
 /**
  * Plot the solution using gnuplot
@@ -75,7 +103,7 @@ void check_sol(instance *inst, solution *sol);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void plot_solution(instance *inst, solution *sol);
+void plot_solution(const instance *inst, const solution *sol);
 
 /**
  * Print the hyperparameter of the solution
@@ -83,7 +111,7 @@ void plot_solution(instance *inst, solution *sol);
  * @param sol The solution pointer of the problem
  * @param nnodes The number of nodes
  */
-void print_solution(solution *sol, int nnodes);
+void print_solution(const solution *sol, const int nnodes);
 
 /**
  * Initialize sol, setting cost to INF and allocating visited_nodes 
@@ -91,7 +119,7 @@ void print_solution(solution *sol, int nnodes);
  * @param sol The solution pointer of the instance
  * @param nnodes The number of nodes
  */
-void allocate_solution(solution *sol, int nnodes);
+void allocate_solution(solution *sol, const int nnodes);
 
 /**
  * Deallocates the most space-consuming attributes of solution from memory

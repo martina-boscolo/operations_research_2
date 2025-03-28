@@ -19,20 +19,13 @@
 //-------------------------------------- main utilities --------------------------------------
 
 /**
- * Print the error and exit the program
- * 
- * @param err The error string
- */
-void print_error(const char *err);
-
-/**
  * Parses the input from the command line
  *
  * @param argc The argc from the main function
  * @param argv The argv from the main function
  * @param inst The instance pointer of the problem
  */ 
-void parse_command_line(int argc, const char *argv[], instance *inst);
+void parse_command_line(const int argc, const char *argv[], instance *inst);
 
 
 
@@ -43,7 +36,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst);
  * 
  * @return The seconds
  */
-time_t seconds(void);
+double seconds(void);
 
 /**
  * Compute the elapsed_time (duration) in seconds from starting time to current time.
@@ -52,7 +45,7 @@ time_t seconds(void);
  * 
  * @return The elapsed_time
  */
-double get_elapsed_time(time_t start);
+double get_elapsed_time(const time_t start);
 
 /**
  * Draw a random value between 0 and 1
@@ -62,13 +55,13 @@ double get_elapsed_time(time_t start);
 double random01(void);
 
 /**
- * Compute the distance between two points
+ * Compute the Euclidean distance between two points
  * 
  * @param point1 The first point
  * @param point2 The second point
  * 
  * @return The distance between the points
  */
-double dist(coordinate point1, coordinate point2);
+double dist(const coordinate point1, const coordinate point2);
 
 #endif //UTILITIES_H

@@ -22,8 +22,9 @@ int main(int argc, const char *argv[]) {
     
     // compute the solution
     solve_with_method(&inst, &sol); 
+    update_best_sol(&inst, &sol);
 
-    if (inst.verbose >= HIGH) {
+    if (inst.verbose >= GOOD) {
         // print solution
         printf("\n\n*********SOLUTION*********\n\n");
         print_solution(inst.best_solution, inst.nnodes);
