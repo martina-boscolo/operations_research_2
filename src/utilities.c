@@ -26,7 +26,8 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
             { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
             { strcpy(inst->asked_method,argv[++i]); continue; }
-        if (strcmp(argv[i], "-param") == 0) {  inst->param = atoi(argv[++i]); continue; }           // parameter for the method
+        if (strcmp(argv[i], "-param") == 0)                                                                     // parameter for the method          
+            {  inst->param = atoi(argv[++i]); continue; }                                                       
         if (strcmp(argv[i], "--help") == 0)                                                                     // help
             { help = 1; continue; } 
 
