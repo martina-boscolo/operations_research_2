@@ -239,6 +239,12 @@ void allocate_instance(instance *inst) {
 
     // allocate memory for the best solution
     inst->best_solution = (solution *) malloc(sizeof(solution));
+
+    if (inst->coord == NULL || inst->costs == NULL || inst->best_solution == NULL) {
+        printf("Cannot allocate memory");
+        exit(EXIT_FAILURE);
+    }
+
     initialize_solution(inst->best_solution);
     allocate_solution(inst->best_solution, inst->nnodes);
 
