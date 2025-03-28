@@ -1,0 +1,12 @@
+
+logs
+./logs
+./results
+./plot
+
+*.csv
+
+#keeping the pdf files for the report
+
+#experiment
+ts_pp_csv_maker.bat

@@ -14,14 +14,31 @@
 #include <float.h>
 #include <math.h>
 
+// Enum for tenure types
+typedef enum {
+    FIXED_MIN,
+    FIXED_MAX,
+    RANDOM,
+    LINEAR,
+    SINUSOIDAL
+} TenureType;
+
 // Structure to hold tabu search parameters
 typedef struct {
     int *tabu_list;         // Tabu list: -1 if not tabu, otherwise iteration when it became tabu
     int min_tenure;         // Minimum tabu tenure
     int max_tenure;         // Maximum tabu tenure
     int current_iter;       // Current iteration
+    TenureType tenure_type; // Type of tenure 
 } tabu_params;
 
+/**
+ * Calculate tenure based on the chosen type
+ *  
+ * @param params The tabu search parameters
+ * @return The calculated tenure
+ */
+int calculate_tenure(tabu_params *params);
 
 /**
  * Initialize tabu search parameters
@@ -30,8 +47,9 @@ typedef struct {
  * @param nnodes The number of nodes
  * @param min_tenure Minimum tabu tenure
  * @param max_tenure Maximum tabu tenure
+ * @param tenure_type Type of tenure 
  */
-void init_tabu_params(tabu_params *params, int nnodes, int min_tenure, int max_tenure);
+void init_tabu_params(tabu_params *params, int nnodes, int min_tenure, int max_tenure, TenureType tenure_type);
 
 /**
  * Free tabu search parameters
@@ -40,13 +58,6 @@ void init_tabu_params(tabu_params *params, int nnodes, int min_tenure, int max_t
  */
 void free_tabu_params(tabu_params *params);
 
-/**
- * Get a random number between min and max
- *  
- * @param min The minimum value
- * @param max The maximum value
- */
-int get_random_tenure(int min, int max);
 
 /**
  * Check if a node is tabu
@@ -97,7 +108,7 @@ void find_best_neighbor(instance *inst, solution *current, tabu_params *params);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void tabu_search(instance *inst, solution *sol);
+void tabu_search(instance *inst, solution *sol, time_t t_start);
 
 
 #endif //TABU_SEARCH_H

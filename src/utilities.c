@@ -28,6 +28,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "-timelimit") == 0) { inst->timelimit = atof(argv[++i]); continue; }    // time limit
         if (strcmp(argv[i], "-verbose") == 0) { inst->verbose = atoi(argv[++i]); continue; }        // verbosity level
         if (strcmp(argv[i], "-method") == 0) { strcpy(inst->asked_method,argv[++i]); continue; }
+        if (strcmp(argv[i], "-param") == 0) {  inst->param = atoi(argv[++i]); continue; }           // parameter for the method
         if (strcmp(argv[i], "--help") == 0) { help = 1; continue; } 
 
         // if there is an unknown command
@@ -52,6 +53,7 @@ void parse_command_line(int argc, const char *argv[], instance *inst) {
         printf("-timelimit <time>         The time limit in seconds\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
+        printf("-param <param>            The parameter for the method\n");
 
         exit(0);
 

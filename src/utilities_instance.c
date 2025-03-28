@@ -11,6 +11,7 @@ void initialize_instance(instance *inst) {
     inst->seed = DEFAULT_SEED;
     inst->input_file[0] = EMPTY_STRING;
     inst->asked_method[0] = EMPTY_STRING;
+    inst->param = -1;
 
     inst->verbose = DEFAULT_VERBOSE;
     inst->timelimit = DEFAULT_TIMELIMIT;

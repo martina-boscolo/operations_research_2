@@ -33,10 +33,10 @@ void solve_with_method(instance *inst, solution *sol) {
         vns(inst, sol, VNS_REPS);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
-
+        time_t t_start = inst->t_start; //TODO logic on time should be managed outside
         printf("Solving with TABU_SEARCH method.\n");
         nearest_neighbor(inst, sol, 0);
-        tabu_search(inst, sol);
+        tabu_search(inst, sol, t_start);
         
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
