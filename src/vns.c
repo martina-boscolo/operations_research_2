@@ -1,82 +1,82 @@
 #include "vns.h"
 
-void vns(instance *inst, solution *sol, const int reps) {
+void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps) {
+
+    double t_start = seconds();
+
+    solution temp_sol; 
+    copy_sol(&temp_sol, sol, inst->nnodes);
+
+    solution temp_best_sol; 
+    copy_sol(&temp_best_sol, sol, inst->nnodes);
 
     FILE* f = fopen("results/VNS.csv", "w+");
     int iteration = 0;
-    while (get_elapsed_time(inst->t_start) < inst->timelimit) {
 
+    double elapsed_time;
+    while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
+
+        printf("\n\nBEFORE TWO_OPT\n");/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // go to local optima
-        two_opt(inst, sol);
+        two_opt(inst, &temp_sol, (timelimit-elapsed_time));
+        printf("AFTER TWO_OPT\n");/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // update current best solution
-        update_best_sol(inst, sol);
+        // update local best solution
+        update_sol(inst, &temp_best_sol, &temp_sol);
         
-        fprintf(f, "%d,%f,%f\n", iteration, sol->cost, inst->best_solution->cost);
+        fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
 
         if (inst->verbose >= DEBUG){
-            printf("Time left: %lf \n", inst->timelimit -get_elapsed_time(inst->t_start) );
+            printf("Time left: %lf \n", timelimit - get_elapsed_time(t_start) );
         }
         // escape local minima
-        kick(inst, sol, reps);
+        kick(inst, &temp_sol, k, reps);
 
-        fprintf(f, "%d,%f,%f\n", iteration, sol->cost, inst->best_solution->cost);
+        fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
         
         iteration++;
     }
 
-    strcpy(inst->best_solution->method, "VNS");
-    plot_stats_in_file(inst->best_solution->method);
+    strcpy(temp_best_sol.method, VNS);
+    update_sol(inst, sol, &temp_best_sol);
+    plot_stats_in_file(sol->method);
 
 }
 
-void select_three_indices(int n, int *idx1, int *idx2, int *idx3) {
+void select_three_indices(const int n, int *idx1, int *idx2, int *idx3) {
 
-        *idx1 = rand() % n;
+    *idx1 = rand() % n;
  
-        do {
-            *idx2 = rand() % n;
-        } while (*idx2 == *idx1);
+    do {
+        *idx2 = rand() % n;
+    } while (*idx2 == *idx1);
         
-        do {
-            *idx3 = rand() % n;
-        } while (*idx3 == *idx1 || *idx3 == *idx2);
+    do {
+        *idx3 = rand() % n;
+    } while (*idx3 == *idx1 || *idx3 == *idx2);
         
-        // Sort the indices
-        if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
-        if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
-        if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
-    }
+    // Sort the indices
+    if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
+    if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
+    if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
+}
 
-void kick(instance *inst, solution *sol, const int reps) { //aggiungere int reps 
-    int n = inst->nnodes;
+void kick(const instance *inst, solution *sol, const int k, const int reps) {
     
     for (int i = 0; i < reps; i++) {
 
         int idx1, idx2, idx3;
-        select_three_indices(n, &idx1, &idx2, &idx3);
-        
-        // Calculate the cost of the three edges that would be removed
-        double old_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx1+1) % n], inst) +
-                          cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx2+1) % n], inst) +
-                          cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx3+1) % n], inst);
-        
-        // Calculate the cost of the three new edges that would be added
-        // For a standard 3-opt move, we would connect:
-        // idx1 to (idx2+1), idx2 to (idx3+1), and idx3 to (idx1+1)
-        double new_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx2+1) % n], inst) +
-                          cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx3+1) % n], inst) +
-                          cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx1+1) % n], inst);
-        
-        // Save the original cost for validation
-        double original_cost = sol->cost;
+        select_three_indices(inst->nnodes, &idx1, &idx2, &idx3);
+
+        // Update the solution cost
+        sol->cost += delta3(inst, sol, idx1, idx2, idx3);
         
         // Perform the move
         shift_segment(inst, sol, idx1, idx2, idx3);
         
-        // Update the solution cost
-        sol->cost = original_cost + (new_cost - old_cost);
-        
-        check_sol(inst, sol);
+        if (inst->verbose >= GOOD) {
+            check_sol(inst, sol);
+        }
     }
+
 }

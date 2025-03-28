@@ -2,13 +2,13 @@
 
 //---------------utilities------------------
 
-int find_nearest_node(instance *inst, int len, int *visited_nodes) {
+int find_nearest_node(const instance *inst, const int len, const int *visited_nodes) {
     int nearest = -1;
     double min_cost = INFINITY;
 
     for (int i = len; i < inst->nnodes; i++) {
         int node = visited_nodes[i];
-        double current_cost = cost(visited_nodes[len-1] , node, inst);
+        double current_cost = cost(visited_nodes[len-1], node, inst);
 
         if (current_cost < min_cost) {
             min_cost = current_cost;
@@ -18,13 +18,13 @@ int find_nearest_node(instance *inst, int len, int *visited_nodes) {
     return nearest;
 }
 
-void swap_nodes(int *nodes, int i, int j) {
+void swap_nodes(int *nodes, const int i, const int j) {
     int temp = nodes[i];
     nodes[i] = nodes[j];
     nodes[j] = temp;
 }
 
-void reverse_segment(solution *sol, int i, int j) {
+void reverse_segment(solution *sol, const int i, const int j) {
     for (int k = 0; k < (j - i + 1) / 2; k++) {
         int temp = sol->visited_nodes[i + k];
         sol->visited_nodes[i + k] = sol->visited_nodes[j - k];
@@ -32,7 +32,7 @@ void reverse_segment(solution *sol, int i, int j) {
     }
 }
 
-void shift_segment(instance *inst, solution *sol, int idx1, int idx2, int idx3) {
+void shift_segment(const instance *inst, solution *sol, const int idx1, const int idx2, const int idx3) {
     int n = inst->nnodes;
     
     // Calculate segment sizes
@@ -85,109 +85,150 @@ void shift_segment(instance *inst, solution *sol, int idx1, int idx2, int idx3) 
     free(segment3);    
 }
 
+double delta2(const instance *inst, const solution *sol, const int i, const int j) {
+    
+    // compute the cost of the two edges that would be removed
+    double old_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[i], inst) +
+                      cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
+
+    // compute the cost of the two new edges that would be added
+    double new_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[j], inst) +
+                      cost(sol->visited_nodes[i], sol->visited_nodes[j+1], inst);
+
+    return new_cost - old_cost;
+}
+
+double delta3(const instance *inst, const solution *sol, const int idx1, const int idx2, const int idx3) {
+    int n = inst->nnodes;
+    // compute the cost of the three edges that would be removed
+    double old_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx1+1) % n], inst) +
+                      cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx2+1) % n], inst) +
+                      cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx3+1) % n], inst);
+        
+    // compute the cost of the three new edges that would be added
+    double new_cost = cost(sol->visited_nodes[idx1], sol->visited_nodes[(idx2+1) % n], inst) +
+                      cost(sol->visited_nodes[idx2], sol->visited_nodes[(idx3+1) % n], inst) +
+                      cost(sol->visited_nodes[idx3], sol->visited_nodes[(idx1+1) % n], inst);
+        
+    return new_cost - old_cost;
+}
+
 //---------------heuristics------------------
 
-void nearest_neighbor(instance *inst, solution *sol, int start)
+void nearest_neighbor(const instance *inst, solution *sol, const int start)
 {
-    initialize_tour(sol->visited_nodes, inst->nnodes);
-    swap_nodes(sol->visited_nodes, start, 0);
+    solution temp_sol; 
+    allocate_solution(&temp_sol, inst->nnodes);
+
+    initialize_tour(temp_sol.visited_nodes, inst->nnodes);
+    swap_nodes(temp_sol.visited_nodes, start, 0);
 
     int len = 1;
     double total_cost = 0;
     for (int i = 1; i < inst->nnodes; i++)
     {
-        int nearest_index = find_nearest_node(inst, len, sol->visited_nodes);
+        int nearest_index = find_nearest_node(inst, len, temp_sol.visited_nodes);
         if (nearest_index == -1)
         {
-            print_error("No valid nearest neighbor found\n");
-        } // almost useless
+            printf("No valid nearest neighbor found\n");
+            exit(EXIT_FAILURE);
+        }
 
-        int nearest_node = sol->visited_nodes[nearest_index];
-        swap_nodes(sol->visited_nodes, nearest_index, len);
-        total_cost += cost(sol->visited_nodes[len - 1], nearest_node, inst);
+        int nearest_node = temp_sol.visited_nodes[nearest_index];
+        swap_nodes(temp_sol.visited_nodes, nearest_index, len);
+        total_cost += cost(temp_sol.visited_nodes[len - 1], nearest_node, inst);
         len++;
     }
     // Complete the cycle
-    sol->visited_nodes[inst->nnodes] = start;
-    total_cost += cost(sol->visited_nodes[len - 1], start, inst);
+    temp_sol.visited_nodes[inst->nnodes] = start;
+    total_cost += cost(temp_sol.visited_nodes[len - 1], start, inst);
 
-    sol->cost = total_cost;
+    temp_sol.cost = total_cost;
 
-    check_sol(inst, sol);
+    if (inst->verbose >= GOOD) {
+        check_sol(inst, &temp_sol);
+    }
+
+    strcpy(temp_sol.method, NEAREST_NEIGHBOR);
+    copy_sol(sol, &temp_sol, inst->nnodes);
+    free_solution(&temp_sol);
 }
 
-void multi_start_nn(instance *inst, solution *sol) {
+void multi_start_nn(const instance *inst, solution *sol, const double timelimit) {
+
+    double t_start = seconds();
+
+    solution temp_sol; 
+    copy_sol(&temp_sol, sol, inst->nnodes);
+
+    solution temp_best_sol; 
+    copy_sol(&temp_best_sol, sol, inst->nnodes);
 
     for (int start = 0; start < inst->nnodes; start++) {
 
-        double elapsed_time = get_elapsed_time(inst->t_start);
-        printf("Elapsed time: %.6f seconds\n", elapsed_time); //to debug
-
-        if (inst->timelimit > 0 && elapsed_time >= inst->timelimit) {
-            printf("Time limit reached! Stopping early.\n");
-            break; // Stop if time limit is reached, otherwise finish the complete computation
+        double elapsed_time = get_elapsed_time(t_start);
+        printf("Elapsed time %.6f seconds\n", elapsed_time);
+        
+        if (elapsed_time >= timelimit) { // Stop if time limit is reached
+            if (inst->verbose >= GOOD) {
+                printf("Time limit reached.\n");
+            }
+            break;
         }
 
-        //no check of time limit from now on
-        nearest_neighbor(inst, sol, start);
-        two_opt(inst, sol);
+        nearest_neighbor(inst, &temp_sol, start);
+        two_opt(inst, &temp_sol, (timelimit-elapsed_time));
 
-        // Debug: Print intermediate results
-        printf("Start Node: %d, Cost: %.2lf\n", start, sol->cost);
-
-        update_best_sol(inst, sol);
-        check_sol(inst, sol);
+        // Print intermediate results and check the solution
+        if (inst->verbose >= GOOD) {
+            printf("Start Node: %d, Cost: %.2lf\n", start, temp_sol.cost);
+            check_sol(inst, &temp_sol);
+        }
+        update_sol(inst, &temp_best_sol, &temp_sol);
     }
+
+    strcpy(temp_best_sol.method, NN_TWOOPT);
+    update_sol(inst, sol, &temp_best_sol);
+    free_solution(&temp_sol);
+    free_solution(&temp_best_sol);
+
 }
 
-void two_opt(instance *inst, solution *sol) {
+void two_opt(const instance *inst, solution *sol, const double timelimit) {
+
+    double t_start = seconds();
+
+    solution temp_sol; 
+    copy_sol(&temp_sol, sol, inst->nnodes);
+
     int improved = 1; // Flag to track improvements
-    while (improved && (get_elapsed_time(inst->t_start) < inst->timelimit)) {
+    while (improved && (get_elapsed_time(t_start) < timelimit)) {
         improved = 0;
         for (int i = 1; i < inst->nnodes; i++) {
-            if (get_elapsed_time(inst->t_start) >= inst->timelimit) {
-                break; 
-            }
             for (int j = i + 1; j < inst->nnodes; j++) {
-                if (get_elapsed_time(inst->t_start) >= inst->timelimit) {
+                if (get_elapsed_time(t_start) >= timelimit) {
                     break; 
                 }
-                // Calculate the cost of the two edges that would be removed
-                double old_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[i], inst) +
-                                  cost(sol->visited_nodes[j], sol->visited_nodes[j+1], inst);
-               
-                // Calculate the cost of the two new edges that would be added
-                double new_cost = cost(sol->visited_nodes[i-1], sol->visited_nodes[j], inst) +
-                                  cost(sol->visited_nodes[i], sol->visited_nodes[j+1], inst);
                 
-                if (new_cost < old_cost - EPSILON){
+                double delta = delta2(inst, &temp_sol, i, j);
+
+                if (delta < - EPSILON) {
                     // Reverse the segment between i and j
-                    reverse_segment(sol, i, j);
+                    reverse_segment(&temp_sol, i, j);
                     
                     // Update the solution cost correctly
-                    sol->cost -= (old_cost - new_cost);
+                    temp_sol.cost += delta;
                     improved = 1; // Indicate improvement found
                 }
             }
         }
     }
-    strcpy(sol->method, "TWO_OPT");
-    check_sol(inst, sol);
-}
 
-int ms_2opt_nn_main(instance *inst, solution *sol) {
-
-    strcpy(sol->method, "NEAREST_NEIGHBOR");
-    
-    multi_start_nn(inst, sol);
-
-    printf("Best Solution Cost: %lf\n", inst->best_solution->cost);
-    printf("Best Path: ");
-    for (int i = 0; i <= inst->nnodes; i++) {
-        printf("%d ", inst->best_solution->visited_nodes[i]);
+    if (inst->verbose >= GOOD) {
+        check_sol(inst, &temp_sol);
     }
-    printf("\n");
-    check_sol(inst, sol);
 
-    return 0;
+    strcpy(temp_sol.method, TWO_OPT);
+    update_sol(inst, sol, &temp_sol);
+    free_solution(&temp_sol);
 }

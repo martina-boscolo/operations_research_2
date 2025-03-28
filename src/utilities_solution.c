@@ -8,7 +8,7 @@ void initialize_solution(solution *sol) {
 
 }
 
-void initialize_tour(int *visited_nodes, int nnodes) {
+void initialize_tour(int *visited_nodes, const int nnodes) {
     for (int i = 0; i < nnodes; i++) {
         visited_nodes[i] = i;
     }
@@ -24,13 +24,13 @@ void solve_with_method(instance *inst, solution *sol) {
     if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 
         printf("Solving with Nearest Neighbor method.\n");
-        ms_2opt_nn_main(inst, sol); 
+        multi_start_nn(inst, sol, inst->timelimit); 
 
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
         nearest_neighbor(inst, sol, 0);
-        vns(inst, sol, VNS_REPS);
+        vns(inst, sol, inst->timelimit, 3, VNS_REPS); //todo: sistemare questione kick
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
         time_t t_start = inst->t_start; //TODO logic on time should be managed outside
@@ -46,7 +46,7 @@ void solve_with_method(instance *inst, solution *sol) {
     
 }
 
-bool validate_node_visits(instance *inst, solution *sol)
+bool validate_node_visits(const instance *inst, const solution *sol)
 {
     int *visited = (int *)calloc(inst->nnodes, sizeof(int));
     if (!visited)
@@ -89,7 +89,7 @@ bool validate_node_visits(instance *inst, solution *sol)
     return true; 
 }
 
-double compute_solution_cost(instance *inst, solution *sol)
+double compute_solution_cost(const instance *inst, const solution *sol)
 {
     double computed_cost = 0;
     for (int i = 0; i < inst->nnodes; i++)
@@ -99,35 +99,58 @@ double compute_solution_cost(instance *inst, solution *sol)
     return computed_cost;
 }
 
-int validate_cost(instance *inst, solution *sol)
+bool validate_cost(const instance *inst, const solution *sol)
 {
     double computed_cost = compute_solution_cost(inst, sol);
     if (fabs(computed_cost - sol->cost) > EPSILON)
     { // Floating-point error tolerance
         fprintf(stderr, "Cost mismatch! Expected: %lf, Computed: %lf\n", sol->cost, computed_cost);
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 
-void check_sol(instance *inst, solution *sol)
+void check_sol(const instance *inst, solution *sol)
 {
-    if (inst->verbose >= 50)
-    { // only for debug
-        if (!validate_node_visits(inst, sol))
-        {
-            exit(EXIT_FAILURE); // problem in the visit of the nodes
-        }
-        if (!validate_cost(inst, sol))
-        {
-            exit(EXIT_FAILURE); // mismatch in the cost
-        }
-        // Solution is valid
+    if (!validate_node_visits(inst, sol))
+    {
+        printf("Problem in the visit of the nodes\n");
+        exit(EXIT_FAILURE);
     }
-    
+    if (!validate_cost(inst, sol))
+    {
+        printf("Mismatch in the cost\n");
+        exit(EXIT_FAILURE);
+    }
+    // Solution is valid
+    if (inst->verbose >= DEBUG) {
+        printf("Solution is valid\n");
+    }
+
 }
 
-void plot_solution(instance *inst, solution *sol) {
+void update_sol(const instance *inst, solution *sol1, const solution *sol2)
+{
+    if (sol2->cost < (sol1->cost - EPSILON))
+    {
+        if(inst->verbose >= ONLY_INCUMBMENT) {
+            printf("%s incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol2->method, sol1->cost, sol2->cost);
+        }
+        sol1->cost = sol2->cost;
+        strcpy(sol1->method, sol2->method);
+        memcpy(sol1->visited_nodes, sol2->visited_nodes, (inst->nnodes + 1) * sizeof(int));
+    }
+}
+
+void copy_sol(solution *sol1, const solution *sol2, const int nnodes) {
+    initialize_solution(sol1);
+    allocate_solution(sol1, nnodes);
+    sol1->cost = sol2->cost;
+    strcpy(sol1->method, sol2->method);
+    memcpy(sol1->visited_nodes, sol2->visited_nodes, (nnodes + 1) * sizeof(int));
+}
+
+void plot_solution(const instance *inst, const solution *sol) {
 
     //use gnuplot to print the solution
     FILE *gnuplot = open_plot();
@@ -156,7 +179,7 @@ void plot_solution(instance *inst, solution *sol) {
 
 }
 
-void print_solution(solution *sol, int nnodes) {
+void print_solution(const solution *sol, const int nnodes) {
 
     printf("Cost: %lf\n", sol->cost);
     printf("Method: %s\n", sol->method);
@@ -177,7 +200,7 @@ void print_solution(solution *sol, int nnodes) {
 
 }
 
-void allocate_solution(solution *sol, int nnodes) {
+void allocate_solution(solution *sol, const int nnodes) {
 
     free_solution(sol);
 

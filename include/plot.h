@@ -36,7 +36,7 @@ void add_plot_customization(FILE *plot, const char *customization);
  * @param node1 The coordinate of first node
  * @param node2 The coordinate of second node
  */
-void plot_edge(FILE *plot, coordinate node1, coordinate node2);
+void plot_edge(FILE *plot, const coordinate node1, const coordinate node2);
 
 /**
  * Plot stats of the cost and best solution cost based on number of solutions
@@ -44,14 +44,14 @@ void plot_edge(FILE *plot, coordinate node1, coordinate node2);
  * @param plot The Gnuplot file pointer
  * @param filepath path to csv file for data
  */
-void plot_cost_evolution(FILE *plot, char* filepath);
+void plot_cost_evolution(FILE *plot, const char* filepath);
 
 /**
  * Plot stats in a file
  * 
  * @param filename name of the file
  */
-void plot_stats_in_file(char* filename);
+void plot_stats_in_file(const char* filename);
 
 
 /**

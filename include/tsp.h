@@ -13,14 +13,12 @@
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
 
-// default value for the solution
-#define INFINITE_COST 10e38
+// value limits
+#define MIN_NNODES 5
 
 // verbose levels
 #define ONLY_INCUMBMENT 10 
-#define LITTLE_OUTPUT 20
 #define GOOD 50
-#define HIGH 70 
 #define DEBUG 100
 
 typedef struct {

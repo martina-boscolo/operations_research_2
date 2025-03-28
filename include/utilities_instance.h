@@ -68,7 +68,7 @@ void compute_all_costs(instance *inst);
  * 
  * @return The distance between the two nodes
  */
-double cost(int i, int j, instance *inst);
+double cost(const int i, const int j, const instance *inst);
 
 /**
  * Check if the given solution is better than the curren one,
@@ -77,7 +77,7 @@ double cost(int i, int j, instance *inst);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void update_best_sol(instance *inst, solution *sol);
+void update_best_sol(instance *inst, const solution *sol);
 
 /**
  * Print the hyperparameter of the instance
