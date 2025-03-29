@@ -142,7 +142,7 @@ void tabu_search(const instance *inst, solution *sol, time_t t_start) {
         find_best_neighbor(inst, &temp_sol, &params);
         
         // Update best solution if needed
-        update_sol(inst, sol, &temp_sol);
+        update_sol(inst, sol, &temp_sol, true);
         fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost ,sol->cost);
 
         check_sol(inst, sol);
