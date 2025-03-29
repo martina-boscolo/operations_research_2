@@ -9,6 +9,7 @@
 #include <math.h>
 #include <time.h>
 #include <float.h>
+#include <stdbool.h>
 
 #define INF DBL_MAX
 
@@ -124,6 +125,6 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
  * @param sol The solution pointer of the instance
  * @param timelimit Time limit for the algorithm
  */
-void two_opt(const instance *inst, solution *sol, const double timelimit); 
+void two_opt(const instance *inst, solution *sol, const double timelimit, bool print); 
 
 #endif //HEURISTICS_H

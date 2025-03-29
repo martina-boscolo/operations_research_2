@@ -176,24 +176,24 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
         }
 
         nearest_neighbor(inst, &temp_sol, start);
-        two_opt(inst, &temp_sol, (timelimit-elapsed_time));
+        two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
 
         // Print intermediate results and check the solution
         if (inst->verbose >= GOOD) {
             printf("Start Node: %d, Cost: %.2lf\n", start, temp_sol.cost);
             check_sol(inst, &temp_sol);
         }
-        update_sol(inst, &temp_best_sol, &temp_sol);
+        update_sol(inst, &temp_best_sol, &temp_sol, true);
     }
 
     strcpy(temp_best_sol.method, NN_TWOOPT);
-    update_sol(inst, sol, &temp_best_sol);
+    update_sol(inst, sol, &temp_best_sol, false);
     free_solution(&temp_sol);
     free_solution(&temp_best_sol);
 
 }
 
-void two_opt(const instance *inst, solution *sol, const double timelimit) {
+void two_opt(const instance *inst, solution *sol, const double timelimit, bool print) {
 
     double t_start = seconds();
 
@@ -228,6 +228,6 @@ void two_opt(const instance *inst, solution *sol, const double timelimit) {
     }
 
     strcpy(temp_sol.method, TWO_OPT);
-    update_sol(inst, sol, &temp_sol);
+    update_sol(inst, sol, &temp_sol, print);
     free_solution(&temp_sol);
 }
