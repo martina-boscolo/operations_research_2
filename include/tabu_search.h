@@ -90,7 +90,7 @@ int is_tabu_list_full(tabu_params *params, int nnodes);
  * @param params The tabu search parameters
  * @param inst The instance pointer of the problem
  */
-void reset_tabu_list_if_full(tabu_params *params, instance *inst);
+void reset_tabu_list_if_full(tabu_params *params, const instance *inst);
 
 /**
  * Find best neighbor using swap operator and considering tabu status
@@ -99,7 +99,7 @@ void reset_tabu_list_if_full(tabu_params *params, instance *inst);
  * @param sol The solution pointer of the instance
  * @param params The tabu search parameters
  */
-void find_best_neighbor(instance *inst, solution *current, tabu_params *params);
+void find_best_neighbor(const instance *inst, solution *current, tabu_params *params);
 
 
 /**
@@ -108,7 +108,7 @@ void find_best_neighbor(instance *inst, solution *current, tabu_params *params);
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void tabu_search(instance *inst, solution *sol, time_t t_start);
+void tabu_search(const instance *inst, solution *sol, time_t t_start);
 
 
 #endif //TABU_SEARCH_H

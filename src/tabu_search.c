@@ -54,7 +54,7 @@ int is_tabu_list_full(tabu_params *params, int nnodes) {
     return ( count > (nnodes * 0.75));
 }
 
-void reset_tabu_list_if_full(tabu_params *params, instance *inst) {
+void reset_tabu_list_if_full(tabu_params *params, const instance *inst) {
     if (is_tabu_list_full(params, inst->nnodes)) {
         // Reset the entire tabu list
         for (int i = 0; i < inst->nnodes; i++) {
@@ -65,7 +65,7 @@ void reset_tabu_list_if_full(tabu_params *params, instance *inst) {
     }
 }
 
-void find_best_neighbor(instance *inst, solution *current, tabu_params *params) {
+void find_best_neighbor(const instance *inst, solution *current, tabu_params *params) {
     int nnodes = inst->nnodes;
     double best_cost = DBL_MAX;
     int best_i = -1, best_j = -1;
@@ -116,39 +116,42 @@ void find_best_neighbor(instance *inst, solution *current, tabu_params *params) 
 }
 
 
-void tabu_search(instance *inst, solution *sol, time_t t_start) {
-    
-    int nnodes = inst->nnodes;
-    
+void tabu_search(const instance *inst, solution *sol, time_t t_start) {
+
+    solution temp_sol; 
+    copy_sol(&temp_sol, sol, inst->nnodes);
+        
     // Initialize tabu parameters
     tabu_params params;
-    int min_tenure = (int)(1 + 0.1 * nnodes);            // Min number of iterations node remains tabu
-    int max_tenure = (int)(1 + 0.2 * nnodes);            // Max number of iterations node remains tabu
-    init_tabu_params(&params, nnodes, min_tenure, max_tenure, inst->param1);
+    int min_tenure = (int)(1 + 0.2 *  inst->nnodes);            // Min number of iterations node remains tabu
+    int max_tenure = (int)(1 + 0.6 *  inst->nnodes);            // Max number of iterations node remains tabu
+    init_tabu_params(&params,  inst->nnodes, min_tenure, max_tenure, inst->param1);
+    
     char filename[50];
     char filename_results[50];
     sprintf(filename, "TS_n%d_s%d_p%d", inst->nnodes, inst->seed, inst->param1); 
     sprintf(filename_results, "results/%s.csv",filename); 
     FILE* f = fopen( filename_results, "w+");
 
- 
     // Main loop
 
     while (get_elapsed_time(t_start) < inst->timelimit) {
         reset_tabu_list_if_full(&params, inst);
 
         // Find best neighbor
-        find_best_neighbor(inst, sol, &params);
+        find_best_neighbor(inst, &temp_sol, &params);
         
         // Update best solution if needed
-        update_best_sol(inst, sol);
-        fprintf(f, "%d,%f,%f\n", params.current_iter, sol->cost, inst->best_solution->cost);
+        update_sol(inst, sol, &temp_sol);
+        fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost ,sol->cost);
 
         check_sol(inst, sol);
         params.current_iter++;
         
     }
 
+    sprintf(sol->method, filename);
+  
     strcpy(inst->best_solution->method, "TS");
     plot_stats_in_file(filename);   
 

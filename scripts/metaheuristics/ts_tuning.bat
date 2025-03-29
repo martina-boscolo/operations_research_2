@@ -3,11 +3,11 @@ setlocal enabledelayedexpansion
 
 REM Define constants
 set SEED_START=1
-set SEED_END=5
+set SEED_END=50
 set PARAM_START=0
 set PARAM_END=4
-set NODES=500
-set TIMELIMIT=60
+set NODES=100
+set TIMELIMIT=15
 
 REM Create logs folder if it doesn't exist
 if not exist logs mkdir logs
