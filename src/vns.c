@@ -10,17 +10,22 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     solution temp_best_sol; 
     copy_sol(&temp_best_sol, sol, inst->nnodes);
 
-    FILE* f = fopen("results/VNS.csv", "w+");
+    char method_name[50];
+    sprintf(method_name, "%s_k%d_r%d", VNS, k, reps);
+
+    char filename[65];
+    sprintf(filename, "results/%s.csv", method_name);
+    FILE* f = fopen(filename, "w+");
     int iteration = 0;
 
     double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
         // go to local optima
-        two_opt(inst, &temp_sol, (timelimit-elapsed_time));
+        two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
 
         // update local best solution
-        update_sol(inst, &temp_best_sol, &temp_sol);
+        update_sol(inst, &temp_best_sol, &temp_sol, false);
         
         fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
 
@@ -35,9 +40,8 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         iteration++;
     }
 
-    sprintf(temp_best_sol.method, "%s_k%d_r%d", VNS, k, reps);
-    //strcpy(temp_best_sol.method, VNS);
-    update_sol(inst, sol, &temp_best_sol);
+    strcpy(temp_best_sol.method, method_name);
+    update_sol(inst, sol, &temp_best_sol, true);
     plot_stats_in_file(sol->method);
 
 }

@@ -7,7 +7,6 @@
 #include "vns.h"
 #include "tabu_search.h"
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,8 +82,9 @@ void check_sol(const instance *inst, solution *sol);
  * @param inst The instance pointer of the problem
  * @param sol1 The first solution pointer of the instance
  * @param sol2 The second solution pointer of the instance
+ * @param print If it is false it forces to NOT print independently from verbose parameter
  */
-void update_sol(const instance *inst, solution *sol1, const solution *sol2);
+void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print);
 
 /**
  * Copy the second solution into the first solution

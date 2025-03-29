@@ -30,6 +30,7 @@ void solve_with_method(instance *inst, solution *sol) {
 
         printf("Solving with VNS method.\n");
         nearest_neighbor(inst, sol, 0);
+        if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = 3; }
         if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
         vns(inst, sol, inst->timelimit, inst->param1, inst->param2);
         
@@ -130,11 +131,11 @@ void check_sol(const instance *inst, solution *sol)
 
 }
 
-void update_sol(const instance *inst, solution *sol1, const solution *sol2)
+void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print)
 {
     if (sol2->cost < (sol1->cost - EPSILON))
     {
-        if(inst->verbose >= ONLY_INCUMBMENT) {
+        if(print && inst->verbose >= ONLY_INCUMBMENT) {
             printf("Incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol1->cost, sol2->cost);
         }
         sol1->cost = sol2->cost;
