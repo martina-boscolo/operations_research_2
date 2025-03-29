@@ -34,8 +34,9 @@ int main(int argc, const char *argv[]) {
     // plot the solution
     plot_solution(&inst, inst.best_solution);
 
-    printf("$STAT;%s;%d;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost);
-
+    if (inst.verbose != PARAMS_TUNING){
+        printf("$STAT;%s;%d;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost);
+    }
     // free the instance and its solution
     free_instance(&inst);
     free_solution(&sol); 

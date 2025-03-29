@@ -6,16 +6,35 @@ int calculate_tenure(tabu_params *params) {
     switch (params->tenure_type) {
         case FIXED_MIN:
             return params->min_tenure; // Fixed tenure value to min
+            
         case FIXED_MAX:
             return params->max_tenure; // Fixed tenure value to max
+            
         case RANDOM:
-            return params->min_tenure + rand() % (params->max_tenure - params->min_tenure + 1);  // Random within range
+            // More diverse random - occasional spikes
+            if (rand() % 10 == 0) // 10% chance of extreme value
+                return params->max_tenure + (int)(params->max_tenure * 0.5);
+            else
+                return params->min_tenure + rand() % (params->max_tenure - params->min_tenure + 1);
+            
         case LINEAR:
-            return params->min_tenure + ((params->current_iter % (params->max_tenure - params->min_tenure + 1))); // Linearly increasing
+            // Sawtooth pattern - linear increase followed by reset
+            {
+                int cycle_length = 2 * (params->max_tenure - params->min_tenure);
+                int position = params->current_iter % cycle_length;
+                if (position < cycle_length / 2)
+                    return params->min_tenure + position; // Increasing
+                else
+                    return params->max_tenure - (position - cycle_length / 2); // Decreasing
+            }
+        default: //best performer   
         case SINUSOIDAL:
-            return params->min_tenure + (int)((params->max_tenure - params->min_tenure) * (0.5 * (1 + sin((double)params->current_iter / 100.0)))); // Sinusoidal pattern
-        default:
-            return params->min_tenure; // Default to fixed min if unknown type
+            // More pronounced sinusoidal with wider amplitude
+            {
+                double frequency = 0.05; // Slower oscillation
+                double amplitude = params->max_tenure - params->min_tenure;
+                return params->min_tenure + (int)(amplitude * (0.5 * (1 + sin(frequency * params->current_iter))));
+            }
     }
 }
 
@@ -50,8 +69,8 @@ int is_tabu_list_full(tabu_params *params, int nnodes) {
             count++;
         }
     }
-    // Consider the list "full" if more than 75% of nodes are tabu
-    return ( count > (nnodes * 0.75));
+    // Consider the list "full" if more than 95% of nodes are tabu
+    return ( count > (nnodes * 0.95));
 }
 
 void reset_tabu_list_if_full(tabu_params *params, const instance *inst) {
@@ -152,9 +171,12 @@ void tabu_search(const instance *inst, solution *sol, time_t t_start) {
 
     sprintf(sol->method, filename);
   
-    strcpy(inst->best_solution->method, "TS");
-    plot_stats_in_file(filename);   
-
+    //strcpy(inst->best_solution->method, "TS");
+    plot_stats_in_file(filename);
+    if (inst->verbose == PARAMS_TUNING) {
+        printf("\n\n$STAT;%s;%d;%d;%lf1\n;", "TS", inst->seed, inst->param1, sol->cost);   
+    }
+    
     // Free memory
     free_tabu_params(&params);
 }
