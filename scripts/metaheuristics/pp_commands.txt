@@ -1,2 +1,0 @@
-fine tuning of ts param:
-python perfprof.py -D "," -T 3600 -S 1.2 -M 5 ./metaheuristics/ts_stats.csv ./metaheuristics/ts_tuning.pdf -P "all instances, shift 2 sec.s"
