@@ -4,9 +4,9 @@ logs
 ./results
 ./plot
 
-*.csv
-
+#keeping csv stats files for the report (they are only few lines)
 #keeping the pdf files for the report
 
 #experiment
 ts_pp_csv_maker.bat
+commands.txt

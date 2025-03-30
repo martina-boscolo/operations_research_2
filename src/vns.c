@@ -43,6 +43,9 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     strcpy(temp_best_sol.method, method_name);
     update_sol(inst, sol, &temp_best_sol, true);
     plot_stats_in_file(sol->method);
+    if (inst->verbose == PARAMS_TUNING) {
+        printf("\n\n$STAT;%s;%d;%d;%d;%lf1\n;", "VNS", inst->seed, inst->param1, inst->param2, sol->cost);   
+    }
 
 }
 
