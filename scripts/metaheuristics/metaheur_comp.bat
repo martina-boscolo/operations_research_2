@@ -30,7 +30,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
 )
 
 REM Create CSV header with parameter combinations
-echo seed,NN,TS,VNS > metaheur_comp.csv
+echo 3,NN,TS,VNS > metaheur_comp.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
