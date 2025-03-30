@@ -9,7 +9,7 @@
 // default values for the instance
 #define DEFAULT_NNODES 150
 #define DEFAULT_SEED 1
-#define DEFAULT_TIMELIMIT 3600.0
+#define DEFAULT_TIMELIMIT 3600
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
 
@@ -52,7 +52,7 @@ typedef struct {
     int param2;                 // second parameter for the method
 
     int verbose;                // printing level
-    double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
+    int timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
     time_t t_start;             // initial time
 
 } instance;

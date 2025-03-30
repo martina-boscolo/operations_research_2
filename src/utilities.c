@@ -14,14 +14,14 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
     // parsing
     for (int i = 1; i < argc; i++) {
 
-        if (strcmp(argv[i], "-file") == 0 )                                                                     // input file
+        if (strcmp(argv[i], "-file") == 0)                                                                     // input file
             { strcpy(inst->input_file,argv[++i]); continue; }
         if (strcmp(argv[i], "-n") == 0)                                                                         // number of nodes
             { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; } continue; }          
         if (strcmp(argv[i], "-seed") == 0)                                                                      // random seed
             { inst->seed = atoi(argv[++i]); continue; }              
         if (strcmp(argv[i], "-timelimit") == 0)                                                                 // time limit
-            { inst->timelimit = atof(argv[++i]); if (inst->timelimit < EPSILON) { need_help = 1; } continue; }    
+            { inst->timelimit = atoi(argv[++i]); if (inst->timelimit < 1) { need_help = 1; } continue; }    
         if (strcmp(argv[i], "-verbose") == 0)                                                                   // verbosity level
             { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
@@ -57,6 +57,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
         printf("-param1 <param>           The first parameter for the method\n");
+        printf("-param2 <param>           The second parameter for the method\n");
 
         exit(0);
 
@@ -75,7 +76,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
 //--- various utilities ---
 
-double seconds(void) {
+time_t seconds(void) {
 
     time_t curr_time;
     time(&curr_time);
@@ -84,12 +85,12 @@ double seconds(void) {
 
 }
 
-double get_elapsed_time(const time_t start) {
+int get_elapsed_time(const time_t start) {
 
     // get current time
     time_t curr_time;
     time(&curr_time);
-    return difftime(curr_time, start );
+    return (int) difftime(curr_time, start);
 
 }
 

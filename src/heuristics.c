@@ -153,9 +153,9 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start)
     free_solution(&temp_sol);
 }
 
-void multi_start_nn(const instance *inst, solution *sol, const double timelimit) {
+void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
 
-    double t_start = seconds();
+    time_t t_start = seconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -163,10 +163,10 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
     solution temp_best_sol; 
     copy_sol(&temp_best_sol, sol, inst->nnodes);
 
+    double elapsed_time;
     for (int start = 0; start < inst->nnodes; start++) {
 
-        double elapsed_time = get_elapsed_time(t_start);
-        printf("Elapsed time %.6f seconds\n", elapsed_time);
+        elapsed_time = get_elapsed_time(t_start);
         
         if (elapsed_time >= timelimit) { // Stop if time limit is reached
             if (inst->verbose >= GOOD) {
@@ -193,9 +193,9 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
 
 }
 
-void two_opt(const instance *inst, solution *sol, const double timelimit, bool print) {
+void two_opt(const instance *inst, solution *sol, const int timelimit, bool print) {
 
-    double t_start = seconds();
+    time_t t_start = seconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);

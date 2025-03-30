@@ -36,7 +36,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst);
  * 
  * @return The seconds
  */
-double seconds(void);
+time_t seconds(void);
 
 /**
  * Compute the elapsed_time (duration) in seconds from starting time to current time.
@@ -45,7 +45,7 @@ double seconds(void);
  * 
  * @return The elapsed_time
  */
-double get_elapsed_time(const time_t start);
+int get_elapsed_time(const time_t start);
 
 /**
  * Draw a random value between 0 and 1

@@ -108,7 +108,7 @@ void find_best_neighbor(const instance *inst, solution *current, tabu_params *pa
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  */
-void tabu_search(const instance *inst, solution *sol, time_t t_start);
+void tabu_search(const instance *inst, solution *sol, const int timelimit);
 
 
 #endif //TABU_SEARCH_H

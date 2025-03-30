@@ -16,15 +16,17 @@ void initialize_tour(int *visited_nodes, const int nnodes) {
 }
 
 void solve_with_method(instance *inst, solution *sol) {
-    
+
     initialize_solution(sol);
     allocate_solution(sol, inst->nnodes);
     mkdir("./results", 0777);
 
+    int timelimit = inst->timelimit - get_elapsed_time(inst->t_start);
+
     if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 
         printf("Solving with Nearest Neighbor method.\n");
-        multi_start_nn(inst, sol, inst->timelimit); 
+        multi_start_nn(inst, sol, timelimit); 
 
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
@@ -32,13 +34,12 @@ void solve_with_method(instance *inst, solution *sol) {
         nearest_neighbor(inst, sol, 0);
         if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = 3; }
         if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
-        vns(inst, sol, inst->timelimit, inst->param1, inst->param2);
+        vns(inst, sol, timelimit, inst->param1, inst->param2);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
-        time_t t_start = inst->t_start; //TODO logic on time should be managed outside
         printf("Solving with TABU_SEARCH method.\n");
         nearest_neighbor(inst, sol, 0);
-        tabu_search(inst, sol, t_start);
+        tabu_search(inst, sol, timelimit);
         
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);

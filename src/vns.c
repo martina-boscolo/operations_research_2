@@ -1,8 +1,8 @@
 #include "vns.h"
 
-void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps) {
+void vns(const instance *inst, solution *sol, const int timelimit, const int k, const int reps) {
 
-    double t_start = seconds();
+    time_t t_start = seconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -21,6 +21,10 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
+        if (inst->verbose >= DEBUG){
+            printf("Time left: %lf \n", timelimit - elapsed_time);
+        }
+
         // go to local optima
         two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
 
@@ -29,9 +33,6 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         
         fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
 
-        if (inst->verbose >= DEBUG){
-            printf("Time left: %lf \n", timelimit - get_elapsed_time(t_start) );
-        }
         // escape local minima
         kick(inst, &temp_sol, k, reps);
 

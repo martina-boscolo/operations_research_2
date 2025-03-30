@@ -135,7 +135,9 @@ void find_best_neighbor(const instance *inst, solution *current, tabu_params *pa
 }
 
 
-void tabu_search(const instance *inst, solution *sol, time_t t_start) {
+void tabu_search(const instance *inst, solution *sol, const int timelimit) {
+
+    time_t t_start = seconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -154,7 +156,7 @@ void tabu_search(const instance *inst, solution *sol, time_t t_start) {
 
     // Main loop
 
-    while (get_elapsed_time(t_start) < inst->timelimit) {
+    while (get_elapsed_time(t_start) < timelimit) {
         reset_tabu_list_if_full(&params, inst);
 
         // Find best neighbor

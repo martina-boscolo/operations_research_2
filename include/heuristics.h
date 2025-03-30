@@ -114,7 +114,7 @@ void nearest_neighbor(const instance *inst,  solution *sol, const int start);
  *            Note: at the end it will contain the best solution between the input one and the best found one.
  * @param timelimit Time limit for the algorithm
  */
-void multi_start_nn(const instance *inst, solution *sol, const double timelimit);
+void multi_start_nn(const instance *inst, solution *sol, const int timelimit);
 
 //--- k-OPT REFINEMENT ---
 
@@ -125,6 +125,6 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
  * @param sol The solution pointer of the instance
  * @param timelimit Time limit for the algorithm
  */
-void two_opt(const instance *inst, solution *sol, const double timelimit, bool print); 
+void two_opt(const instance *inst, solution *sol, const int timelimit, bool print); 
 
 #endif //HEURISTICS_H

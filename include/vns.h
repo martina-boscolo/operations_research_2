@@ -19,7 +19,7 @@
  * @param k if 3 it will use a fixed 3-opt move as kick, if 5 it will use a fixed 5-opt move as kick
  * @param reps number of k-opt moves that are performed as kick
  */
-void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps);
+void vns(const instance *inst, solution *sol, const int timelimit, const int k, const int reps);
 
 /**
  * Algorithm to modify the solution to escape the current local optima
