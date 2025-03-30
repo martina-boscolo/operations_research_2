@@ -32,7 +32,7 @@ void solve_with_method(instance *inst, solution *sol) {
 
         printf("Solving with VNS method.\n");
         nearest_neighbor(inst, sol, 0);
-        if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = 3; }
+        if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = DEAULT_K; }
         if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
         vns(inst, sol, timelimit, inst->param1, inst->param2);
         

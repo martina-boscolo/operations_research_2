@@ -175,9 +175,6 @@ void tabu_search(const instance *inst, solution *sol, const int timelimit) {
   
     //strcpy(inst->best_solution->method, "TS");
     plot_stats_in_file(filename);
-    if (inst->verbose == PARAMS_TUNING) {
-        printf("\n\n$STAT;%s;%d;%d;%lf1\n;", "TS", inst->seed, inst->param1, sol->cost);   
-    }
     
     // Free memory
     free_tabu_params(&params);

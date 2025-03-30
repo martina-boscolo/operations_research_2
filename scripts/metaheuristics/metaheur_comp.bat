@@ -3,9 +3,9 @@ setlocal enabledelayedexpansion
 
 REM Define constants
 set SEED_START=1
-set SEED_END=3
-set NODES=100
-set TIMELIMIT=5
+set SEED_END=10
+set NODES=1000
+set TIMELIMIT=60
 
 REM Define specific parameter values
 set METHOD=NN TS VNS
