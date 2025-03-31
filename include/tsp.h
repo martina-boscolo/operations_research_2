@@ -14,7 +14,7 @@
 #define EMPTY_STRING '\0'
 
 // value limits
-#define MIN_NNODES 5
+#define MIN_NNODES 10
 
 // verbose levels
 #define ONLY_INCUMBMENT 10 

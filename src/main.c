@@ -24,7 +24,7 @@ int main(int argc, const char *argv[]) {
     solve_with_method(&inst, &sol); 
     update_best_sol(&inst, &sol);
 
-    if (inst.verbose >= GOOD) {
+    if (inst.verbose >= DEBUG) {
         // print solution
         printf("\n\n*********SOLUTION*********\n\n");
         print_solution(inst.best_solution, inst.nnodes);

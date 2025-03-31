@@ -8,6 +8,7 @@
 
 #define DEAULT_K 3 
 #define DEFAULT_REPS 1
+#define POSSIBLE_THREE_OPT_MOVES 4
 
 /**
  * VNS algorithm 
@@ -30,6 +31,11 @@ void vns(const instance *inst, solution *sol, const int timelimit, const int k, 
  * @param reps number of k-opt moves that are performed as kick
  */
 void kick(const instance *inst, solution *sol, const int k, const int reps);
+
+void fixed_three_opt_move1(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
+void fixed_three_opt_move2(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
+void fixed_three_opt_move3(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
+void fixed_three_opt_move4(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
 
 /**
  * Rearrange tour segments in the solution following this pattern:

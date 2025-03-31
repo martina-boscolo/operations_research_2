@@ -31,10 +31,12 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
+        //multi_start_nn(inst, sol, 0.1*timelimit);
         nearest_neighbor(inst, sol, 0);
         if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = DEAULT_K; }
         if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
-        vns(inst, sol, timelimit, inst->param1, inst->param2);
+        int elapsed_time = get_elapsed_time(inst->t_start);
+        vns(inst, sol, (timelimit-elapsed_time), inst->param1, inst->param2);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
         printf("Solving with TABU_SEARCH method.\n");

@@ -163,10 +163,14 @@ void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
     solution temp_best_sol; 
     copy_sol(&temp_best_sol, sol, inst->nnodes);
 
-    double elapsed_time;
+    int elapsed_time;
     for (int start = 0; start < inst->nnodes; start++) {
 
         elapsed_time = get_elapsed_time(t_start);
+
+        if (inst->verbose >= GOOD) {
+            printf("Remaining time %d\n", timelimit-elapsed_time);
+        }
         
         if (elapsed_time >= timelimit) { // Stop if time limit is reached
             if (inst->verbose >= GOOD) {
@@ -202,6 +206,8 @@ void two_opt(const instance *inst, solution *sol, const int timelimit, bool prin
 
     int improved = 1; // Flag to track improvements
     while (improved && (get_elapsed_time(t_start) < timelimit)) {
+        double best_delta = INFINITY, best_i = -1, best_j = -1;
+
         improved = 0;
         for (int i = 1; i < inst->nnodes; i++) {
             for (int j = i + 1; j < inst->nnodes; j++) {
@@ -211,15 +217,20 @@ void two_opt(const instance *inst, solution *sol, const int timelimit, bool prin
                 
                 double delta = delta2(inst, &temp_sol, i, j);
 
-                if (delta < - EPSILON) {
-                    // Reverse the segment between i and j
-                    reverse_segment(&temp_sol, i, j);
-                    
-                    // Update the solution cost correctly
-                    temp_sol.cost += delta;
-                    improved = 1; // Indicate improvement found
+                if (delta < best_delta- EPSILON) {
+                    best_delta = delta;
+                    best_i = i;
+                    best_j = j;
                 }
             }
+        }
+        if (best_delta < - EPSILON) {
+            // Reverse the segment between i and j
+            reverse_segment(&temp_sol, best_i, best_j);
+            
+            // Update the solution cost correctly
+            temp_sol.cost += best_delta;
+            improved = 1; // Indicate improvement found
         }
     }
 

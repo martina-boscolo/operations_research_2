@@ -2,6 +2,59 @@
 #include "heuristics.h"
 
 int main(int argc, const char *argv[]) {
+
+    //TEST 3-OPT KICK
+    int nnodes = 6, i1 = 0, i2 = 2, i3 = 4;
+
+    instance inst;
+    initialize_instance(&inst);
+    inst.nnodes = nnodes;
+    allocate_instance(&inst);
+    build_instance(&inst);
+
+    solution sol1, sol2, sol3, sol4;
+    initialize_solution(&sol1);
+    allocate_solution(&sol1, nnodes);
+    initialize_tour(sol1.visited_nodes, nnodes);
+    sol1.cost = compute_solution_cost(&inst, &sol1);
+    
+    initialize_solution(&sol2);
+    allocate_solution(&sol2, nnodes);
+    copy_sol(&sol2, &sol1, nnodes);
+
+    
+    initialize_solution(&sol3);
+    allocate_solution(&sol3, nnodes);
+    copy_sol(&sol3, &sol1, nnodes);
+
+    
+    initialize_solution(&sol4);
+    allocate_solution(&sol4, nnodes);
+    copy_sol(&sol4, &sol1, nnodes);
+
+    printf("INITIAL SOLUTION\n");
+    print_solution(&sol1, nnodes);
+
+    printf("\n\nKICK1\n");
+    fixed_three_opt_move1(&inst, &sol1,i1,i2,i3);
+    check_sol(&inst, &sol1);
+    print_solution(&sol1, nnodes);
+
+    printf("\n\nKICK2\n");
+    fixed_three_opt_move2(&inst, &sol2,i1,i2,i3);
+    check_sol(&inst, &sol2);
+    print_solution(&sol2, nnodes);
+
+    printf("\n\nKICK3\n");
+    fixed_three_opt_move3(&inst, &sol3,i1,i2,i3);
+    check_sol(&inst, &sol3);
+    print_solution(&sol3, nnodes);
+
+    printf("\n\nKICK4\n");
+    fixed_three_opt_move4(&inst, &sol4,i1,i2,i3);
+    check_sol(&inst, &sol4);
+    print_solution(&sol4, nnodes);
+
     /*TEST 5-OPT KICK
     int nnodes = 12;
 

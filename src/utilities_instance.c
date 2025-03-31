@@ -197,7 +197,7 @@ void print_instance(instance *inst) {
 
     printf("\n");
 
-    printf("Timelimit: %lf\n", inst->timelimit); 
+    printf("Timelimit: %d\n", inst->timelimit); 
     printf("Verbose: %d\n", inst->verbose); 
 
     printf("\n");

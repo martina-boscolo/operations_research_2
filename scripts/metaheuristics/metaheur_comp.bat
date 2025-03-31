@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=1
-set SEED_END=10
+set SEED_START=11
+set SEED_END=13
 set NODES=1000
 set TIMELIMIT=60
 
@@ -25,7 +25,7 @@ echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for %%m in (%METHOD%) do (
         echo Running with method=%%m, seed=%%s...
-        ..\..\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% > logs\%%m_n%NODES%_seed%%s.log
+        ..\..\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 10 > logs\%%m_n%NODES%_seed%%s.log
     )
 )
 
