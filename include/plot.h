@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
+#include <direct.h>  // for _mkdir
 
 /**
  * Open a Gnuplot file

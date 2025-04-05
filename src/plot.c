@@ -3,22 +3,21 @@
 
 FILE *open_plot(void) {
 
-    FILE *plot = popen("gnuplot -persistent", "w");
+    FILE *plot = _popen("gnuplot -persistent", "w");
 
     // if cannot open file
     if (!plot) {
-        printf("Open Gnuplot");
+        printf("Error opening Gnuplot\n");
         exit(EXIT_FAILURE);
     }
 
     return plot;
-
 }
 
 void plot_in_file(FILE *plot, const char *filename) {
 
     // Create the plot directory if does not exists
-    mkdir("./plot", 0777); 
+    _mkdir("./plot", 0777); 
     
     fprintf(plot, "set terminal png size 800, 600\n");
     fprintf(plot, "set output './plot/%s.png'\n", filename);
@@ -80,6 +79,5 @@ void input_end(FILE *plot) {
 void free_plot(FILE *plot) {
 
     fflush(plot);
-    pclose(plot);
-
+    _pclose(plot);  // Use _pclose for Windows
 }

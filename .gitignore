@@ -1,9 +1,12 @@
 .vscode/
+.vs/
 plot/
 results/
 test/plot/
 test/results/
 test/results/
+build/
+out/
 
 *.o
 *.exe

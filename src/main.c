@@ -2,6 +2,34 @@
 #include "utilities.h"
 #include "utilities_instance.h"
 #include "utilities_solution.h"
+#include <stdio.h>
+//#include <ilcplex/cplex.h>
+
+
+// int prova() {
+//     int status;
+//     CPXENVptr env = CPXopenCPLEX(&status);  // Initialize CPLEX
+
+//     if (env == NULL) {
+//         printf("Error initializing CPLEX.\n");
+//         return 1;
+//     }
+
+//     // Get and print the CPLEX version
+//     int major, minor, release;
+//     CPXversionnumber(env, &major, &minor, &release);
+//     printf("CPLEX Version: %d.%d.%d\n", major, minor, release);
+
+//     int a;
+//     CPXgetintparam(env, CPX_PARAM_NODELIM, &a);
+//     printf("CPLEX params:\n %d\n", a);
+
+
+    
+//     // Clean up
+//     CPXcloseCPLEX(&env);
+//     return 0;
+// }
 
 int main(int argc, const char *argv[]) {
 
@@ -39,6 +67,8 @@ int main(int argc, const char *argv[]) {
     // free the instance and its solution
     free_instance(&inst);
     free_solution(&sol); 
+   //prova();
 
     return 0;
 }
+

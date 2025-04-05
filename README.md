@@ -18,3 +18,15 @@ gcc --version
 mingw32-make --version
 gnuplot --version
 ```
+### Build with CMake
+```
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+cmake --build . --config Release
+```
+### Run with Cmake
+```
+cd Release
+tsp.exe ...... (as before)
+```
