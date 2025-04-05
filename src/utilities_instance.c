@@ -39,7 +39,6 @@ void build_instance(instance *inst) {
         if (inst->verbose >= 50) {
             printf("No input file provided. Using random instance\n\n");
         }
-
         random_instance_generator(inst);
 
     }
