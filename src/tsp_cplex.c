@@ -18,15 +18,11 @@ void print_error(const char *err)
  */
 double dist_CPLEX(int i, int j, instance *inst)
 {
-	printf("inside cost");
 	double dist = 0;
-
-
 	double dx = inst->coord[i].x - inst->coord[j].x;
 	double dy = inst->coord[i].y - inst->coord[j].y;
 	int dis = sqrt(dx*dx+dy*dy) + 0.499999999; // nearest integer
 	dist = dis + 0.0;
-	printf("dist(%d,%d) = %lf\n", i+1,j+1,dist);
 	return dist;
 	
 }    
@@ -58,7 +54,6 @@ int TSPopt(instance *inst)
         exit(1);
     }
     printf("CPLEX problem object created successfully.\n");
-	printf("Number ofgfsggf nodes: %d\n", inst->nnodes);
     // Build the model
     build_model_CPLEX(inst, env, lp);
     printf("Model built successfully.\n");
@@ -121,7 +116,6 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 	char **cname = (char **) calloc(1, sizeof(char*));
     cname[0] = (char *) calloc(100, sizeof(char));
 
-	printf("Number of nodes: %d\n", inst->nnodes);
 	// add binary var.s x(i,j) for i < j  
 	for ( int i = 0; i < inst->nnodes; i++ )
 	{
