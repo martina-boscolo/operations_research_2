@@ -18,6 +18,7 @@ set(CPLEX_LIB_FILE "${CPLEX_LIB_DIR}/stat_mda/cplex2212.lib")
 
 # Find source files
 file(GLOB SRC_FILES "${SRC_DIR}/*.c")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${SRC_DIR}/*.c")
 
 # Create executable
 add_executable(tsp ${SRC_FILES})
