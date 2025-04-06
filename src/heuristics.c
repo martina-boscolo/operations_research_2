@@ -116,12 +116,13 @@ double delta3(const instance *inst, const solution *sol, const int idx1, const i
 
 void nearest_neighbor(const instance *inst, solution *sol, const int start)
 {
-    solution temp_sol; 
+    solution temp_sol;
+    initialize_solution(&temp_sol);
     allocate_solution(&temp_sol, inst->nnodes);
 
     initialize_tour(temp_sol.visited_nodes, inst->nnodes);
     swap_nodes(temp_sol.visited_nodes, start, 0);
-
+    
     int len = 1;
     double total_cost = 0;
     for (int i = 1; i < inst->nnodes; i++)
@@ -206,7 +207,8 @@ void two_opt(const instance *inst, solution *sol, const int timelimit, bool prin
 
     int improved = 1; // Flag to track improvements
     while (improved && (get_elapsed_time(t_start) < timelimit)) {
-        double best_delta = INFINITY, best_i = -1, best_j = -1;
+        double best_delta = INFINITY;
+        int best_i = -1, best_j = -1;
 
         improved = 0;
         for (int i = 1; i < inst->nnodes; i++) {
