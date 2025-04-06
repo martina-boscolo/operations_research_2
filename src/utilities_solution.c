@@ -1,5 +1,7 @@
 #include "utilities_solution.h"
 
+#define CPLEX "C"
+
 void initialize_solution(solution *sol) {
 
     sol->cost = INFINITY;
@@ -42,6 +44,16 @@ void solve_with_method(instance *inst, solution *sol) {
         nearest_neighbor(inst, sol, 0);
         tabu_search(inst, sol, timelimit);
         
+    } else if (strcmp(inst->asked_method, CPLEX) == 0) {
+        printf("Solving with CPLEX method.\n");
+        int result = TSPopt(inst);
+
+        if (result == 0) {
+            printf("TSP optimization completed successfully.\n");
+        } else {
+            printf("TSP optimization failed.\n");
+        }
+            
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
         printf("Valid methods are:\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH);

@@ -1,5 +1,6 @@
 #include "tsp_cplex.h"
 
+
 void print_error(const char *err) 
 { 
 	printf("\n\n ERROR: %s \n\n", err); 
@@ -17,10 +18,14 @@ void print_error(const char *err)
  */
 double dist_CPLEX(int i, int j, instance *inst)
 {
-	double costDbl = cost(i,j,inst); 
-	int dis = (int) costDbl + 0.499999999; 	// nearest integer 
-	return dis+0.0;
-}        
+	double dist = 0;
+	double dx = inst->coord[i].x - inst->coord[j].x;
+	double dy = inst->coord[i].y - inst->coord[j].y;
+	int dis = sqrt(dx*dx+dy*dy) + 0.499999999; // nearest integer
+	dist = dis + 0.0;
+	return dist;
+	
+}    
 
 
 /**
@@ -31,41 +36,68 @@ double dist_CPLEX(int i, int j, instance *inst)
  */
 int TSPopt(instance *inst)
 {  
+    // Open CPLEX model
+    int error;
+    CPXENVptr env = CPXopenCPLEX(&error);
+    if (env == NULL) {
+        printf("Failed to create CPLEX environment.\n");
+        exit(1);
+    }
+    printf("CPLEX environment created successfully.\n");
 
-	// open CPLEX model
-	int error;
-    // CPLEX environment
-	CPXENVptr env = CPXopenCPLEX(&error);
-    // problem object
-	CPXLPptr lp = CPXcreateprob(env, &error, NULL); 
+    // Create problem object
+    CPXLPptr lp = CPXcreateprob(env, &error, "TSP_Problem");
+    if (lp == NULL) {
+        printf("Failed to create CPLEX problem object. Error code: %d\n", error);
+        CPXcloseCPLEX(&env);
+        exit(1);
+    }
+    printf("CPLEX problem object created successfully.\n");
 
-	build_model_CPLEX(inst, env, lp);
-	
-	// Cplex's parameter setting
-	// ...
+    // Build the model
+    build_model_CPLEX(inst, env, lp);
+    printf("Model built successfully.\n");
+    CPXsetintparam(env, CPXPARAM_RandomSeed, inst->seed);
 
-	if ( CPXmipopt(env,lp) ) print_error("CPXmipopt() error");    
+    // Solve the model
+    if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
 
-	// use the optimal solution found by CPLEX
-	
-	int ncols = CPXgetnumcols(env, lp);
-	double *xstar = (double *) calloc(ncols, sizeof(double));
-	if ( CPXgetx(env, lp, xstar, 0, ncols-1) ) print_error("CPXgetx() error");	
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		for ( int j = i+1; j < inst->nnodes; j++ )
-		{
-			if ( xstar[xpos(i,j,inst)] > 0.5 ) printf("  ... x(%3d,%3d) = 1\n", i+1,j+1);
-		}
-	}
-	free(xstar);
-	
-	// free and close cplex model   
-	CPXfreeprob(env, &lp);
-	CPXcloseCPLEX(&env); 
+    // Retrieve the optimal solution
+    int ncols = CPXgetnumcols(env, lp);
+    double *xstar = (double *) calloc(ncols, sizeof(double));
+    if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
-	return 0; // or an appropriate nonzero error code
+    // Print the solution
+    for (int i = 0; i < inst->nnodes; i++) {
+        for (int j = i + 1; j < inst->nnodes; j++) {
+            if (xstar[xpos(i, j, inst)] > 0.5) {
+                printf("  ... x(%3d,%3d) = 1\n", i + 1, j + 1);
+            }
+        }
+    }
 
+    // Build the solution (succ, comp, ncomp)
+    int *succ = (int *) calloc(inst->nnodes, sizeof(int));
+    int *comp = (int *) calloc(inst->nnodes, sizeof(int));
+    int ncomp;
+    build_sol(xstar, inst, succ, comp, &ncomp);
+
+    // Print the solution components
+    printf("Number of components: %d\n", ncomp);
+    for (int i = 0; i < inst->nnodes; i++) {
+        printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
+    }
+
+    // Free allocated memory
+    free(succ);
+    free(comp);
+    free(xstar);
+
+    // Free and close CPLEX model
+    CPXfreeprob(env, &lp);
+    CPXcloseCPLEX(&env);
+
+    return 0; // or an appropriate nonzero error code
 }
 
 
@@ -98,15 +130,15 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 	int izero = 0;
 	char binary = 'B'; 
 	
-	char **cname = (char **) calloc(1, sizeof(char *));		// (char **) required by cplex...
-	cname[0] = (char *) calloc(100, sizeof(char));
+	char **cname = (char **) calloc(1, sizeof(char*));
+    cname[0] = (char *) calloc(100, sizeof(char));
 
 	// add binary var.s x(i,j) for i < j  
 	for ( int i = 0; i < inst->nnodes; i++ )
 	{
-		for ( int j = i+1; j < inst->nnodes; j++ )
+		for ( int j = i+1; j < inst->nnodes; j++ ) 
 		{
-			sprintf(cname[0], "x(%d,%d)", i+1,j+1);  // x(1,2), x(1,3) ....
+			sprintf(cname[0], "x(%d,%d)", i+1,j+1);
 			double obj = dist_CPLEX(i,j,inst); // cost == distance   
 			double lb = 0.0;
 			double ub = 1.0;
@@ -222,6 +254,7 @@ void build_sol(const double *xstar, instance *inst, int *succ, int *comp, int *n
 	}
 }
 
+
 // **** LAZY CONTRAINTS ****
 
 // Ex: MZT formulation with directed-arc variables x_ij and x_ji --> xpos_compact(i,j,inst)
@@ -285,20 +318,20 @@ void build_sol(const double *xstar, instance *inst, int *succ, int *comp, int *n
 	
 // 	CPXsetintparam(env, CPX_PARAM_NODELIM, 0); 		// abort Cplex after the root node
 // 	CPXsetintparam(env, CPX_PARAM_INTSOLLIM, 1);	// abort Cplex after the first incumbent update
-// 	CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-4);  	// abort Cplex when gap below 10%	 
-	
-
-		
-
-	
-	
-	
+// 	CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-4);  	// abort Cplex when gap below 10%
 
 
 
 
 
- 
+
+
+
+
+
+
+
+
 
 
 
