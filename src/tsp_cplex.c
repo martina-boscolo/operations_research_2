@@ -36,7 +36,6 @@ double dist_CPLEX(int i, int j, instance *inst)
  */
 int TSPopt(instance *inst)
 {  
-
     // Open CPLEX model
     int error;
     CPXENVptr env = CPXopenCPLEX(&error);
@@ -54,33 +53,51 @@ int TSPopt(instance *inst)
         exit(1);
     }
     printf("CPLEX problem object created successfully.\n");
+
     // Build the model
     build_model_CPLEX(inst, env, lp);
     printf("Model built successfully.\n");
-	CPXsetintparam(env, CPXPARAM_RandomSeed, inst->seed);
+    CPXsetintparam(env, CPXPARAM_RandomSeed, inst->seed);
 
-	if ( CPXmipopt(env,lp) ) print_error("CPXmipopt() error");   
+    // Solve the model
+    if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
 
-	// use the optimal solution found by CPLEX	
-	int ncols = CPXgetnumcols(env, lp);
-	double *xstar = (double *) calloc(ncols, sizeof(double));
+    // Retrieve the optimal solution
+    int ncols = CPXgetnumcols(env, lp);
+    double *xstar = (double *) calloc(ncols, sizeof(double));
+    if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
-	if ( CPXgetx(env, lp, xstar, 0, ncols-1) ) print_error("CPXgetx() error");	
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		for ( int j = i+1; j < inst->nnodes; j++ )
-		{
-			if ( xstar[xpos(i,j,inst)] > 0.5 ) printf("  ... x(%3d,%3d) = 1\n", i+1,j+1);
-		}
-	}
-	free(xstar);
-	
-	// free and close cplex model   
-	CPXfreeprob(env, &lp);
-	CPXcloseCPLEX(&env); 
+    // Print the solution
+    for (int i = 0; i < inst->nnodes; i++) {
+        for (int j = i + 1; j < inst->nnodes; j++) {
+            if (xstar[xpos(i, j, inst)] > 0.5) {
+                printf("  ... x(%3d,%3d) = 1\n", i + 1, j + 1);
+            }
+        }
+    }
 
-	return 0; // or an appropriate nonzero error code
+    // Build the solution (succ, comp, ncomp)
+    int *succ = (int *) calloc(inst->nnodes, sizeof(int));
+    int *comp = (int *) calloc(inst->nnodes, sizeof(int));
+    int ncomp;
+    build_sol(xstar, inst, succ, comp, &ncomp);
 
+    // Print the solution components
+    printf("Number of components: %d\n", ncomp);
+    for (int i = 0; i < inst->nnodes; i++) {
+        printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
+    }
+
+    // Free allocated memory
+    free(succ);
+    free(comp);
+    free(xstar);
+
+    // Free and close CPLEX model
+    CPXfreeprob(env, &lp);
+    CPXcloseCPLEX(&env);
+
+    return 0; // or an appropriate nonzero error code
 }
 
 
@@ -301,20 +318,20 @@ void build_sol(const double *xstar, instance *inst, int *succ, int *comp, int *n
 	
 // 	CPXsetintparam(env, CPX_PARAM_NODELIM, 0); 		// abort Cplex after the root node
 // 	CPXsetintparam(env, CPX_PARAM_INTSOLLIM, 1);	// abort Cplex after the first incumbent update
-// 	CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-4);  	// abort Cplex when gap below 10%	 
-	
-
-		
-
-	
-	
-	
+// 	CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-4);  	// abort Cplex when gap below 10%
 
 
 
 
 
- 
+
+
+
+
+
+
+
+
 
 
 
