@@ -16,16 +16,12 @@ int main(int argc, const char *argv[]) {
 
     // build the instance
     build_instance(&inst);
-    
-    // solution of the instance
-    solution sol;
 
     // starting solving time
     inst.t_start = seconds();
     
     // compute the solution
-    solve_with_method(&inst, &sol); 
-    update_best_sol(&inst, &sol);
+    solve_with_method(&inst, inst.best_solution); 
 
     if (inst.verbose >= DEBUG) {
         // print solution
@@ -41,9 +37,7 @@ int main(int argc, const char *argv[]) {
 
     // free the instance and its solution
     free_instance(&inst);
-    free_solution(&sol); 
  
-
     return 0;
 }
 

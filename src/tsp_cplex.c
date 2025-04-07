@@ -1,79 +1,77 @@
 #include "tsp_cplex.h"
 
-#define DEBUG_CPLEX      
+#define DEBUG_CPLEX
 
-int TSPopt(instance *inst, const double timelimit)
-{  
+int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
+
     // Open CPLEX model
     int error;
-    CPXENVptr env = CPXopenCPLEX(&error);
-    if (env == NULL) {
+    *env = CPXopenCPLEX(&error);
+    if (*env == NULL) {
         print_error("Failed to create CPLEX environment.\n");
-    }
-    if (inst->verbose >= DEBUG) {
-        printf("CPLEX environment created successfully.\n");
     }
 
     // Create problem object
-    CPXLPptr lp = CPXcreateprob(env, &error, "TSP_Problem");
-    if (lp == NULL) {
-        CPXcloseCPLEX(&env);
+    *lp = CPXcreateprob(*env, &error, "TSP_Problem");
+    if (*lp == NULL) {
+        CPXcloseCPLEX(env);
         print_error("Failed to create CPLEX problem object.");
-    }
-    if (inst->verbose >= DEBUG) {
-        printf("CPLEX problem object created successfully.\n");
     }
 
     // Build the model
-    build_model_CPLEX(inst, env, lp);
-    if (inst->verbose >= DEBUG) {
-        printf("Model built successfully.\n");
-    }
-    CPXsetintparam(env, CPXPARAM_RandomSeed, inst->seed);
+    build_model_CPLEX(inst, *env, *lp);
+    CPXsetintparam(*env, CPXPARAM_RandomSeed, inst->seed);
 
-    // Solve the model
-    if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
+    return 0;
+}
 
+int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp) {
+    
     // Retrieve the optimal solution
     int ncols = CPXgetnumcols(env, lp);
     double *xstar = (double *) calloc(ncols, sizeof(double));
     if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
-    if (inst->verbose >= GOOD) {
-        // Print the solution
-        for (int i = 0; i < inst->nnodes; i++) {
-            for (int j = i + 1; j < inst->nnodes; j++) {
-                if (xstar[xpos(i, j, inst)] > 0.5) {
-                    printf("  ... x(%3d,%3d) = 1\n", i + 1, j + 1);
-                }
-            }
-        }
-    }
-
     // Build the solution (succ, comp, ncomp)
-    int *succ = (int *) calloc(inst->nnodes, sizeof(int));
-    int *comp = (int *) calloc(inst->nnodes, sizeof(int));
-    int ncomp;
-    build_cplex_sol(xstar, inst, succ, comp, &ncomp);
+    succ = (int *) calloc(inst->nnodes, sizeof(int));
+    comp = (int *) calloc(inst->nnodes, sizeof(int));
+    build_sol_CPLEX(xstar, inst, succ, comp, ncomp);
 
     if (inst->verbose >= GOOD) {
         // Print the solution components
-        printf("Number of components: %d\n", ncomp);
+        printf("Number of components: %d\n", &ncomp);
         for (int i = 0; i < inst->nnodes; i++) {
             printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
         }
     }
 
+    free(xstar);
+
+    return 0;
+
+}
+
+int TSPopt(instance *inst, const double timelimit)
+{  
+    // Open CPLEX model
+    CPXENVptr env;
+    CPXLPptr lp;
+    initialize_CPLEX(inst, &env, &lp);
+
+    // Solve the model
+    if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
+
+    int *succ = NULL, *comp = NULL, ncomp = -1;
+    get_optimal_solution_CPLEX(inst, env, lp, succ, comp, &ncomp);
+
     // Free allocated memory
     free(succ);
     free(comp);
-    free(xstar);
 
     // Free and close CPLEX model
-    CPXfreeprob(env, &lp);
-    CPXcloseCPLEX(&env);
+    free_CPLEX(&env, &lp);
 
-    return 0; // or an appropriate nonzero error code
+    return 0;
 }
 
 int xpos(int i, int j, instance *inst)      // to be verified                                           
@@ -140,7 +138,7 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 }
 
-void build_cplex_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
+void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
 {   
 
 #ifdef DEBUG_CPLEX
@@ -201,13 +199,22 @@ void build_cplex_sol(const double *xstar, instance *inst, int *succ, int *comp, 
     }
 }
 
-void build_solution(instance *inst, solution *sol, int *succ) {
+void build_solution_form_CPLEX(instance *inst, solution *sol, int *succ) {
+
 	sol->visited_nodes[0] = 0;
 	int s = succ[0];
 	for (int i = 1; i <= inst->nnodes; i++) {
 		sol->visited_nodes[i] = s;
 		s = succ[s];
 	}
-	if (sol->visited_nodes[inst->nnodes] != 0) print_error("Infeasible solution, build_solution");
 	sol->cost = compute_solution_cost(inst, sol);
+    check_sol(inst, sol);
+}
+
+void free_CPLEX(CPXENVptr *env, CPXLPptr *lp) {
+
+    // Free and close CPLEX model
+    CPXfreeprob(*env, lp);
+    CPXcloseCPLEX(env);
+
 }

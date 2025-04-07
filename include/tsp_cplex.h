@@ -10,46 +10,66 @@
 #define CPLEX "C"
 
 /**
- Optimizer.
+ * 
+ */
+int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
- @param inst instance of the struct "instance" for TSP problem.
- @param timelimit 
- @return 0 if successful, otherwise 1.
+/**
+ * 
+ */
+int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp);
+
+/**
+ * Find the optimal solution of the instance
+ * 
+ * @param inst The instance pointer of the problem
+ * @param timelimit Time limit for the algorithm
+ * @return 0 if successful, otherwise 1.
  */
 int TSPopt(instance *inst, const double timelimit);
 
 
 /**
- Return the index of CPLEX solution array from two subsequent nodes..
-
- @param i first node.
- @param j second node.
- @param inst instance of the struct "instance" for TSP problem.
- @return array position.
+ * Return the index of CPLEX solution array from the edge between two nodes
+ * 
+ * @param i First node
+ * @param j Second node
+ * @param inst The instance pointer of the problem
+ * @return Edge index
  */
 int xpos(int i, int j, instance *inst);                                       
 
     
 /**
- Build the model.
-
- @param inst instance of the struct "instance" for TSP problem.
- @param env CPLEX environment.
- @param lp CPLEX LP.
+ * Build the ILP model
+ * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
  */
 void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
 
 /**
- Build succ() and comp() wrt xstar().
-
- @param xstar CPLEX solution.
- @param inst instance of the struct "instance" for TSP problem.
- @param succ TSP solution as successors.
- @param comp component associated for each nodes.
- @param ncomp number of components in the solution.
+ * Build the solution based on the edges selected in xstar
+ *
+ * @param xstar CPLEX solution
+ * @param inst The instance pointer of the problem
+ * @param succ Solution as successors
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
  */
-void build_cplex_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp);
+void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp);
 
-void build_solution(instance *inst, solution *sol, int *succ);
+/**
+ * From CPLEX solution, as successors, to a solution in the struct
+ * Note: assume that there is only one connected component
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ * @param succ Solution as successors
+ */
+void build_solution_form_CPLEX(instance *inst, solution *sol, int *succ);
+
+void free_CPLEX(CPXENVptr *env, CPXLPptr *lp);
 
 #endif //TSP_CPLEX_H
