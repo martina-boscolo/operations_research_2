@@ -59,8 +59,8 @@ int add_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const 
 
     int izero = 0;
     
-    int *index = (int *) malloc(inst->nnodes * sizeof(int));
-    double *value = (double *) malloc(inst->nnodes * sizeof(double)); 
+    int *index = (int *) malloc(CPXgetnumcols(env,lp) * sizeof(int));
+    double *value = (double *) malloc(CPXgetnumcols(env,lp) * sizeof(double)); 
 
 	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
 		print_error("Impossible to allocate memory, add_SECs()");
