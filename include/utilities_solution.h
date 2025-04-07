@@ -7,6 +7,7 @@
 #include "vns.h"
 #include "tabu_search.h"
 #include "tsp_cplex.h"
+#include "benders.h"
 
 #include <stdio.h>
 #include <stdlib.h>

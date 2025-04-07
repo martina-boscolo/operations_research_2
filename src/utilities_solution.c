@@ -38,19 +38,15 @@ void solve_with_method(instance *inst, solution *sol) {
         vns(inst, sol, (timelimit-elapsed_time), inst->param1, inst->param2);
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
+
         printf("Solving with TABU_SEARCH method.\n");
         nearest_neighbor(inst, sol, 0);
         tabu_search(inst, sol, timelimit);
         
-    } else if (strcmp(inst->asked_method, CPLEX) == 0) {
-        printf("Solving with CPLEX method.\n");
-        int result = TSPopt(inst, timelimit);
+    } else if (strcmp(inst->asked_method, BENDERS) == 0) {
 
-        if (result == 0) {
-            printf("TSP optimization completed successfully.\n");
-        } else {
-            printf("TSP optimization failed.\n");
-        }
+        printf("Solving with Benders' loop method.\n");
+        benders_loop(inst, sol, timelimit);
             
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);

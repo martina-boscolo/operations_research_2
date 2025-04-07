@@ -7,8 +7,6 @@
 #include <ilcplex/cplex.h>
 #include <stdbool.h>
 
-#define CPLEX "C"
-
 /**
  * 
  */
@@ -20,14 +18,9 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp);
 
 /**
- * Find the optimal solution of the instance
  * 
- * @param inst The instance pointer of the problem
- * @param timelimit Time limit for the algorithm
- * @return 0 if successful, otherwise 1.
  */
-int TSPopt(instance *inst, const double timelimit);
-
+int add_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes
@@ -38,7 +31,6 @@ int TSPopt(instance *inst, const double timelimit);
  * @return Edge index
  */
 int xpos(int i, int j, instance *inst);                                       
-
     
 /**
  * Build the ILP model

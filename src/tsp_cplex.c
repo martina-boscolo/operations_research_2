@@ -27,19 +27,20 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
 int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp) {
     
+	// Solve the model
+	if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
+
     // Retrieve the optimal solution
     int ncols = CPXgetnumcols(env, lp);
     double *xstar = (double *) calloc(ncols, sizeof(double));
     if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
     // Build the solution (succ, comp, ncomp)
-    succ = (int *) calloc(inst->nnodes, sizeof(int));
-    comp = (int *) calloc(inst->nnodes, sizeof(int));
     build_sol_CPLEX(xstar, inst, succ, comp, ncomp);
 
     if (inst->verbose >= GOOD) {
         // Print the solution components
-        printf("Number of components: %d\n", &ncomp);
+        printf("Number of components: %d\n", *ncomp);
         for (int i = 0; i < inst->nnodes; i++) {
             printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
         }
@@ -51,30 +52,65 @@ int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *
 
 }
 
-int TSPopt(instance *inst, const double timelimit)
-{  
-    // Open CPLEX model
-    CPXENVptr env;
-    CPXLPptr lp;
-    initialize_CPLEX(inst, &env, &lp);
+int add_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
 
-    // Solve the model
-    if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
+	char **cname = (char **) calloc(1, sizeof(char*));
+    cname[0] = (char *) calloc(100, sizeof(char));
 
-    int *succ = NULL, *comp = NULL, ncomp = -1;
-    get_optimal_solution_CPLEX(inst, env, lp, succ, comp, &ncomp);
+    int izero = 0;
+    
+    int *index = (int *) malloc(inst->nnodes * sizeof(int));
+    double *value = (double *) malloc(inst->nnodes * sizeof(double)); 
 
-    // Free allocated memory
-    free(succ);
-    free(comp);
+	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
+		print_error("Impossible to allocate memory, add_SECs()");
 
-    // Free and close CPLEX model
-    free_CPLEX(&env, &lp);
+    for (int k=1; k<=ncomp; k++) {
+
+		sprintf(cname[0], "SEC(%d)", k); 
+        char sense = 'L'; 
+        int nnz = 0;
+        double rhs = -1;
+
+		if (inst->verbose >= DEBUG) printf("%s\n", cname[0]);
+
+        for (int i=0; i<inst->nnodes; i++) {
+
+			if (inst->verbose >= DEBUG) printf("comp[%d] = %d\n", i+1, comp[i]);
+            if (comp[i] != k) continue;
+
+            rhs++;
+
+            for (int j=i+1; j<inst->nnodes; j++) {
+
+                if (comp[j] != k) continue;
+
+				if (inst->verbose >= DEBUG) printf("Add edge %d %d to SEC %d\n", i+1, j+1, k);
+
+				index[nnz] = xpos(i, j, inst);
+				value[nnz] = 1.0;
+				nnz++;
+
+            }
+
+        }
+
+		if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
+
+    }
+
+	free(value);
+    free(index);
+
+    if (inst->verbose >= GOOD) CPXwriteprob(env, lp, "model.lp", NULL);   
+
+    free(cname[0]);
+    free(cname);
 
     return 0;
 }
 
-int xpos(int i, int j, instance *inst)      // to be verified                                           
+int xpos(int i, int j, instance *inst)                                         
 { 
     if ( i == j ) print_error(" i == j in xpos" );
     if ( i > j ) return xpos(j,i,inst);
@@ -106,7 +142,6 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
     } 
 
     // add degree constr.s 
-
     int *index = (int *) malloc(inst->nnodes * sizeof(int));
     double *value = (double *) malloc(inst->nnodes * sizeof(double));  
     
@@ -114,7 +149,7 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
     for ( int h = 0; h < inst->nnodes; h++ )  // degree constraints
     {
         double rhs = 2.0;
-        char sense = 'E';                     // 'E' for equality constraint 
+        char sense = 'E'; // Equality constraint 
         sprintf(cname[0], "degree(%d)", h+1); 
         int nnz = 0;
         for ( int i = 0; i < inst->nnodes; i++ )
@@ -129,9 +164,9 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
     } 
 
     free(value);
-    free(index);    
+    free(index);
 
-    if ( inst->verbose >= -100 ) CPXwriteprob(env, lp, "model.lp", NULL);   
+    if (inst->verbose >= GOOD) CPXwriteprob(env, lp, "model.lp", NULL);   
 
     free(cname[0]);
     free(cname);
@@ -201,13 +236,13 @@ void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, 
 
 void build_solution_form_CPLEX(instance *inst, solution *sol, int *succ) {
 
-	sol->visited_nodes[0] = 0;
-	int s = succ[0];
-	for (int i = 1; i <= inst->nnodes; i++) {
-		sol->visited_nodes[i] = s;
-		s = succ[s];
-	}
-	sol->cost = compute_solution_cost(inst, sol);
+    sol->visited_nodes[0] = 0;
+    int s = succ[0];
+    for (int i = 1; i <= inst->nnodes; i++) {
+        sol->visited_nodes[i] = s;
+        s = succ[s];
+    }
+    sol->cost = compute_solution_cost(inst, sol);
     check_sol(inst, sol);
 }
 
