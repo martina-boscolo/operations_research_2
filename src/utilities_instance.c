@@ -173,19 +173,6 @@ double cost(const int i, const int j, const instance *inst)
     return inst->costs[i * inst->nnodes + j];
 }
 
-void update_best_sol(instance *inst, const solution *sol)
-{
-    if (sol->cost < (inst->best_solution->cost - EPSILON))
-    {
-        if(inst->verbose >= ONLY_INCUMBMENT) {
-            printf("Incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", inst->best_solution->cost, sol->cost);
-        }
-        inst->best_solution->cost = sol->cost;
-        strcpy(inst->best_solution->method, sol->method);
-        memcpy(inst->best_solution->visited_nodes, sol->visited_nodes, (inst->nnodes + 1) * sizeof(int));
-    }
-}
-
 void print_instance(instance *inst) {
 
     printf("Name: %s\n", inst->name);
