@@ -9,11 +9,6 @@
 
 #define TABU_SEARCH "TS"
 
-
-#include "tabu_search.h"
-#include <float.h>
-#include <math.h>
-
 // Enum for tenure types
 typedef enum {
     FIXED_MIN,

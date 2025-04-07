@@ -1,62 +1,34 @@
 #include "tsp_cplex.h"
 
+#define DEBUG_CPLEX      
 
-void print_error(const char *err) 
-{ 
-	printf("\n\n ERROR: %s \n\n", err); 
-	fflush(NULL); 
-	exit(1); 
-}   
-
-/**
- Compute the euclidean distance between two nodes.
-
- @param i first node.
- @param j second node.
- @param inst instance of the struct "instance" for TSP problem.
- @return distance between two nodes.
- */
-double dist_CPLEX(int i, int j, instance *inst)
-{
-	double dist = 0;
-	double dx = inst->coord[i].x - inst->coord[j].x;
-	double dy = inst->coord[i].y - inst->coord[j].y;
-	int dis = sqrt(dx*dx+dy*dy) + 0.499999999; // nearest integer
-	dist = dis + 0.0;
-	return dist;
-	
-}    
-
-
-/**
- Optimizer.
-
- @param inst instance of the struct "instance" for TSP problem.
- @return 0 if successful, otherwise 1.
- */
-int TSPopt(instance *inst)
+int TSPopt(instance *inst, const double timelimit)
 {  
     // Open CPLEX model
     int error;
     CPXENVptr env = CPXopenCPLEX(&error);
     if (env == NULL) {
-        printf("Failed to create CPLEX environment.\n");
-        exit(1);
+        print_error("Failed to create CPLEX environment.\n");
     }
-    printf("CPLEX environment created successfully.\n");
+    if (inst->verbose >= DEBUG) {
+        printf("CPLEX environment created successfully.\n");
+    }
 
     // Create problem object
     CPXLPptr lp = CPXcreateprob(env, &error, "TSP_Problem");
     if (lp == NULL) {
-        printf("Failed to create CPLEX problem object. Error code: %d\n", error);
         CPXcloseCPLEX(&env);
-        exit(1);
+        print_error("Failed to create CPLEX problem object.");
     }
-    printf("CPLEX problem object created successfully.\n");
+    if (inst->verbose >= DEBUG) {
+        printf("CPLEX problem object created successfully.\n");
+    }
 
     // Build the model
     build_model_CPLEX(inst, env, lp);
-    printf("Model built successfully.\n");
+    if (inst->verbose >= DEBUG) {
+        printf("Model built successfully.\n");
+    }
     CPXsetintparam(env, CPXPARAM_RandomSeed, inst->seed);
 
     // Solve the model
@@ -67,11 +39,13 @@ int TSPopt(instance *inst)
     double *xstar = (double *) calloc(ncols, sizeof(double));
     if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
-    // Print the solution
-    for (int i = 0; i < inst->nnodes; i++) {
-        for (int j = i + 1; j < inst->nnodes; j++) {
-            if (xstar[xpos(i, j, inst)] > 0.5) {
-                printf("  ... x(%3d,%3d) = 1\n", i + 1, j + 1);
+    if (inst->verbose >= GOOD) {
+        // Print the solution
+        for (int i = 0; i < inst->nnodes; i++) {
+            for (int j = i + 1; j < inst->nnodes; j++) {
+                if (xstar[xpos(i, j, inst)] > 0.5) {
+                    printf("  ... x(%3d,%3d) = 1\n", i + 1, j + 1);
+                }
             }
         }
     }
@@ -80,12 +54,14 @@ int TSPopt(instance *inst)
     int *succ = (int *) calloc(inst->nnodes, sizeof(int));
     int *comp = (int *) calloc(inst->nnodes, sizeof(int));
     int ncomp;
-    build_sol(xstar, inst, succ, comp, &ncomp);
+    build_cplex_sol(xstar, inst, succ, comp, &ncomp);
 
-    // Print the solution components
-    printf("Number of components: %d\n", ncomp);
-    for (int i = 0; i < inst->nnodes; i++) {
-        printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
+    if (inst->verbose >= GOOD) {
+        // Print the solution components
+        printf("Number of components: %d\n", ncomp);
+        for (int i = 0; i < inst->nnodes; i++) {
+            printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
+        }
     }
 
     // Free allocated memory
@@ -100,242 +76,138 @@ int TSPopt(instance *inst)
     return 0; // or an appropriate nonzero error code
 }
 
-
-/**
- Return the index of CPLEX solution array from two subsequent nodes..
-
- @param i first node.
- @param j second node.
- @param inst instance of the struct "instance" for TSP problem.
- @return array position.
- */
 int xpos(int i, int j, instance *inst)      // to be verified                                           
 { 
-	if ( i == j ) print_error(" i == j in xpos" );
-	if ( i > j ) return xpos(j,i,inst);
-	int pos = i * inst->nnodes + j - (( i + 1 ) * ( i + 2 )) / 2;
-	return pos;
+    if ( i == j ) print_error(" i == j in xpos" );
+    if ( i > j ) return xpos(j,i,inst);
+    int pos = i * inst->nnodes + j - (( i + 1 ) * ( i + 2 )) / 2;
+    return pos;
 }
-	
-/**
- Build the model.
 
- @param inst instance of the struct "instance" for TSP problem.
- @param env CPLEX environment.
- @param lp CPLEX LP.
- */
 void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 {    
 
-	int izero = 0;
-	char binary = 'B'; 
-	
-	char **cname = (char **) calloc(1, sizeof(char*));
+    int izero = 0;
+    char binary = 'B'; 
+    
+    char **cname = (char **) calloc(1, sizeof(char*));
     cname[0] = (char *) calloc(100, sizeof(char));
 
-	// add binary var.s x(i,j) for i < j  
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		for ( int j = i+1; j < inst->nnodes; j++ ) 
-		{
-			sprintf(cname[0], "x(%d,%d)", i+1,j+1);
-			double obj = dist_CPLEX(i,j,inst); // cost == distance   
-			double lb = 0.0;
-			double ub = 1.0;
-			if ( CPXnewcols(env, lp, 1, &obj, &lb, &ub, &binary, cname) ) print_error(" wrong CPXnewcols on x var.s");
-    		if ( CPXgetnumcols(env,lp)-1 != xpos(i,j, inst) ) print_error(" wrong position for x var.s");
-		}
-	} 
+    // add binary var.s x(i,j) for i < j  
+    for ( int i = 0; i < inst->nnodes; i++ )
+    {
+        for ( int j = i+1; j < inst->nnodes; j++ ) 
+        {
+            sprintf(cname[0], "x(%d,%d)", i+1,j+1);
+            double obj = cost(i,j,inst); // cost == distance   
+            double lb = 0.0;
+            double ub = 1.0;
+            if ( CPXnewcols(env, lp, 1, &obj, &lb, &ub, &binary, cname) ) print_error(" wrong CPXnewcols on x var.s");
+            if ( CPXgetnumcols(env,lp)-1 != xpos(i,j, inst) ) print_error(" wrong position for x var.s");
+        }
+    } 
 
-	// add degree constr.s 
+    // add degree constr.s 
 
-	int *index = (int *) malloc(inst->nnodes * sizeof(int));
-	double *value = (double *) malloc(inst->nnodes * sizeof(double));  
-	
-	// add the degree constraints
-	for ( int h = 0; h < inst->nnodes; h++ )  // degree constraints
-	{
-		double rhs = 2.0;
-		char sense = 'E';                     // 'E' for equality constraint 
-		sprintf(cname[0], "degree(%d)", h+1); 
-		int nnz = 0;
-		for ( int i = 0; i < inst->nnodes; i++ )
-		{
-			if ( i == h ) continue;
-			index[nnz] = xpos(i,h, inst);
-			value[nnz] = 1.0;
-			nnz++;
-		}
-		
-		if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [degree]");
-	} 
+    int *index = (int *) malloc(inst->nnodes * sizeof(int));
+    double *value = (double *) malloc(inst->nnodes * sizeof(double));  
+    
+    // add the degree constraints
+    for ( int h = 0; h < inst->nnodes; h++ )  // degree constraints
+    {
+        double rhs = 2.0;
+        char sense = 'E';                     // 'E' for equality constraint 
+        sprintf(cname[0], "degree(%d)", h+1); 
+        int nnz = 0;
+        for ( int i = 0; i < inst->nnodes; i++ )
+        {
+            if ( i == h ) continue;
+            index[nnz] = xpos(i,h, inst);
+            value[nnz] = 1.0;
+            nnz++;
+        }
+        
+        if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [degree]");
+    } 
 
     free(value);
-    free(index);	
+    free(index);    
 
-	if ( inst->verbose >= -100 ) CPXwriteprob(env, lp, "model.lp", NULL);   
+    if ( inst->verbose >= -100 ) CPXwriteprob(env, lp, "model.lp", NULL);   
 
-	free(cname[0]);
-	free(cname);
+    free(cname[0]);
+    free(cname);
 
 }
 
-
-#define EPS 1e-5
-
-
-/**
- Build succ() and comp() wrt xstar().
-
- @param xstar CPLEX solution.
- @param inst instance of the struct "instance" for TSP problem.
- @param succ TSP solution as successors.
- @param comp component associated for each nodes.
- @param ncomp number of components in the solution.
- */
-void build_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
+void build_cplex_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
 {   
 
-#ifdef DEBUG
-	int *degree = (int *) calloc(inst->nnodes, sizeof(int));
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		for ( int j = i+1; j < inst->nnodes; j++ )
-		{
-			int k = xpos(i,j,inst);
-			if ( fabs(xstar[k]) > EPS && fabs(xstar[k]-1.0) > EPS ) print_error(" wrong xstar in build_sol()");
-			if ( xstar[k] > 0.5 ) 
-			{
-				++degree[i];
-				++degree[j];
-			}
-		}
-	}
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		if ( degree[i] != 2 ) print_error("wrong degree in build_sol()");
-	}	
-	free(degree);
+#ifdef DEBUG_CPLEX
+    int *degree = (int *) calloc(inst->nnodes, sizeof(int));
+    for ( int i = 0; i < inst->nnodes; i++ )
+    {
+        for ( int j = i+1; j < inst->nnodes; j++ )
+        {
+            int k = xpos(i,j,inst);
+            if ( fabs(xstar[k]) > EPSILON && fabs(xstar[k]-1.0) > EPSILON ) print_error(" wrong xstar in build_sol()");
+            if ( xstar[k] > 0.5 ) 
+            {
+                ++degree[i];
+                ++degree[j];
+            }
+        }
+    }
+    for ( int i = 0; i < inst->nnodes; i++ )
+    {
+        if ( degree[i] != 2 ) print_error("wrong degree in build_sol()");
+    }    
+    free(degree);
 #endif
 
-	*ncomp = 0;
-	for ( int i = 0; i < inst->nnodes; i++ )
-	{
-		succ[i] = -1;
-		comp[i] = -1;
-	}
-	
-	for ( int start = 0; start < inst->nnodes; start++ )
-	{
-		if ( comp[start] >= 0 ) continue;  // node "start" was already visited, just skip it
+    *ncomp = 0;
+    for ( int i = 0; i < inst->nnodes; i++ )
+    {
+        succ[i] = -1;
+        comp[i] = -1;
+    }
+    
+    for ( int start = 0; start < inst->nnodes; start++ )
+    {
+        if ( comp[start] >= 0 ) continue;  // node "start" was already visited, just skip it
 
-		// a new component is found
-		(*ncomp)++;
-		int i = start;
-		int done = 0;
-		while ( !done )  // go and visit the current component
-		{
-			comp[i] = *ncomp;
-			done = 1;
-			for ( int j = 0; j < inst->nnodes; j++ )
-			{
-				if ( i != j && xstar[xpos(i,j,inst)] > 0.5 && comp[j] == -1 ) // the edge [i,j] is selected in xstar and j was not visited before 
-				{
-					succ[i] = j;
-					i = j;
-					done = 0;
-					break;
-				}
-			}
-		}	
-		succ[i] = start;  // last arc to close the cycle
-		
-		// go to the next component...
-	}
+        // a new component is found
+        (*ncomp)++;
+        int i = start;
+        bool done = false;
+        while ( !done )  // go and visit the current component
+        {
+            comp[i] = *ncomp;
+            done = true;
+            for ( int j = 0; j < inst->nnodes; j++ )
+            {
+                if ( i != j && xstar[xpos(i,j,inst)] > 0.5 && comp[j] == -1 ) // the edge [i,j] is selected in xstar and j was not visited before 
+                {
+                    succ[i] = j;
+                    i = j;
+                    done = false;
+                    break;
+                }
+            }
+        }    
+        succ[i] = start;  // last arc to close the cycle
+        
+        // go to the next component...
+    }
 }
 
-
-// **** LAZY CONTRAINTS ****
-
-// Ex: MZT formulation with directed-arc variables x_ij and x_ji --> xpos_compact(i,j,inst)
-
-// ...
-
-// 	int izero = 0;
-// 	int index[3]; 
-// 	double value[3];
-
-// 	// add lazy constraints  1.0 * u_i - 1.0 * u_j + M * x_ij <= M - 1, for each arc (i,j) not touching node 0	
-// 	double big_M = inst->nnodes - 1.0;
-// 	double rhs = big_M -1.0;
-// 	char sense = 'L';
-// 	int nnz = 3;
-// 	for ( int i = 1; i < inst->nnodes; i++ ) // excluding node 0
-// 	{
-// 		for ( int j = 1; j < inst->nnodes; j++ ) // excluding node 0 
-// 		{
-// 			if ( i == j ) continue;
-// 			sprintf(cname[0], "u-consistency for arc (%d,%d)", i+1, j+1);
-// 			index[0] = upos(i,inst);	
-// 			value[0] = 1.0;	
-// 			index[1] = upos(j,inst);
-// 			value[1] = -1.0;
-// 			index[2] = xpos_compact(i,j,inst);
-// 			value[2] = big_M;
-// 			if ( CPXaddlazyconstraints(env, lp, 1, nnz, &rhs, &sense, &izero, index, value, cname) ) print_error("wrong CPXlazyconstraints() for u-consistency");
-// 		}
-// 	}
-	
-// 	// add lazy constraints 1.0 * x_ij + 1.0 * x_ji <= 1, for each arc (i,j) with i < j
-// 	rhs = 1.0; 
-// 	char sense = 'L';
-// 	nnz = 2;
-// 	for ( int i = 0; i < inst->nnodes; i++ ) 
-// 	{
-// 		for ( int j = i+1; j < inst->nnodes; j++ ) 
-// 		{
-// 			sprintf(cname[0], "SEC on node pair (%d,%d)", i+1, j+1);
-// 			index[0] = xpos_compact(i,j,inst);
-// 			value[0] = 1.0;
-// 			index[1] = xpos_compact(j,i,inst);
-// 			value[1] = 1.0;
-// 			if ( CPXaddlazyconstraints(env, lp, 1, nnz, &rhs, &sense, &izero, index, value, cname) ) print_error("wrong CPXlazyconstraints on 2-node SECs");
-// 		}
-// 	}
-
-// *** SOME CPLEX'S PARAMETERS ***
-
-
-// 	// increased precision for big-M models
-// 	CPXsetdblparam(env, CPX_PARAM_EPINT, 0.0);		// very important if big-M is present
-// 	CPXsetdblparam(env, CPX_PARAM_EPRHS, 1e-9);   						
-
-// 	CPXsetintparam(env, CPX_PARAM_MIPDISPLAY, 4);
-// 	if ( VERBOSE >= 60 ) CPXsetintparam(env, CPX_PARAM_SCRIND, CPX_ON); // Cplex output on screen
-// 	CPXsetintparam(env, CPX_PARAM_RANDOMSEED, 123456);
-	
-// 	CPXsetdblparam(env, CPX_PARAM_TILIM, CPX_INFBOUND+0.0); 
-	
-// 	CPXsetintparam(env, CPX_PARAM_NODELIM, 0); 		// abort Cplex after the root node
-// 	CPXsetintparam(env, CPX_PARAM_INTSOLLIM, 1);	// abort Cplex after the first incumbent update
-// 	CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-4);  	// abort Cplex when gap below 10%
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void build_solution(instance *inst, solution *sol, int *succ) {
+	sol->visited_nodes[0] = 0;
+	int s = succ[0];
+	for (int i = 1; i <= inst->nnodes; i++) {
+		sol->visited_nodes[i] = s;
+		s = succ[s];
+	}
+	if (sol->visited_nodes[inst->nnodes] != 0) print_error("Infeasible solution, build_solution");
+	sol->cost = compute_solution_cost(inst, sol);
+}

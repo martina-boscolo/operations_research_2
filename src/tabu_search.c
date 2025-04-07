@@ -150,7 +150,7 @@ void tabu_search(const instance *inst, solution *sol, const int timelimit) {
     
     char filename[50];
     char filename_results[50];
-    sprintf(filename, "TS_n%d_s%d_p%d", inst->nnodes, inst->seed, inst->param1); 
+    sprintf(filename, "TS_p%d", inst->param1); 
     sprintf(filename_results, "results/%s.csv",filename); 
     FILE* f = fopen( filename_results, "w+");
 

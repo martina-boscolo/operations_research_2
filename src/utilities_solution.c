@@ -1,7 +1,5 @@
 #include "utilities_solution.h"
 
-#define CPLEX "C"
-
 void initialize_solution(solution *sol) {
 
     sol->cost = INFINITY;
@@ -46,7 +44,7 @@ void solve_with_method(instance *inst, solution *sol) {
         
     } else if (strcmp(inst->asked_method, CPLEX) == 0) {
         printf("Solving with CPLEX method.\n");
-        int result = TSPopt(inst);
+        int result = TSPopt(inst, timelimit);
 
         if (result == 0) {
             printf("TSP optimization completed successfully.\n");

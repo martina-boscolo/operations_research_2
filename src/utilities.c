@@ -2,6 +2,13 @@
 
 //--- main utilities ---
 
+void print_error(const char *err) 
+{ 
+	printf("\n\n ERROR: %s \n\n", err); 
+	fflush(NULL); 
+	exit(1); 
+}
+
 void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
     // set default values

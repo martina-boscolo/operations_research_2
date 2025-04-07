@@ -21,6 +21,9 @@
 #define GOOD 50
 #define DEBUG 100
 
+// useful constants
+#define EPSILON 1e-5
+
 typedef struct {
 
     double x;                   // x coordinate

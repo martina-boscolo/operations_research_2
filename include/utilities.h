@@ -12,11 +12,9 @@
 #include <math.h>
 #include <time.h>
 
-
-// useful constants
-#define EPSILON 1e-5
-
 //-------------------------------------- main utilities --------------------------------------
+
+void print_error(const char *err);
 
 /**
  * Parses the input from the command line

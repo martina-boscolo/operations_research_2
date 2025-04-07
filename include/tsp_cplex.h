@@ -3,30 +3,20 @@
 
 #include "tsp.h"
 #include "utilities_instance.h"
+
 #include <ilcplex/cplex.h>
+#include <stdbool.h>
 
-
-
-void print_error(const char *err);
-
-/**
- Compute the euclidean distance between two nodes.
-
- @param i first node.
- @param j second node.
- @param inst instance of the struct "instance" for TSP problem.
- @return distance between two nodes.
- */
-double dist_CPLEX(int i, int j, instance *inst);      
-
+#define CPLEX "C"
 
 /**
  Optimizer.
 
  @param inst instance of the struct "instance" for TSP problem.
+ @param timelimit 
  @return 0 if successful, otherwise 1.
  */
-int TSPopt(instance *inst);
+int TSPopt(instance *inst, const double timelimit);
 
 
 /**
@@ -39,7 +29,7 @@ int TSPopt(instance *inst);
  */
 int xpos(int i, int j, instance *inst);                                       
 
-	
+    
 /**
  Build the model.
 
@@ -48,9 +38,6 @@ int xpos(int i, int j, instance *inst);
  @param lp CPLEX LP.
  */
 void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
-
-#define EPS 1e-5
-
 
 /**
  Build succ() and comp() wrt xstar().
@@ -61,5 +48,8 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
  @param comp component associated for each nodes.
  @param ncomp number of components in the solution.
  */
-void build_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp);
+void build_cplex_sol(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp);
+
+void build_solution(instance *inst, solution *sol, int *succ);
+
 #endif //TSP_CPLEX_H
