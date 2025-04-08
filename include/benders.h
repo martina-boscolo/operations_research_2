@@ -24,7 +24,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit);
 /**
  * 
  */
-void patch_heuristic(instance *inst, solution *sol, int *succ, int *comp, int ncomp);
+void patch_heuristic(instance *inst, int *succ, int *comp, int ncomp);
 
 /**
  * 

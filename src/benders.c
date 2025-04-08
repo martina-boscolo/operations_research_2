@@ -8,6 +8,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     CPXENVptr env;
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
+    printf("CPLEX INIT\n");
 
     int *succ = (int *) malloc(inst->nnodes * sizeof(int));
     int *comp = (int *) malloc(inst->nnodes * sizeof(int));
@@ -37,13 +38,12 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
         if (ncomp > 1) {
             build_SECs(inst, env, lp, comp, ncomp);
-            //patch_heuristic(inst, sol, succ, comp, ncomp);
+            patch_heuristic(inst, succ, comp, ncomp);
         }
 
     } while (ncomp > 1);
 
     build_solution_form_CPLEX(inst, sol, succ);
-    print_solution(sol, inst->nnodes);
 
     // Free allocated memory
     free(xstar);
@@ -57,10 +57,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
 }
 
-void patch_heuristic(instance *inst, solution *sol, int *succ, int *comp, int ncomp) {
-
-    solution temp_sol;
-    copy_sol(&temp_sol, sol, inst->nnodes);
+void patch_heuristic(instance *inst, int *succ, int *comp, int ncomp) {
 
     while (ncomp > 1) {
 
@@ -118,13 +115,6 @@ void patch_heuristic(instance *inst, solution *sol, int *succ, int *comp, int nc
 
         ncomp --;
 
-    }
-
-    build_solution_form_CPLEX(inst, &temp_sol, succ);
-    strcpy(temp_sol.method, "PATCH");
-
-    if (temp_sol.cost < sol->cost) {
-        update_sol(inst, sol, &temp_sol, true);
     }
 
 }

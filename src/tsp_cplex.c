@@ -18,7 +18,7 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
         print_error("Failed to create CPLEX problem object.");
     }
 
-    CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9);
+    //CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9);
 
     // Build the model
     build_model_CPLEX(inst, *env, *lp);

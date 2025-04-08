@@ -20,23 +20,32 @@ int main(int argc, const char *argv[]) {
     sol1.cost = compute_solution_cost(&inst1, &sol1);
     print_solution(&sol1, inst1.nnodes);
 
-    // Open CPLEX model
-    CPXENVptr env;
-    CPXLPptr lp;
-    initialize_CPLEX(&inst1, &env, &lp);
+    printf("BEFORE CPLEX\n");
+    int error;
+    CPXENVptr env = CPXopenCPLEX(&error);
+    CPXLPptr lp = CPXcreateprob(env, &error, "TSP_Problem");
+    build_model_CPLEX(&inst1, env, lp);
+    printf("AFTER CPLEX\n");
 
     int *succ = (int *) malloc(inst1.nnodes * sizeof(int));
     int *comp = (int *) malloc(inst1.nnodes * sizeof(int));
     double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
-    int ncomp = -1, iter = 0;
-    double z = 0.0;
+    int ncomp = -1;
 
+    if (succ==NULL || comp==NULL || xstar==NULL) print_error("MEMORY MAIN");
+
+    printf("BEFORE OPT SOL\n");
     get_optimal_solution_CPLEX(&inst1, env, lp, xstar, succ, comp, &ncomp);
+    printf("AFTER OPT SOL\n");
 
     printf("BEFORE PATCH\n");
     patch_heuristic(&inst1, &sol1, succ, comp, ncomp);
+    printf("Number of components: %d\n", ncomp);
+        for (int i = 0; i < inst1.nnodes; i++) {
+            printf("Node %d -> Successor: %d, Component: %d\n", i, succ[i], comp[i]);
+        }
     printf("AFTER PATCH\n");
-    print_solution(&sol1, &inst1);*/
+    print_solution(&sol1, inst1.nnodes);*/
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
