@@ -15,12 +15,17 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 /**
  * 
  */
-int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp);
+int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
 
 /**
  * 
  */
-int add_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
+int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
+
+/**
+ * 
+ */
+int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes

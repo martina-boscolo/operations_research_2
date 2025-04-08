@@ -5,6 +5,9 @@
 #include "tsp_cplex.h"
 #include "utilities.h"
 
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include <ilcplex/cplex.h>
 
 #define BENDERS "B"
@@ -18,5 +21,29 @@
  */
 void benders_loop(instance *inst, solution *sol, const double timelimit);
 
+/**
+ * 
+ */
+void patch_heuristic(instance *inst, solution *sol, int *succ, int *comp, int ncomp);
+
+/**
+ * 
+ */
+double delta_dir(const int i, const int j, const instance *inst, const int *succ);
+
+/**
+ * 
+ */
+double delta_rev(const int i, const int j, const instance *inst, const int *succ);
+
+/**
+ * 
+ */
+void reverse_succ(const int i, int *succ);
+
+/**
+ * 
+ */
+void update_comp(int i, const int new_comp, const int *succ, int *comp);
 
 #endif //BENDERS_H

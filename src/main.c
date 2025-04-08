@@ -8,6 +8,38 @@
 
 int main(int argc, const char *argv[]) {
 
+    /*instance inst1;
+    initialize_instance(&inst1);
+    inst1.nnodes = 10;
+    build_instance(&inst1);
+
+    solution sol1;
+    initialize_solution(&sol1);
+    allocate_solution(&sol1, inst1.nnodes);
+    initialize_tour(sol1.visited_nodes, inst1.nnodes);
+    sol1.cost = compute_solution_cost(&inst1, &sol1);
+    print_solution(&sol1, inst1.nnodes);
+
+    // Open CPLEX model
+    CPXENVptr env;
+    CPXLPptr lp;
+    initialize_CPLEX(&inst1, &env, &lp);
+
+    int *succ = (int *) malloc(inst1.nnodes * sizeof(int));
+    int *comp = (int *) malloc(inst1.nnodes * sizeof(int));
+    double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
+    int ncomp = -1, iter = 0;
+    double z = 0.0;
+
+    get_optimal_solution_CPLEX(&inst1, env, lp, xstar, succ, comp, &ncomp);
+
+    printf("BEFORE PATCH\n");
+    patch_heuristic(&inst1, &sol1, succ, comp, ncomp);
+    printf("AFTER PATCH\n");
+    print_solution(&sol1, &inst1);*/
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+
     // problem instance
     instance inst;
 

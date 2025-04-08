@@ -18,21 +18,21 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
         print_error("Failed to create CPLEX problem object.");
     }
 
+    CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9);
+
     // Build the model
     build_model_CPLEX(inst, *env, *lp);
-    CPXsetintparam(*env, CPXPARAM_RandomSeed, inst->seed);
 
     return 0;
 }
 
-int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *succ, int *comp, int *ncomp) {
+int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
     
 	// Solve the model
 	if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
 
     // Retrieve the optimal solution
     int ncols = CPXgetnumcols(env, lp);
-    double *xstar = (double *) calloc(ncols, sizeof(double));
     if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
 
     // Build the solution (succ, comp, ncomp)
@@ -46,68 +46,70 @@ int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, int *
         }
     }
 
-    free(xstar);
-
     return 0;
 
 }
 
-int add_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
+int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
 
 	char **cname = (char **) calloc(1, sizeof(char*));
     cname[0] = (char *) calloc(100, sizeof(char));
-
-    int izero = 0;
     
     int *index = (int *) malloc(CPXgetnumcols(env,lp) * sizeof(int));
     double *value = (double *) malloc(CPXgetnumcols(env,lp) * sizeof(double)); 
 
 	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
-		print_error("Impossible to allocate memory, add_SECs()");
+		print_error("Impossible to allocate memory, build_SECs()");
 
     for (int k=1; k<=ncomp; k++) {
 
-		sprintf(cname[0], "SEC(%d)", k); 
-        char sense = 'L'; 
-        int nnz = 0;
-        double rhs = -1;
-
-		if (inst->verbose >= DEBUG) printf("%s\n", cname[0]);
-
-        for (int i=0; i<inst->nnodes; i++) {
-
-			if (inst->verbose >= DEBUG) printf("comp[%d] = %d\n", i+1, comp[i]);
-            if (comp[i] != k) continue;
-
-            rhs++;
-
-            for (int j=i+1; j<inst->nnodes; j++) {
-
-                if (comp[j] != k) continue;
-
-				if (inst->verbose >= DEBUG) printf("Add edge %d %d to SEC %d\n", i+1, j+1, k);
-
-				index[nnz] = xpos(i, j, inst);
-				value[nnz] = 1.0;
-				nnz++;
-
-            }
-
-        }
-
-		if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
+        add_SEC(inst, env, lp, k, comp, ncomp, cname, index, value);
 
     }
 
-	free(value);
-    free(index);
-
     if (inst->verbose >= GOOD) CPXwriteprob(env, lp, "model.lp", NULL);   
 
+	free(value);
+    free(index);
     free(cname[0]);
     free(cname);
 
     return 0;
+}
+
+int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value) {
+
+    int izero = 0;
+    sprintf(cname[0], "SEC(%d)", sec_comp); 
+    char sense = 'L'; 
+    int nnz = 0;
+    double rhs = -1;
+
+	if (inst->verbose >= DEBUG) printf("%s\n", cname[0]);
+
+    for (int i=0; i<inst->nnodes; i++) {
+
+		if (inst->verbose >= DEBUG) printf("comp[%d] = %d\n", i+1, comp[i]);
+        if (comp[i] != sec_comp) continue;
+
+        rhs++;
+
+        for (int j=i+1; j<inst->nnodes; j++) {
+
+            if (comp[j] != sec_comp) continue;
+
+			if (inst->verbose >= DEBUG) printf("Add edge %d %d to SEC %d\n", i+1, j+1, sec_comp);
+
+			index[nnz] = xpos(i, j, inst);
+			value[nnz] = 1.0;
+			nnz++;
+
+        }
+
+    }
+
+    if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
+    
 }
 
 int xpos(int i, int j, instance *inst)                                         
