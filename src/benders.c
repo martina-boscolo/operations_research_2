@@ -66,32 +66,39 @@ void patch_heuristic(instance *inst, int *succ, int *comp, int ncomp) {
         while (comp[j] == comp[i]) j++;
 
         double min_delta = INFINITY;
-        int best_j = j, h = succ[j];
+        int best_j = j, best_i = i;
+        int i1 = succ[i], j1 = succ[j];
         bool to_reverse = false;
 
         // find best patch
         do {
+            do {
 
-            double delta_d = delta_dir(i, h, inst, succ), delta_r = delta_rev(i, h, inst, succ);
-            
-            if (delta_d <= delta_r) {
-                if (delta_d < min_delta) {
-                    min_delta = delta_d;
-                    to_reverse = false;
-                    best_j = h;
+                double delta_d = delta_dir(i1, j1, inst, succ), delta_r = delta_rev(i1, j1, inst, succ);
+                
+                if (delta_d <= delta_r) {
+                    if (delta_d < min_delta) {
+                        min_delta = delta_d;
+                        to_reverse = false;
+                        best_i = i1;
+                        best_j = j1;
+                    }
+                } else {
+                    if (delta_r < min_delta) {
+                        min_delta = delta_r;
+                        to_reverse = true;
+                        best_i = i1;
+                        best_j = j1;
+                    }
                 }
-            } else {
-                if (delta_r < min_delta) {
-                    min_delta = delta_r;
-                    to_reverse = true;
-                    best_j = h;
-                }
-            }
 
-            h = succ[h];
-        } while (h != j);
+                j1 = succ[j1];
+            } while (j1 != j);
+            i1 = succ[i1];
+        } while (i1 != i);
 
         j = best_j;
+        i = best_i;
 
         if (to_reverse) { 
             
