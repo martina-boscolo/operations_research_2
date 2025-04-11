@@ -134,48 +134,58 @@ void find_best_neighbor(const instance *inst, solution *current, tabu_params *pa
     free_solution(&temp_sol);
 }
 
-
-void tabu_search(const instance *inst, solution *sol, const int timelimit) {
+void tabu_search(const instance *inst, solution *sol, const int timelimit)
+{
 
     time_t t_start = seconds();
 
-    solution temp_sol; 
+    solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
-        
+
     // Initialize tabu parameters
     tabu_params params;
-    int min_tenure = (int)(1 + 0.2 *  inst->nnodes);            // Min number of iterations node remains tabu
-    int max_tenure = (int)(1 + 0.6 *  inst->nnodes);            // Max number of iterations node remains tabu
-    init_tabu_params(&params,  inst->nnodes, min_tenure, max_tenure, inst->param1);
-    
+    int min_tenure = (int)(1 + 0.2 * inst->nnodes); // Min number of iterations node remains tabu
+    int max_tenure = (int)(1 + 0.6 * inst->nnodes); // Max number of iterations node remains tabu
+    init_tabu_params(&params, inst->nnodes, min_tenure, max_tenure, inst->param1);
+
     char filename[50];
-    char filename_results[50];
-    sprintf(filename, "TS_p%d", inst->param1); 
-    sprintf(filename_results, "results/%s.csv",filename); 
-    FILE* f = fopen( filename_results, "w+");
+    sprintf(filename, "TS_p%d", inst->param1);
+    FILE *f = NULL;
+    if (inst->verbose >= ONLY_INCUMBMENT)
+    {
+        char filename_results[50];
+        sprintf(filename_results, "results/%s.csv", filename);
+        f = fopen(filename_results, "w+");
+    }
 
     // Main loop
-
-    while (get_elapsed_time(t_start) < timelimit) {
+    while (get_elapsed_time(t_start) < timelimit)
+    {
         reset_tabu_list_if_full(&params, inst);
 
         // Find best neighbor
         find_best_neighbor(inst, &temp_sol, &params);
-        
+
         // Update best solution if needed
         update_sol(inst, sol, &temp_sol, true);
-        fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost ,sol->cost);
 
+        if (inst->verbose >= ONLY_INCUMBMENT){
+            fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost, sol->cost);
+        }
         check_sol(inst, sol);
         params.current_iter++;
-        
     }
 
     sprintf(sol->method, filename);
-  
-    //strcpy(inst->best_solution->method, "TS");
-    plot_stats_in_file(filename);
-    
+
+    if (inst->verbose >= ONLY_INCUMBMENT){
+        plot_stats_in_file(filename);
+    }
+    // Close the file if it was opened
+    if (f != NULL){
+        fclose(f);
+    }
+
     // Free memory
     free_tabu_params(&params);
 }
