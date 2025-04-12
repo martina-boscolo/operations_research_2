@@ -65,7 +65,7 @@ void update_tabu_status(tabu_params *params, int node) {
 int is_tabu_list_full(tabu_params *params, int nnodes) {
     int count = 0;
     for (int i = 0; i < nnodes; i++) {
-        if (params->tabu_list[i] != -1) {
+        if (is_tabu(params, i)) {
             count++;
         }
     }
@@ -85,53 +85,52 @@ void reset_tabu_list_if_full(tabu_params *params, const instance *inst) {
 }
 
 void find_best_neighbor(const instance *inst, solution *current, tabu_params *params) {
+    
     int nnodes = inst->nnodes;
-    double best_cost = DBL_MAX;
+    double best_delta = DBL_MAX;
     int best_i = -1, best_j = -1;
-
-    // Create a temporary tour for evaluating moves
-    solution temp_sol;
-    temp_sol.visited_nodes = (int *)malloc((nnodes + 1) * sizeof(int));
 
     // Try all possible 2-opt swaps
     for (int i = 1; i < nnodes - 1; i++) {
         for (int j = i + 1; j < nnodes; j++) {
             // Skip if any of the nodes are tabu, unless aspiration criterion applies
-            if (is_tabu(params, current->visited_nodes[i]) ||
+            if (is_tabu(params, current->visited_nodes[i]) &&
                 is_tabu(params, current->visited_nodes[j])) {
                 continue;
             }
 
-            // Copy the current tour to evaluate this move
-            memcpy(temp_sol.visited_nodes, current->visited_nodes, (nnodes + 1) * sizeof(int));
+            // Compute the delta cost
+            double delta = delta2(inst, current, i, j);
 
-            // Perform 2-opt swap
-            reverse_segment(&temp_sol, i, j);
-
-            // Calculate new cost
-            double new_cost = compute_solution_cost(inst, &temp_sol);
-
-            // Check if this is the best move so far
-            if (new_cost < best_cost) {
-                best_cost = new_cost;
+            // If current delta is better update it
+            if (delta < best_delta - EPSILON) {
+                best_delta = delta;
                 best_i = i;
                 best_j = j;
             }
+            
         }
     }
 
     // If we found a valid move, apply it directly to the current solution
     if (best_i != -1 && best_j != -1) {
+
         reverse_segment(current, best_i, best_j);
-        current->cost = best_cost;
+        current->cost += delta2(inst, current, best_i, best_j);
 
         // Randomly select one of the four nodes involved in the swap to mark as tabu
-        int nodes_involved[4] = {best_i, best_i + 1, best_j, (best_j + 1) % nnodes};
-        int random_node = nodes_involved[rand() % 4];
-        update_tabu_status(params, current->visited_nodes[random_node]);
+        //int nodes_involved[4] = {best_i-1, best_i, best_j, best_j+1};
+        //int random_node = nodes_involved[rand() % 4];
+        //update_tabu_status(params, current->visited_nodes[random_node]);
+
+        // Mark as tabu the edges
+        update_tabu_status(params, current->visited_nodes[best_i-1]);
+        update_tabu_status(params, current->visited_nodes[best_i]);
+        update_tabu_status(params, current->visited_nodes[best_j]);
+        update_tabu_status(params, current->visited_nodes[best_j+1]);
+
     }
 
-    free_solution(&temp_sol);
 }
 
 
@@ -141,10 +140,13 @@ void tabu_search(const instance *inst, solution *sol, const int timelimit) {
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
+
+    // Go to local minima, for first iteration the tabu list is useless
+    two_opt(inst, &temp_sol, timelimit, false);
         
     // Initialize tabu parameters
     tabu_params params;
-    int min_tenure = (int)(1 + 0.2 *  inst->nnodes);            // Min number of iterations node remains tabu
+    int min_tenure = (int)(1 + 0.1 *  inst->nnodes);            // Min number of iterations node remains tabu
     int max_tenure = (int)(1 + 0.6 *  inst->nnodes);            // Max number of iterations node remains tabu
     init_tabu_params(&params,  inst->nnodes, min_tenure, max_tenure, inst->param1);
     
@@ -161,12 +163,15 @@ void tabu_search(const instance *inst, solution *sol, const int timelimit) {
 
         // Find best neighbor
         find_best_neighbor(inst, &temp_sol, &params);
+
+        if (inst->verbose >= GOOD) {
+            check_sol(inst, &temp_sol);
+        }
         
         // Update best solution if needed
         update_sol(inst, sol, &temp_sol, true);
         fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost ,sol->cost);
 
-        check_sol(inst, sol);
         params.current_iter++;
         
     }
