@@ -22,7 +22,7 @@ echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for /l %%p in (%PARAM_START%,1,%PARAM_END%) do (
         echo Running with seed=%%s, param=%%p...
-        ..\..\tsp.exe -method TS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p -verbose 10 > logs\TS_n%NODES%_seed%%s_param%%p.log
+        ..\..\build\Release\tsp.exe -method TS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p -verbose 10 > logs\TS_n%NODES%_seed%%s_param%%p.log
     )
 )
 
