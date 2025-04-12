@@ -39,12 +39,13 @@ int main(int argc, const char *argv[]) {
     printf("AFTER OPT SOL\n");
 
     printf("BEFORE PATCH\n");
-    patch_heuristic(&inst1, &sol1, succ, comp, ncomp);
+    patch_heuristic(&inst1, succ, comp, ncomp);
     printf("Number of components: %d\n", ncomp);
         for (int i = 0; i < inst1.nnodes; i++) {
             printf("Node %d -> Successor: %d, Component: %d\n", i, succ[i], comp[i]);
         }
     printf("AFTER PATCH\n");
+    build_solution_form_CPLEX(&inst1, &sol1, succ);
     print_solution(&sol1, inst1.nnodes);*/
 
     //////////////////////////////////////////////////////////////////////////////////////////
