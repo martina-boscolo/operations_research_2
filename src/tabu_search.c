@@ -115,9 +115,9 @@ void find_best_neighbor(const instance *inst, solution *current, tabu_params *pa
     // If we found a valid move, apply it directly to the current solution
     if (best_i != -1 && best_j != -1) {
 
-        reverse_segment(current, best_i, best_j);
         current->cost += delta2(inst, current, best_i, best_j);
-
+        reverse_segment(current, best_i, best_j);
+        
         // Randomly select one of the four nodes involved in the swap to mark as tabu
         //int nodes_involved[4] = {best_i-1, best_i, best_j, best_j+1};
         //int random_node = nodes_involved[rand() % 4];
