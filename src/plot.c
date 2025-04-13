@@ -59,6 +59,34 @@ void plot_cost_evolution(FILE *plot, const char* filepath) {
         
 }
 
+void plot_cost_evolution_base(FILE *plot, const char* filepath) {
+
+    fprintf(plot, "set style data line\n");
+    fprintf(plot, "set datafile separator \",\"\n");
+    
+    // Make sure to read the full file
+    fprintf(plot, "set datafile missing \"NaN\"\n");
+    
+    // Add labels for the axes with time in seconds
+    fprintf(plot, "set xlabel 'Time (seconds)'\n");
+    fprintf(plot, "set ylabel 'Cost'\n");
+    fprintf(plot, "set title 'Cost Evolution Over Time'\n");
+    
+    // Set time format if needed
+    fprintf(plot, "set format x \"%%g s\"\n");
+    
+    // Ensure all points are plotted by setting autoscale
+    fprintf(plot, "set autoscale\n");
+    
+    // Plot data - using column 3 (time in seconds) as x-axis and column 2 (cost) as y-axis
+    fprintf(plot,
+        "plot '%s' using 3:2 title \"Cost vs Time\" with linespoints lw 1.5 pt 7 ps 1\n",
+        filepath);
+        
+    // Flush to ensure all commands are sent
+    fflush(plot);
+}
+
 void plot_stats_in_file(const char* filename){
     
     FILE *plot = open_plot();
@@ -66,6 +94,18 @@ void plot_stats_in_file(const char* filename){
     char filepath[50];
     sprintf(filepath, "results/%s.csv", filename);
     plot_cost_evolution(plot, filepath);
+    free_plot(plot);
+
+}
+
+
+void plot_stats_in_file_base(const char* filename){
+    
+    FILE *plot = open_plot();
+    plot_in_file(plot, filename);
+    char filepath[50];
+    sprintf(filepath, "results/%s.csv", filename);
+    plot_cost_evolution_base(plot, filepath);
     free_plot(plot);
 
 }

@@ -65,6 +65,20 @@ void plot_stats_in_file(const char* filename);
  */
 void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, int nsubtours, int iter);
 
+/**
+ * Plot the cost evolution in a base file
+ * 
+ * @param plot The Gnuplot file pointer
+ * @param filepath path to csv file for data
+ */
+void plot_cost_evolution_base(FILE *plot, const char* filepath);
+
+/**
+ * Plot stats in a base file
+ * 
+ * @param filename name of the file
+ */
+void plot_stats_in_file_base(const char* filename);
 
 /**
  * Tells Gnuplot that the input data are ended

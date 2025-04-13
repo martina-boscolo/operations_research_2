@@ -16,6 +16,12 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     int ncomp = -1, iter = 0;
     double z = 0.0;
 
+    FILE* f;
+    if (inst->verbose >= ONLY_INCUMBMENT) {
+        char filename[65];
+        sprintf(filename, "results/benders.csv");
+        f = fopen(filename, "w+");
+    }
     do {
         
         iter++;
@@ -35,6 +41,9 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
         {
             printf("Iteration %4d, Lower bound %10.2f, ncomp %4d, time %5.2f\n", iter, z, ncomp, get_time_in_milliseconds() - t_start);
             fflush(NULL);
+            fprintf(f, "%d,%f,%f\n", iter, z, get_time_in_milliseconds() - t_start);
+
+
             if (inst->verbose >= GOOD)
             {
 
@@ -70,8 +79,11 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     // Free and close CPLEX model
     free_CPLEX(&env, &lp);
-
+    fclose(f);
     sprintf(sol->method, BENDERS);
+    if (inst->verbose >= ONLY_INCUMBMENT) {
+        plot_stats_in_file_base("benders");
+    }
 
 }
 

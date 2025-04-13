@@ -53,6 +53,7 @@ void vns(const instance *inst, solution *sol, const int timelimit, const int k, 
     if (inst->verbose >= ONLY_INCUMBMENT) {
         plot_stats_in_file(method_name);
     }
+    fclose(f);
 
 }
 
