@@ -70,9 +70,33 @@ void plot_stats_in_file(const char* filename){
 
 }
 
+void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, int nsubtours, int iter) {
+    FILE *gnuplot = open_plot();
+
+    char filename[100];
+    sprintf(filename, "%s_subtours_iter%d", inst->name, iter);
+    plot_in_file(gnuplot, filename);
+
+    add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7");
+
+    for (int k = 0; k < nsubtours; k++) {
+        for (int i = 0; i < subtour_lengths[k]; i++) {
+            int from = subtours[k][i];
+            int to = subtours[k][(i + 1) % subtour_lengths[k]];
+
+            coordinate c1 = inst->coord[from];
+            coordinate c2 = inst->coord[to];
+            plot_edge(gnuplot, c1, c2);
+        }
+    }
+
+    input_end(gnuplot);
+    free_plot(gnuplot);
+}
+
 void input_end(FILE *plot) {
 
-    fprintf(plot, "e");  
+    fprintf(plot, "e\n");  
 
 }
 

@@ -54,6 +54,17 @@ void plot_cost_evolution(FILE *plot, const char* filepath);
  */
 void plot_stats_in_file(const char* filename);
 
+/**
+ * Plot the subtours in the Gnuplot file
+ * 
+ * @param inst The instance pointer of the problem
+ * @param subtours The array of subtours
+ * @param subtour_lengths The lengths of each subtour
+ * @param nsubtours The number of subtours
+ * @param iter The iteration number
+ */
+void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, int nsubtours, int iter);
+
 
 /**
  * Tells Gnuplot that the input data are ended

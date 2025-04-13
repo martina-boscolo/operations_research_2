@@ -31,9 +31,27 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
         if (CPXgetbestobjval(env, lp, &z)) print_error("CPXgetobjval() error");
 
-        if (inst->verbose >= ONLY_INCUMBMENT) {
-            printf("Iteration %4d, Lower bound %10.2f, ncomp %4d, time %5.2f\n", iter, z, ncomp, get_time_in_milliseconds()-t_start);
+        if (inst->verbose >= ONLY_INCUMBMENT)
+        {
+            printf("Iteration %4d, Lower bound %10.2f, ncomp %4d, time %5.2f\n", iter, z, ncomp, get_time_in_milliseconds() - t_start);
             fflush(NULL);
+            if (inst->verbose >= GOOD)
+            {
+
+                int **subtours;
+                int *subtour_lengths;
+
+                extract_subtours_from_successors(inst, succ, &subtours, &subtour_lengths, &ncomp);
+                plot_subtours(inst, subtours, subtour_lengths, ncomp, iter);
+
+                // Clean up
+                for (int k = 0; k < ncomp; k++)
+                {
+                    free(subtours[k]);
+                }
+                free(subtours);
+                free(subtour_lengths);
+            }
         }
 
         if (ncomp > 1) {
@@ -163,4 +181,55 @@ void update_comp(int i, const int new_comp, const int *succ, int *comp) {
         i = succ[i];
     }
 
+}
+
+void extract_subtours_from_successors(const instance *inst, int *succ,
+                                      int ***subtours_out, int **subtour_lengths_out, int *ncomp_out)
+{
+    int **subtours = (int **)malloc(inst->nnodes * sizeof(int *));
+    int *subtour_lengths = (int *)malloc(inst->nnodes * sizeof(int));
+    int *visited = (int *)calloc(inst->nnodes, sizeof(int));
+
+    int ncomp = 0;
+
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        if (visited[i])
+            continue;
+
+        int *this_subtour = (int *)malloc(inst->nnodes * sizeof(int));
+        int len = 0;
+        int curr = i;
+
+        while (!visited[curr])
+        {
+            this_subtour[len++] = curr;
+            visited[curr] = 1;
+            curr = succ[curr];
+
+            if (curr < 0 || curr >= inst->nnodes)
+            {
+                printf("Error: Invalid succ[%d] = %d\n", curr, succ[curr]);
+                break;
+            }
+
+            if (len > inst->nnodes)
+            {
+                printf("Error: Infinite loop in successor chain starting at node %d\n", i);
+                break;
+            }
+        }
+
+        subtours[ncomp] = (int *)malloc(len * sizeof(int));
+        memcpy(subtours[ncomp], this_subtour, len * sizeof(int));
+        subtour_lengths[ncomp] = len;
+        free(this_subtour);
+        ncomp++;
+    }
+
+    *subtours_out = subtours;
+    *subtour_lengths_out = subtour_lengths;
+    *ncomp_out = ncomp;
+
+    free(visited);
 }

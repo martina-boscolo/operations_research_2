@@ -46,4 +46,10 @@ void reverse_succ(const int i, int *succ);
  */
 void update_comp(int i, const int new_comp, const int *succ, int *comp);
 
+/**
+ * Function to extract subtours from the successors array
+ */
+void extract_subtours_from_successors(const instance *inst, int *succ,
+    int ***subtours_out, int **subtour_lengths_out, int *ncomp_out);
+
 #endif //BENDERS_H
