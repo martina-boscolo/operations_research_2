@@ -16,7 +16,7 @@ void initialize_instance(instance *inst) {
 
     inst->verbose = DEFAULT_VERBOSE;
     inst->timelimit = DEFAULT_TIMELIMIT;
-    inst->t_start = seconds();
+    inst->t_start = get_time_in_milliseconds();
 
 }
 

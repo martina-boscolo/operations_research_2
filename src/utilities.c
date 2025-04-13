@@ -92,13 +92,24 @@ time_t seconds(void) {
 
 }
 
-int get_elapsed_time(const time_t start) {
+double get_elapsed_time(const double start) {
 
-    // get current time
-    time_t curr_time;
-    time(&curr_time);
-    return (int) difftime(curr_time, start);
+    return get_time_in_milliseconds() - start;
 
+}
+
+double get_time_in_milliseconds() {
+    static LARGE_INTEGER frequency;
+    static BOOL initialized = FALSE;
+    LARGE_INTEGER now;
+
+    if (!initialized) {
+        QueryPerformanceFrequency(&frequency);
+        initialized = TRUE;
+    }
+
+    QueryPerformanceCounter(&now);
+    return (double)now.QuadPart / (double)frequency.QuadPart;
 }
 
 double random01(void)

@@ -2,7 +2,7 @@
 
 void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
-    time_t t_start = seconds();
+    double t_start = get_time_in_milliseconds();
 
     // Open CPLEX model
     CPXENVptr env;
@@ -32,7 +32,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
         if (CPXgetbestobjval(env, lp, &z)) print_error("CPXgetobjval() error");
 
         if (inst->verbose >= ONLY_INCUMBMENT) {
-            printf("Iteration %4d, Lower bound %10.2f, ncomp %4d, time %5.2f\n", iter, z, ncomp, seconds()-t_start);
+            printf("Iteration %4d, Lower bound %10.2f, ncomp %4d, time %5.2f\n", iter, z, ncomp, get_time_in_milliseconds()-t_start);
             fflush(NULL);
         }
 

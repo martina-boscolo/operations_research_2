@@ -156,7 +156,7 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start)
 
 void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
 
-    time_t t_start = seconds();
+    double t_start = get_time_in_milliseconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -164,7 +164,7 @@ void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
     solution temp_best_sol; 
     copy_sol(&temp_best_sol, sol, inst->nnodes);
 
-    int elapsed_time;
+    double elapsed_time;
     for (int start = 0; start < inst->nnodes; start++) {
 
         elapsed_time = get_elapsed_time(t_start);
@@ -200,7 +200,7 @@ void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
 
 void two_opt(const instance *inst, solution *sol, const int timelimit, bool print) {
 
-    time_t t_start = seconds();
+    double t_start = get_time_in_milliseconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);

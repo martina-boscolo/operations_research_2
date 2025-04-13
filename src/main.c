@@ -60,7 +60,7 @@ int main(int argc, const char *argv[]) {
     build_instance(&inst);
 
     // starting solving time
-    inst.t_start = seconds();
+    inst.t_start = get_time_in_milliseconds();    
     
     // compute the solution
     solve_with_method(&inst, inst.best_solution); 

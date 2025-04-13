@@ -2,7 +2,7 @@
 
 void vns(const instance *inst, solution *sol, const int timelimit, const int k, const int reps) {
 
-    time_t t_start = seconds();
+    double t_start = get_time_in_milliseconds();
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -21,7 +21,7 @@ void vns(const instance *inst, solution *sol, const int timelimit, const int k, 
     }
     int iteration = 0;
 
-    int elapsed_time;
+    double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
         if (inst->verbose >= DEBUG){

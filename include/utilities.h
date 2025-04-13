@@ -11,6 +11,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <windows.h>
 
 //-------------------------------------- main utilities --------------------------------------
 
@@ -43,7 +44,15 @@ time_t seconds(void);
  * 
  * @return The elapsed_time
  */
-int get_elapsed_time(const time_t start);
+double get_elapsed_time(const double start);
+
+/**
+ * Get the current time in seconds using high-resolution performance counter.
+ * Windows only.
+ * 
+ * @return The current time in seconds
+ */
+double get_time_in_milliseconds();
 
 /**
  * Draw a random value between 0 and 1

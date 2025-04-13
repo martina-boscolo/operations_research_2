@@ -55,7 +55,7 @@ typedef struct {
 
     int verbose;                // printing level
     int timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
-    time_t t_start;             // initial time
+    double t_start;             // initial time
 
 } instance;
 
