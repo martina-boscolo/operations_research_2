@@ -2,7 +2,7 @@
 
 #define DEBUG_CPLEX
 
-int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
+int initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
     // Open CPLEX model
     int error;
@@ -26,7 +26,7 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
     return 0;
 }
 
-int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
+int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
     
 	// Solve the model
 	if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
@@ -50,7 +50,7 @@ int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, doubl
 
 }
 
-int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
+int build_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
 
 	char **cname = (char **) calloc(1, sizeof(char*));
     cname[0] = (char *) calloc(100, sizeof(char));
@@ -77,7 +77,7 @@ int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, cons
     return 0;
 }
 
-int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value) {
+int add_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value) {
 
     int izero = 0;
     sprintf(cname[0], "SEC(%d)", sec_comp); 
@@ -112,7 +112,7 @@ int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, cons
     
 }
 
-int xpos(int i, int j, instance *inst)                                         
+int xpos(int i, int j, const instance *inst)                                         
 { 
     if ( i == j ) print_error(" i == j in xpos" );
     if ( i > j ) return xpos(j,i,inst);
@@ -120,7 +120,7 @@ int xpos(int i, int j, instance *inst)
     return pos;
 }
 
-void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
+void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp)
 {    
 
     int izero = 0;
@@ -175,7 +175,7 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 
 }
 
-void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
+void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
 {   
 
 #ifdef DEBUG_CPLEX
@@ -236,7 +236,7 @@ void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, 
     }
 }
 
-void build_solution_form_CPLEX(instance *inst, solution *sol, int *succ) {
+void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ) {
 
     sol->visited_nodes[0] = 0;
     int s = succ[0];

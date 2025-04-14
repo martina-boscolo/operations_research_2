@@ -21,7 +21,7 @@ void solve_with_method(instance *inst, solution *sol) {
     allocate_solution(sol, inst->nnodes);
     _mkdir("./results"); //, 0777);
 
-    int timelimit =(int) inst->timelimit - get_elapsed_time(inst->t_start);
+    double timelimit = inst->timelimit - get_elapsed_time(inst->t_start);
 
     if (strcmp(inst->asked_method, NEAREST_NEIGHBOR) == 0) {
 

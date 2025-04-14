@@ -60,7 +60,6 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
                 extract_subtours_from_successors(inst, succ, &subtours, &subtour_lengths, &ncomp);
                 plot_subtours(inst, subtours, subtour_lengths, ncomp, iter);
 
-                // Clean up
                 for (int k = 0; k < ncomp; k++)
                 {
                     free(subtours[k]);
@@ -78,7 +77,6 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
             update_sol(inst, &temp_best_sol, &temp_sol, true);
 
             if (inst->verbose >= GOOD) {
-                char filename[100];
                 sprintf(temp_sol.method, "PatchHeuristic_subtours_iter%d", iter);
                 plot_solution(inst, &temp_sol);
             }

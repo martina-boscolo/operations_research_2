@@ -14,7 +14,7 @@
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
+int initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
  * Obtain the optimal solution of lp w.r.t. instance, store it in xstar, succ, comp, ncomp
@@ -27,7 +27,7 @@ int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
  */
-int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
+int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
 
 /**
  * For each connected component add the correspondent SEC to the lp model
@@ -38,7 +38,7 @@ int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, doubl
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
  */
-int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
+int build_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
 
 /**
  * Add the SEC to the lp model
@@ -53,7 +53,7 @@ int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, cons
  * @param index Index for non zero coefficients
  * @param value Value for non zero coefficients
  */
-int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value);
+int add_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes
@@ -63,7 +63,7 @@ int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, cons
  * @param inst The instance pointer of the problem
  * @return Edge index
  */
-int xpos(int i, int j, instance *inst);                                       
+int xpos(int i, int j, const instance *inst);                                       
     
 /**
  * Build the ILP model
@@ -72,7 +72,7 @@ int xpos(int i, int j, instance *inst);
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
+void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp);
 
 /**
  * Build the solution based on the edges selected in xstar
@@ -83,7 +83,7 @@ void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
  */
-void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, int *ncomp);
+void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *comp, int *ncomp);
 
 /**
  * From CPLEX solution, as successors, to a solution in the struct
@@ -93,7 +93,7 @@ void build_sol_CPLEX(const double *xstar, instance *inst, int *succ, int *comp, 
  * @param sol The solution pointer of the instance
  * @param succ Solution as successors
  */
-void build_solution_form_CPLEX(instance *inst, solution *sol, int *succ);
+void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ);
 
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp);
 
