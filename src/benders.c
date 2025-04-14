@@ -1,6 +1,6 @@
 #include "benders.h"
 
-void benders_loop(instance *inst, solution *sol, const double timelimit) {
+void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -112,7 +112,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
 }
 
-void patch_heuristic(instance *inst, int *succ, int *comp, int ncomp) {
+void patch_heuristic(const instance *inst, int *succ, int *comp, int ncomp) {
 
     while (ncomp > 1) {
 

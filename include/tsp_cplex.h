@@ -8,22 +8,50 @@
 #include <stdbool.h>
 
 /**
+ * Initialize the CPLEX enviroment and build the base model of TSP (w/o SEC's)
  * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
  */
 int initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
+ * Obtain the optimal solution of lp w.r.t. instance, store it in xstar, succ, comp, ncomp
  * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ * @param xstar Contain the optimal coefficient for each edge
+ * @param succ Solution as successors
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
  */
 int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
 
 /**
+ * For each connected component add the correspondent SEC to the lp model
  * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
  */
 int build_SECs(instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
 
 /**
+ * Add the SEC to the lp model
  * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ * @param sec_comp Number of the connected component the SEC will be associated
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
+ * @param cname Array for the name of the constraint 
+ * @param index Index for non zero coefficients
+ * @param value Value for non zero coefficients
  */
 int add_SEC(instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value);
 

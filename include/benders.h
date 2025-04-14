@@ -14,35 +14,61 @@
 
 /**
  * Find the optimal solution of the instance
+ * Note: If the time limit is reached the solution might not be optimal
  * 
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
  * @param timelimit Time limit for the algorithm
  */
-void benders_loop(instance *inst, solution *sol, const double timelimit);
+void benders_loop(const instance *inst, solution *sol, const double timelimit);
 
 /**
+ * Build a feasible solution from different subtours connecting them and then apply 2-opt refinement
  * 
+ * @param inst The instance pointer of the problem
+ * @param succ Solution as successors
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
  */
-void patch_heuristic(instance *inst, int *succ, int *comp, int ncomp);
+void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, int ncomp);
 
 /**
- * 
+ * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,succ_j), (j,succ_i)
+ *
+ * @param i First index
+ * @param j Second index
+ * @param inst The instance pointer of the problem
+ * @param succ Solution as successors
  */
 double delta_dir(const int i, const int j, const instance *inst, const int *succ);
 
 /**
- * 
+ * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,j), (succ_j,succ_i)
+ *
+ * @param i First node
+ * @param j Second node
+ * @param inst The instance pointer of the problem
+ * @param succ Solution as successors
  */
 double delta_rev(const int i, const int j, const instance *inst, const int *succ);
 
 /**
+ * Reverse the order of the subtour that contains node i in succ 
  * 
+ * @param i Node in the subtour
+ * @param succ Solution as successors
  */
 void reverse_succ(const int i, int *succ);
 
 /**
+ * Update the connected components such that the (sub)tour that contains i figures as connected component numbered new_comp
+ * Note: Use this function once you have connect two subtours
+ * Note: i must be the first node in the (sub)tour with different connected component number
  * 
+ * @param i Node in the (sub)tour
+ * @param new_comp Number of connected component to assign
+ * @param succ Solution as successors
+ * @param comp Component associated for each nodes
  */
 void update_comp(int i, const int new_comp, const int *succ, int *comp);
 
