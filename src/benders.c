@@ -74,8 +74,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
             build_SECs(inst, env, lp, comp, ncomp);
 
-            patch_heuristic(inst, succ, comp, ncomp);
-            build_solution_form_CPLEX(inst, &temp_sol, succ);
+            patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
             update_sol(inst, &temp_best_sol, &temp_sol, true);
 
             if (inst->verbose >= GOOD) {
@@ -112,7 +111,9 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
 }
 
-void patch_heuristic(const instance *inst, int *succ, int *comp, int ncomp) {
+void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, int ncomp, const double timelimit) {
+
+    double t_start = get_time_in_milliseconds();
 
     while (ncomp > 1) {
 
@@ -178,6 +179,10 @@ void patch_heuristic(const instance *inst, int *succ, int *comp, int ncomp) {
         ncomp --;
 
     }
+
+    build_solution_form_CPLEX(inst, sol, succ);
+
+    two_opt(inst, sol, timelimit - get_elapsed_time(t_start), false);
 
 }
 

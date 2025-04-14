@@ -29,8 +29,9 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit);
  * @param succ Solution as successors
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
+ * @param timelimit Time limit for the algorithm
  */
-void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, int ncomp);
+void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, int ncomp, const double timelimit);
 
 /**
  * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,succ_j), (j,succ_i)
