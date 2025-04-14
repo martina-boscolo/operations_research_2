@@ -43,6 +43,8 @@ void shift_segment(solution *sol, const int n, const int idx1, const int idx2, c
     int *segment1 = (int *)malloc(segment1_size * sizeof(int));
     int *segment2 = (int *)malloc(segment2_size * sizeof(int));
     int *segment3 = (int *)malloc(segment3_size * sizeof(int));
+
+    if (segment1 == NULL || segment2 == NULL || segment3 == NULL) print_error("shift_segment(): Impossible to allocate memory.");
     
     // Copy segments
     for (int j = 0; j < segment1_size; j++) {
@@ -82,6 +84,7 @@ void shift_segment(solution *sol, const int n, const int idx1, const int idx2, c
     free(segment1);
     free(segment2);
     free(segment3);    
+
 }
 
 double delta2(const instance *inst, const solution *sol, const int i, const int j) {
@@ -154,7 +157,7 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start)
     free_solution(&temp_sol);
 }
 
-void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
+void multi_start_nn(const instance *inst, solution *sol, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
 
@@ -198,7 +201,7 @@ void multi_start_nn(const instance *inst, solution *sol, const int timelimit) {
 
 }
 
-void two_opt(const instance *inst, solution *sol, const int timelimit, bool print) {
+void two_opt(const instance *inst, solution *sol, const double timelimit, bool print) {
 
     double t_start = get_time_in_milliseconds();
 

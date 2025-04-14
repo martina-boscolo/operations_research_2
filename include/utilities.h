@@ -31,13 +31,6 @@ void parse_command_line(const int argc, const char *argv[], instance *inst);
 //------------------------------------ various utilities -------------------------------------
 
 /**
- * Calculates the seconds since a reference time.
- * 
- * @return The seconds
- */
-time_t seconds(void);
-
-/**
  * Compute the elapsed_time (duration) in seconds from starting time to current time.
  * 
  * @param start starting time

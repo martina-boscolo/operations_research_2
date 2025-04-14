@@ -21,19 +21,19 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
     // parsing
     for (int i = 1; i < argc; i++) {
 
-        if (strcmp(argv[i], "-file") == 0)                                                                     // input file
+        if (strcmp(argv[i], "-file") == 0 || strcmp(argv[i], "-f") == 0)                                                                     // input file
             { strcpy(inst->input_file,argv[++i]); continue; }
         if (strcmp(argv[i], "-n") == 0)                                                                         // number of nodes
             { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; } continue; }          
         if (strcmp(argv[i], "-seed") == 0)                                                                      // random seed
             { inst->seed = atoi(argv[++i]); continue; }              
         if (strcmp(argv[i], "-timelimit") == 0)                                                                 // time limit
-            { inst->timelimit = atoi(argv[++i]); if (inst->timelimit < 1) { need_help = 1; } continue; }    
+            { inst->timelimit = atof(argv[++i]); if (inst->timelimit < 1.0) { need_help = 1; } continue; }    
         if (strcmp(argv[i], "-verbose") == 0)                                                                   // verbosity level
             { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
             { strcpy(inst->asked_method,argv[++i]); continue; }
-        if (strcmp(argv[i], "-param1") == 0)                                                                    // first parameter for the method          
+        if (strcmp(argv[i], "-param") == 0 || strcmp(argv[i], "-param1") == 0)                                                                    // first parameter for the method          
             {  inst->param1 = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-param2") == 0)                                                                    // second parameter for the method          
             {  inst->param2 = atoi(argv[++i]); continue; }  
@@ -57,13 +57,13 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
     // asked to see the available commands
     if (help) {
 
-        printf("-file <file's path>       To pass the problem's path\n");
+        printf("-file|-f <file's path>    To pass the problem's path\n");
         printf("-n <nnodes>               The number of nodes in the graph, must be at least %d\n", MIN_NNODES);
         printf("-seed <seed>              The seed for random generation\n");
         printf("-timelimit <time>         The time limit in seconds, must be positive\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
-        printf("-param1 <param>           The first parameter for the method\n");
+        printf("-param|-param1 <param>    The first parameter for the method\n");
         printf("-param2 <param>           The second parameter for the method\n");
 
         exit(0);
@@ -82,15 +82,6 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
 }
 
 //--- various utilities ---
-
-time_t seconds(void) {
-
-    time_t curr_time;
-    time(&curr_time);
-
-    return curr_time;
-
-}
 
 double get_elapsed_time(const double start) {
 

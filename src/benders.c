@@ -8,13 +8,14 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     CPXENVptr env;
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
-    printf("CPLEX INIT\n");
 
     int *succ = (int *) malloc(inst->nnodes * sizeof(int));
     int *comp = (int *) malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
     int ncomp = -1, iter = 0;
     double z = 0.0;
+
+    if (succ == NULL || comp == NULL || xstar == NULL) print_error("benders_loop(): Impossible to allocate memory.");
 
     FILE* f;
     if (inst->verbose >= ONLY_INCUMBMENT) {
@@ -244,4 +245,5 @@ void extract_subtours_from_successors(const instance *inst, int *succ,
     *ncomp_out = ncomp;
 
     free(visited);
+    
 }

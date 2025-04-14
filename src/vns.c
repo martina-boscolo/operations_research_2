@@ -1,6 +1,6 @@
 #include "vns.h"
 
-void vns(const instance *inst, solution *sol, const int timelimit, const int k, const int reps) {
+void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps) {
 
     double t_start = get_time_in_milliseconds();
 
