@@ -157,7 +157,6 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
         if (to_reverse) { 
             
             // (i, succ_i), (j,succ_j) -> (i,j), (succ_j,succ_i)
-            // to check
             int succ_i = succ[i];
             int succ_j = succ[j];
             // reverse succ
@@ -204,7 +203,7 @@ void reverse_succ(const int i, int *succ) {
     int sj = succ[j];
     int ssj = succ[sj];
 
-    while (j != i) { //check
+    while (j != i) {
         succ[sj] = j;
         j = sj;
         sj = ssj;

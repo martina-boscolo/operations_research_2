@@ -18,7 +18,8 @@ int initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp) {
         print_error("Failed to create CPLEX problem object.");
     }
 
-    //CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9);
+    //if (CPXsetdblparam(env, CPX_PARAM_EPAGAP, 1e-9)) print_error("CPXsetdblparam(): Cannot set relative tollerance");
+    //if (CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9)) print_error("CPXsetdblparam(): Cannot set absolute tollerance");
 
     // Build the model
     build_model_CPLEX(inst, *env, *lp);
@@ -109,7 +110,8 @@ int add_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp
     }
 
     if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
-    
+ 
+    return 0;
 }
 
 int xpos(int i, int j, const instance *inst)                                         
