@@ -2,6 +2,12 @@
 
 void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
+    solution temp_sol;
+    copy_sol(&temp_sol, sol, inst->nnodes);
+
+    solution temp_best_sol;
+    copy_sol(&temp_best_sol, sol, inst->nnodes);
+
     double t_start = get_time_in_milliseconds();
 
     // Open CPLEX model
@@ -65,13 +71,28 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
         }
 
         if (ncomp > 1) {
+
             build_SECs(inst, env, lp, comp, ncomp);
+
             patch_heuristic(inst, succ, comp, ncomp);
+            build_solution_form_CPLEX(inst, &temp_sol, succ);
+            update_sol(inst, &temp_best_sol, &temp_sol, true);
+
+            if (inst->verbose >= GOOD) {
+                char filename[100];
+                sprintf(temp_sol.method, "PatchHeuristic_subtours_iter%d", iter);
+                plot_solution(inst, &temp_sol);
+            }
+
         }
 
     } while (ncomp > 1);
 
-    build_solution_form_CPLEX(inst, sol, succ);
+    build_solution_form_CPLEX(inst, &temp_sol, succ);
+    update_sol(inst, &temp_best_sol, &temp_sol, true);
+    sprintf(temp_best_sol.method, BENDERS);
+
+    update_sol(inst, sol, &temp_best_sol, false);
 
     // Free allocated memory
     free(xstar);
@@ -81,7 +102,10 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     // Free and close CPLEX model
     free_CPLEX(&env, &lp);
     fclose(f);
-    sprintf(sol->method, BENDERS);
+
+    free_solution(&temp_best_sol);
+    free_solution(&temp_sol);
+
     if (inst->verbose >= ONLY_INCUMBMENT) {
         plot_stats_in_file_base("benders");
     }
@@ -245,5 +269,5 @@ void extract_subtours_from_successors(const instance *inst, int *succ,
     *ncomp_out = ncomp;
 
     free(visited);
-    
+
 }

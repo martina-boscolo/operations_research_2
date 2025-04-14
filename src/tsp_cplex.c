@@ -38,7 +38,7 @@ int get_optimal_solution_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp, doubl
     // Build the solution (succ, comp, ncomp)
     build_sol_CPLEX(xstar, inst, succ, comp, ncomp);
 
-    if (inst->verbose >= GOOD) {
+    if (inst->verbose >= DEBUG) {
         // Print the solution components
         printf("Number of components: %d\n", *ncomp);
         for (int i = 0; i < inst->nnodes; i++) {
