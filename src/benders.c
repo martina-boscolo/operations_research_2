@@ -71,7 +71,8 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
         if (ncomp > 1) {
 
-            build_SECs(inst, env, lp, comp, ncomp);
+            //build_SECs(inst, env, lp, comp, ncomp);
+            add_SECs(inst, env, lp, comp, ncomp);
 
             patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
             update_sol(inst, &temp_best_sol, &temp_sol, true);

@@ -14,7 +14,7 @@
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-int initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
+void initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
  * Obtain the optimal solution of lp w.r.t. instance, store it in xstar, succ, comp, ncomp
@@ -27,7 +27,24 @@ int initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
  */
-int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
+void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
+
+/**
+ * Build the SEC correspondent to the given connected component (identified with sec_comp)
+ * Note: the SEC will be contained in index, value, nnz and rhs
+ * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
+ * @param sec_comp Number of connected component
+ * @param index Index for non zero coefficients
+ * @param value Value for non zero coefficients
+ * @param nnz Number of non-zero coefficients
+ * @param rhs Right hand side
+ */
+void build_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
 
 /**
  * For each connected component add the correspondent SEC to the lp model
@@ -37,23 +54,9 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
  * @param lp CPLEX LP
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
- */
-int build_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
-
-/**
- * Add the SEC to the lp model
- * 
- * @param inst The instance pointer of the problem
- * @param env CPLEX environment
- * @param lp CPLEX LP
- * @param sec_comp Number of the connected component the SEC will be associated
- * @param comp Component associated for each nodes
- * @param ncomp Number of components in the solution
  * @param cname Array for the name of the constraint 
- * @param index Index for non zero coefficients
- * @param value Value for non zero coefficients
  */
-int add_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int sec_comp, const int *comp, const int ncomp, char **cname, int *index, double *value);
+void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes
@@ -95,6 +98,12 @@ void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *
  */
 void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ);
 
+/**
+ * Deallocate memory associated with CPLEX
+ * 
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ */
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp);
 
 #endif //TSP_CPLEX_H
