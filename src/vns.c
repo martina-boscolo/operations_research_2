@@ -25,7 +25,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
         if (inst->verbose >= DEBUG){
-            printf("Time left: %d \n",timelimit - elapsed_time);
+            printf("Time left: %f \n", timelimit - elapsed_time);
         }
 
         // go to local optima
