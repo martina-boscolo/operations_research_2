@@ -47,18 +47,6 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
 void build_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
 
 /**
- * For each connected component add the correspondent SEC to the lp model
- * 
- * @param inst The instance pointer of the problem
- * @param env CPLEX environment
- * @param lp CPLEX LP
- * @param comp Component associated for each nodes
- * @param ncomp Number of components in the solution
- * @param cname Array for the name of the constraint 
- */
-void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp);
-
-/**
  * Return the index of CPLEX solution array from the edge between two nodes
  * 
  * @param i First node

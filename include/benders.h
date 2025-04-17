@@ -23,6 +23,18 @@
 void benders_loop(const instance *inst, solution *sol, const double timelimit);
 
 /**
+ * For each connected component add the correspondent SEC to the lp model
+ * 
+ * @param inst The instance pointer of the problem
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ * @param comp Component associated for each nodes
+ * @param ncomp Number of components in the solution
+ * @param iter Iteration
+ */
+void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter);
+
+/**
  * Build a feasible solution from different subtours connecting them and then apply 2-opt refinement
  * 
  * @param inst The instance pointer of the problem

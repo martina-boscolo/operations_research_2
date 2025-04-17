@@ -76,42 +76,6 @@ void build_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp
 
 }
 
-void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp) {
-
-    int izero = 0;
-    char sense = 'L'; 
-
-    char **cname = (char **) calloc(1, sizeof(char*));
-    cname[0] = (char *) calloc(100, sizeof(char));
-    
-    int *index = (int *) malloc(CPXgetnumcols(env,lp) * sizeof(int));
-    double *value = (double *) malloc(CPXgetnumcols(env,lp) * sizeof(double)); 
-
-    int nnz;
-    double rhs;
-
-	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
-		print_error("Impossible to allocate memory, build_SECs()");
-
-    for (int k=1; k<=ncomp; k++) {
-        
-        sprintf(cname[0], "SEC(%d)", k); 
-
-        build_SEC(inst, env, lp, comp, ncomp, k, index, value, &nnz, &rhs);
-
-        if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
-
-    }
-
-    if (inst->verbose >= GOOD) CPXwriteprob(env, lp, "model.lp", NULL);   
-
-	free(value);
-    free(index);
-    free(cname[0]);
-    free(cname);
-
-}
-
 int xpos(int i, int j, const instance *inst)                                         
 { 
     if ( i == j ) print_error(" i == j in xpos" );
