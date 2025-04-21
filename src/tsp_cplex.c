@@ -48,7 +48,7 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
 
 }
 
-void build_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs) {
+void build_SEC(const instance *inst, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs) {
 
     *nnz = 0;
     *rhs = -1;

@@ -56,6 +56,7 @@ typedef struct {
     int verbose;                // printing level
     double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
     double t_start;             // initial time
+    int ncols;               // number of columns in the model
 
 } instance;
 

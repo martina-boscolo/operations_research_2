@@ -130,7 +130,7 @@ void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp,
         
         sprintf(cname[0], "%dSEC(%d)", iter, k); 
 
-        build_SEC(inst, env, lp, comp, ncomp, k, index, value, &nnz, &rhs);
+        build_SEC(inst, comp, ncomp, k, index, value, &nnz, &rhs);
 
         if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
 

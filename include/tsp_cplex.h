@@ -34,8 +34,6 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
  * Note: the SEC will be contained in index, value, nnz and rhs
  * 
  * @param inst The instance pointer of the problem
- * @param env CPLEX environment
- * @param lp CPLEX LP
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
  * @param sec_comp Number of connected component
@@ -44,7 +42,7 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
  * @param nnz Number of non-zero coefficients
  * @param rhs Right hand side
  */
-void build_SEC(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
+void build_SEC(const instance *inst,  const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes
