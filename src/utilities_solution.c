@@ -48,6 +48,16 @@ void solve_with_method(instance *inst, solution *sol) {
         printf("Solving with Benders' loop method.\n");
         benders_loop(inst, sol, timelimit);
             
+    } else if (strcmp(inst->asked_method, BRANCH_AND_CUT) == 0) {
+
+        printf("Solving with Branch and Cut method.\n");
+        double timelimit_1 = timelimit * 0.1;
+        double timelimit_2 = timelimit * 0.9;
+        printf("Solving with multi-start Nearest Neighbor method for %lf seconds\n", timelimit_1);
+        multi_start_nn(inst, sol, timelimit_1); 
+        printf("Solving with Branch and Cut method for %lf seconds\n", timelimit_2);
+        branch_and_cut(inst, sol, timelimit_2);
+            
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
         printf("Valid methods are:\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH);
