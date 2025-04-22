@@ -7,7 +7,7 @@
 #define VNS "VNS"
 
 #define DEAULT_K 3 
-#define DEFAULT_REPS 1
+#define DEFAULT_REPS 3
 #define POSSIBLE_THREE_OPT_MOVES 4
 
 /**

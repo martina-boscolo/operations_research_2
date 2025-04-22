@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 REM Define constants
 set SEED_START=1
-set SEED_END=3
+set SEED_END=10
 set PARAM_START=0
 set PARAM_END=4
 set NODES=1000

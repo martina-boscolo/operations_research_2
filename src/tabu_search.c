@@ -16,7 +16,8 @@ int calculate_tenure(tabu_params *params) {
                 return params->max_tenure + (int)(params->max_tenure * 0.5);
             else
                 return params->min_tenure + rand() % (params->max_tenure - params->min_tenure + 1);
-            
+           
+        default: //best performer 
         case LINEAR:
             // Sawtooth pattern - linear increase followed by reset
             {
@@ -27,7 +28,7 @@ int calculate_tenure(tabu_params *params) {
                 else
                     return params->max_tenure - (position - cycle_length / 2); // Decreasing
             }
-        default: //best performer   
+          
         case SINUSOIDAL:
             // More pronounced sinusoidal with wider amplitude
             {
