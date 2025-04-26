@@ -33,7 +33,7 @@ int main(int argc, const char *argv[]) {
     // plot the solution
     plot_solution(&inst, inst.best_solution);
 
-    printf("$STAT;%s;%d;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost);
+    printf("$STAT;%s;%d;%lf;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost, get_elapsed_time(inst.t_start));
 
     // free the instance and its solution
     free_instance(&inst);
