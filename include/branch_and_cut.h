@@ -14,6 +14,13 @@
 
 void branch_and_cut(instance *inst, solution *sol, const double timelimit);
 
-int CPXPUBLIC my_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle );
+void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp);
+
+void install_callback(instance *inst, CPXENVptr env, CPXLPptr lp);
+
+int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle);
+
+// return 0 ok, 1 error
+int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const int *comp, const int ncomp, const int tree_node);
 
 #endif // BRANCH_AND_CUT_H
