@@ -8,48 +8,6 @@
 
 int main(int argc, const char *argv[]) {
 
-    /*instance inst1;
-    initialize_instance(&inst1);
-    inst1.nnodes = 10;
-    build_instance(&inst1);
-
-    solution sol1;
-    initialize_solution(&sol1);
-    allocate_solution(&sol1, inst1.nnodes);
-    initialize_tour(sol1.visited_nodes, inst1.nnodes);
-    sol1.cost = compute_solution_cost(&inst1, &sol1);
-    print_solution(&sol1, inst1.nnodes);
-
-    printf("BEFORE CPLEX\n");
-    int error;
-    CPXENVptr env = CPXopenCPLEX(&error);
-    CPXLPptr lp = CPXcreateprob(env, &error, "TSP_Problem");
-    build_model_CPLEX(&inst1, env, lp);
-    printf("AFTER CPLEX\n");
-
-    int *succ = (int *) malloc(inst1.nnodes * sizeof(int));
-    int *comp = (int *) malloc(inst1.nnodes * sizeof(int));
-    double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
-    int ncomp = -1;
-
-    if (succ==NULL || comp==NULL || xstar==NULL) print_error("MEMORY MAIN");
-
-    printf("BEFORE OPT SOL\n");
-    get_optimal_solution_CPLEX(&inst1, env, lp, xstar, succ, comp, &ncomp);
-    printf("AFTER OPT SOL\n");
-
-    printf("BEFORE PATCH\n");
-    patch_heuristic(&inst1, succ, comp, ncomp);
-    printf("Number of components: %d\n", ncomp);
-        for (int i = 0; i < inst1.nnodes; i++) {
-            printf("Node %d -> Successor: %d, Component: %d\n", i, succ[i], comp[i]);
-        }
-    printf("AFTER PATCH\n");
-    build_solution_form_CPLEX(&inst1, &sol1, succ);
-    print_solution(&sol1, inst1.nnodes);*/
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-
     // problem instance
     instance inst;
 
