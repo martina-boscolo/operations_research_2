@@ -15,6 +15,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
 
+    // Instantiate memory
     int *succ = (int *) malloc(inst->nnodes * sizeof(int));
     int *comp = (int *) malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
@@ -23,6 +24,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
     if (succ == NULL || comp == NULL || xstar == NULL) print_error("benders_loop(): Impossible to allocate memory.");
 
+    // Save results in a file, if required
     FILE *f;
     if (inst->verbose >= ONLY_INCUMBMENT) {
         char filename[FILE_NAME_LEN];
@@ -37,11 +39,12 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
         double residual_time = timelimit - get_elapsed_time(t_start);
         if (residual_time <= 0) break;
 
+        // Update CPLEX time limit
         CPXsetdblparam(env, CPX_PARAM_TILIM, residual_time);
 
-        get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
-
-        // check xstar optimality
+        // Obtain optimal solution, and
+        // Check if time limit is reached 
+        if (get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp)) break;
 
         if (CPXgetbestobjval(env, lp, &z)) print_error("CPXgetobjval() error");
 
@@ -55,6 +58,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
             if (inst->verbose >= GOOD)
             {
 
+                // If required plot the subtours
                 int **subtours;
                 int *subtour_lengths;
 
@@ -65,14 +69,17 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
                 {
                     free(subtours[k]);
                 }
+
                 free(subtours);
                 free(subtour_lengths);
             }
+
         }
 
+        // If the solution is unfeasible add the correspondent SECs and use patch heuristic
         if (ncomp > 1) {
 
-            add_SECs(inst, env, lp, comp, ncomp, iter);
+            add_SECs_to_model(inst, env, lp, comp, ncomp, iter);
 
             patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
             update_sol(inst, &temp_best_sol, &temp_sol, true);
@@ -86,8 +93,13 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
     } while (ncomp > 1);
 
-    build_solution_form_CPLEX(inst, &temp_sol, succ);
-    update_sol(inst, &temp_best_sol, &temp_sol, true);
+    // Check if solution is optimal
+    if (CPXgetstat(env, lp) == CPX_STAT_ABORT_TIME_LIM) 
+    {   
+        build_solution_form_CPLEX(inst, &temp_sol, succ);
+        update_sol(inst, &temp_best_sol, &temp_sol, true);
+    }  
+
     sprintf_s(temp_best_sol.method, METH_NAME_LEN, BENDERS);
 
     update_sol(inst, sol, &temp_best_sol, false);
@@ -110,8 +122,9 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
 }
 
-void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter) {
+void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter) {
 
+    // Instantiate memory
     int izero = 0;
     char sense = 'L'; 
 
@@ -127,6 +140,7 @@ void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp,
 	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
 		print_error("Impossible to allocate memory, build_SECs()");
 
+    // For each connected component add the correspondent SEC to the model
     for (int k=1; k<=ncomp; k++) {
         
         sprintf_s(cname[0], CONS_NAME_LEN, "%dSEC(%d)", iter, k); 
@@ -150,6 +164,8 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
 
     double t_start = get_time_in_milliseconds();
 
+    // While there are more than one connected component
+    // patch the connected component of node 0 to another component
     while (ncomp > 1) {
 
         int i = 0, j = 1;
@@ -161,7 +177,7 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
         int i1 = succ[i], j1 = succ[j];
         bool to_reverse = false;
 
-        // find best patch
+        // Find best patch
         do {
             do {
 
@@ -191,6 +207,7 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
         j = best_j;
         i = best_i;
 
+        // Patch the connected components
         if (to_reverse) { 
             
             // (i, succ_i), (j,succ_j) -> (i,j), (succ_j,succ_i)
@@ -207,28 +224,31 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
             succ[i] = succ[j];
             succ[j] = succ_i;
         }
-        // update component
+
+        // Update component
         update_comp(succ[i], comp[i], succ, comp);
 
         ncomp --;
 
     }
 
+    // Obtain the solution that corresponds to the patch
     build_solution_form_CPLEX(inst, sol, succ);
 
+    // Improve the solution using 2-opt refinement
     two_opt(inst, sol, timelimit - get_elapsed_time(t_start), false);
 
 }
 
-// (i, succ_i), (j,succ_j) -> (i,succ_j), (j,succ_i)
 double delta_dir(const int i, const int j, const instance *inst, const int *succ) {
+    // (i, succ_i), (j,succ_j) -> (i,succ_j), (j,succ_i)
     double old_cost = cost(i, succ[i], inst) + cost(j, succ[j], inst);
     double new_cost = cost(i, succ[j], inst) + cost(j, succ[i], inst);
     return new_cost - old_cost;
 }
 
-// (i, succ_i), (j,succ_j) -> (i,j), (succ_j,succ_i)
 double delta_rev(const int i, const int j, const instance *inst, const int *succ) {
+    // (i, succ_i), (j,succ_j) -> (i,j), (succ_j,succ_i)
     double old_cost = cost(i, succ[i], inst) + cost(j, succ[j], inst);
     double new_cost = cost(i, j, inst) + cost(succ[j], succ[i], inst);
     return new_cost - old_cost;

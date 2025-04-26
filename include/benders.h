@@ -32,7 +32,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit);
  * @param ncomp Number of components in the solution
  * @param iter Iteration
  */
-void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter);
+void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter);
 
 /**
  * Build a feasible solution from different subtours connecting them and then apply 2-opt refinement
