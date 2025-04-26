@@ -89,7 +89,7 @@ void basic_TSPLIB_parser(const char *filename, instance *inst) {
     while (fgets(line, sizeof(line), file)) {
         // Find the dimension
         if (strstr(line, "DIMENSION")) {
-            sscanf(line, "DIMENSION : %d", &inst->nnodes);
+            sscanf_s(line, "DIMENSION : %d", &inst->nnodes);
             
             // Allocate memory after finding dimension
             allocate_instance(inst);
@@ -107,7 +107,7 @@ void basic_TSPLIB_parser(const char *filename, instance *inst) {
                 if (strstr(line, "EOF")) break;
                 
                 int temp_id;
-                sscanf(line, "%d %lf %lf", &temp_id, &inst->coord[index].x, &inst->coord[index].y);
+                sscanf_s(line, "%d %lf %lf", &temp_id, &inst->coord[index].x, &inst->coord[index].y);
                 index++;
             }
             break; // Exit the main loop once we've read all coordinates
@@ -127,8 +127,8 @@ void name_instance(instance *inst) {
         char *bar = strrchr(inst->input_file, '/');
         char *point = strrchr(inst->input_file, '.');
 
-        int bar_pos = -1;
-        int point_pos = strlen(inst->input_file);
+        __int64 bar_pos = -1;
+        __int64 point_pos = strlen(inst->input_file);
 
         if (bar) {
             bar_pos = bar - inst->input_file;
@@ -181,7 +181,7 @@ void print_instance(instance *inst) {
 
     printf("\n");
 
-    printf("Timelimit: %d\n", inst->timelimit); 
+    printf("Timelimit: %f\n", inst->timelimit); 
     printf("Verbose: %d\n", inst->verbose); 
 
     printf("\n");
