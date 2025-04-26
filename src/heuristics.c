@@ -208,12 +208,14 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
 
-    int improved = 1; // Flag to track improvements
+    int improved = true; // Flag to track improvements
     while (improved && (get_elapsed_time(t_start) < timelimit)) {
         double best_delta = INFINITY;
         int best_i = -1, best_j = -1;
 
-        improved = 0;
+        improved = false;
+
+        // Get the best delta
         for (int i = 1; i < inst->nnodes; i++) {
             for (int j = i + 1; j < inst->nnodes; j++) {
                 if (get_elapsed_time(t_start) >= timelimit) {
@@ -235,7 +237,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
             
             // Update the solution cost correctly
             temp_sol.cost += best_delta;
-            improved = 1; // Indicate improvement found
+            improved = true; // Indicate improvement found
         }
     }
 

@@ -72,33 +72,15 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 int idx1, idx2, idx3;
                 select_three_indices(inst->nnodes, &idx1, &idx2, &idx3);
 
-                int move = rand() % POSSIBLE_THREE_OPT_MOVES + 1;
-
-                if (inst->verbose >= GOOD) {
-                    printf("Kick %d with %d, %d, %d\n", move, idx1, idx2, idx3);
+                if (inst->verbose >= DEBUG) {
+                    printf("Kick with %d, %d, %d\n", idx1, idx2, idx3);
                 }
                 
-                switch (move)
-                {
-                    case 1:
-                        fixed_three_opt_move1(inst, sol, idx1, idx2, idx3);
-                        break;
-
-                    case 2:
-                        fixed_three_opt_move2(inst, sol, idx1, idx2, idx3);
-                        break;
-                    
-                    case 3:
-                        fixed_three_opt_move1(inst, sol, idx1, idx2, idx3);
-                        break;
-                    
-                    case 4:
-                        fixed_three_opt_move1(inst, sol, idx1, idx2, idx3);
-                        break;
-                    
-                    default:
-                        break;
-                }
+                // Update the solution cost
+                sol->cost += delta3(inst, sol, idx1, idx2, idx3);
+                            
+                // Perform the move
+                shift_segment(sol, inst->nnodes, idx1, idx2, idx3);
                 
                 if (inst->verbose >= GOOD) {
                     check_sol(inst, sol);
@@ -117,6 +99,10 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
 
                 int idx1, idx2, idx3, idx4, idx5;
                 select_five_indices(inst->nnodes, &idx1, &idx2, &idx3, &idx4, &idx5);
+
+                if (inst->verbose >= DEBUG) {
+                    printf("Kick with %d, %d, %d, %d, %d\n", idx1, idx2, idx3,idx4, idx5);
+                }
         
                 // Update the solution cost
                 sol->cost += delta5(inst, sol, idx1, idx2, idx3, idx4, idx5);
@@ -150,74 +136,6 @@ void select_three_indices(const int n, int *idx1, int *idx2, int *idx3) {
     if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
     if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
     if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
-}
-
-void fixed_three_opt_move1(const instance *inst, solution *sol, int idx1, int idx2, int idx3) {
-
-    // Update the solution cost
-    sol->cost += delta3(inst, sol, idx1, idx2, idx3);
-                
-    // Perform the move
-    shift_segment(sol, inst->nnodes, idx1, idx2, idx3);
-
-}
-
-void fixed_three_opt_move2(const instance *inst, solution *sol, int idx1, int idx2, int idx3) {
-
-    // Update the solution cost
-    sol->cost += delta2(inst, sol, idx1+1, idx2);
-                
-    // Perform the move
-    reverse_segment(sol, idx1+1, idx2);
-
-    // Update the solution cost
-    sol->cost += delta2(inst, sol, idx2+1, idx3);
-                
-    // Perform the move
-    reverse_segment(sol, idx2+1, idx3);
-
-}
-
-void fixed_three_opt_move3(const instance *inst, solution *sol, int idx1, int idx2, int idx3) {
-
-    int segmentC_size = idx3 - idx2;
-
-    // Update the solution cost
-    sol->cost += delta3(inst, sol, idx1, idx2, idx3);
-                
-    // Perform the move
-    shift_segment(sol, inst->nnodes, idx1, idx2, idx3);
-
-    idx2 = idx1 + segmentC_size;
-
-    // Update the solution cost
-    sol->cost += delta2(inst, sol, idx1+1, idx2);
-                
-    // Perform the move
-    reverse_segment(sol, idx1+1, idx2);
-
-}
-
-void fixed_three_opt_move4(const instance *inst, solution *sol, int idx1, int idx2, int idx3) {
-
-    int segmentB_size = idx2 - idx1;
-    int segmentC_size = idx3 - idx2;
-
-    // Update the solution cost
-    sol->cost += delta3(inst, sol, idx1, idx2, idx3);
-                
-    // Perform the move
-    shift_segment(sol, inst->nnodes, idx1, idx2, idx3);
-
-    idx2 = idx1 + segmentC_size;
-    idx3 = idx2 + segmentB_size;
-
-    // Update the solution cost
-    sol->cost += delta2(inst, sol, idx2+1, idx3);
-                
-    // Perform the move
-    reverse_segment(sol, idx2+1, idx3);
-
 }
 
 void fixed_five_opt_move(solution *sol, const int nnodes, int idx1, int idx2, int idx3, int idx4, int idx5) {

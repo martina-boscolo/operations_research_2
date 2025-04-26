@@ -32,11 +32,6 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
  */
 void kick(const instance *inst, solution *sol, const int k, const int reps);
 
-void fixed_three_opt_move1(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
-void fixed_three_opt_move2(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
-void fixed_three_opt_move3(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
-void fixed_three_opt_move4(const instance *inst, solution *sol, int idx1, int idx2, int idx3);
-
 /**
  * Rearrange tour segments in the solution following this pattern:
  * A -> D -> !B -> E -> !C -> F (reorder from A-B-C-D-E-F to A-D-!B-E-!C-F)
