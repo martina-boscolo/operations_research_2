@@ -53,7 +53,11 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     if (inst->verbose >= ONLY_INCUMBMENT) {
         plot_stats_in_file(method_name);
     }
-    fclose(f);
+    
+    // Close the file if it was opened
+    if (f != NULL){
+        fclose(f);
+    }
 
 }
 

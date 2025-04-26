@@ -51,16 +51,16 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, BRANCH_AND_CUT) == 0) {
 
         printf("Solving with Branch and Cut method.\n");
-        double timelimit_1 = timelimit * 0.1;
-        double timelimit_2 = timelimit * 0.9;
-        printf("Solving with multi-start Nearest Neighbor method for %lf seconds\n", timelimit_1);
-        multi_start_nn(inst, sol, timelimit_1); 
-        printf("Solving with Branch and Cut method for %lf seconds\n", timelimit_2);
-        branch_and_cut(inst, sol, timelimit_2);
+        if (inst->param1 == 1) {
+            double timelimit1 = timelimit * 0.1;
+            multi_start_nn(inst, sol, timelimit1); 
+        }
+        double timelimit2 = timelimit - get_elapsed_time(inst->t_start);
+        branch_and_cut(inst, sol, timelimit2);
             
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH);
+        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT);
         exit(EXIT_FAILURE);
     }
     
