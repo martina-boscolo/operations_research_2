@@ -19,6 +19,17 @@
 void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
+ * Use the solution as warm up for the branching tree
+ * Note: assume solution is feasible 
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ * @param env CPLEX environment
+ * @param lp CPLEX LP
+ */
+void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp);
+
+/**
  * Obtain the optimal solution of lp w.r.t. instance and lp, store it in xstar, succ, comp, ncomp
  * 
  * @param inst The instance pointer of the problem
@@ -85,7 +96,7 @@ void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *
  * @param sol The solution pointer of the instance
  * @param succ Solution as successors
  */
-void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ);
+void build_solution_from_CPLEX(const instance *inst, solution *sol, int *succ);
 
 /**
  * From solution struct to CPLEX solution, as selected edges

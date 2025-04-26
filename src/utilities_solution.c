@@ -51,7 +51,7 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, BRANCH_AND_CUT) == 0) {
 
         printf("Solving with Branch and Cut method.\n");
-        if (inst->param1 == 1) {
+        if (inst->param1 >= 1) {
             double timelimit1 = timelimit * 0.1;
             multi_start_nn(inst, sol, timelimit1); 
         }

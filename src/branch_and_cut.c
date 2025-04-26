@@ -16,7 +16,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
 
-    if (inst->param1 == 1) warm_up(inst, sol, env, lp);
+    if (inst->param1 >= 1) warm_up(inst, sol, env, lp);
 
     install_callback(inst, env, lp);
     
@@ -57,7 +57,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         
         // Ensure we have a valid solution (single tour)
         if (ncomp == 1) {
-            build_solution_form_CPLEX(inst, &temp_sol, succ);
+            build_solution_from_CPLEX(inst, &temp_sol, succ);
             update_sol(inst, &temp_best_sol, &temp_sol, true);
             
             /*
@@ -132,23 +132,6 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     free_solution(&temp_sol);
 }
 
-void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp) {
-
-    double *xheu = (double *) calloc(inst->ncols, sizeof(double));
-    build_CPLEXsol_from_solution(inst, sol, xheu);
-
-    int *ind = (int *) malloc(inst->ncols * sizeof(int));
-	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
-	int effortlevel = CPX_MIPSTART_NOCHECK;  
-	int beg = 0;
-
-	if (CPXaddmipstarts(env, lp, 1, inst->ncols, &beg, ind, xheu, &effortlevel, NULL)) print_error("CPXaddmipstarts() error");
-
-	free(ind);
-    free(xheu);
-
-}
-
 void install_callback(instance *inst, CPXENVptr env, CPXLPptr lp) {
 
     // Setup callback for lazy constraints (SECs)
@@ -160,6 +143,8 @@ void install_callback(instance *inst, CPXENVptr env, CPXLPptr lp) {
 
 static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle)
 {
+    double t_start = get_time_in_milliseconds();
+
     instance* inst = (instance*) userhandle;
     
     // Thread-local memory allocation
@@ -211,7 +196,9 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
     // Use the build_sol_CPLEX function from tsp_cplex.h
     build_sol_CPLEX(xstar, inst, succ, comp, &ncomp);
     
-    // If more than one component is found, solution has subtours - add subtour elimination constraints
+    // If more than one component is found, solution has subtours 
+    // - add subtour elimination constraints
+    // - post patch heuristic, if asked
     if (ncomp > 1) {
 
         // Find all components and add SECs for all of them
@@ -275,6 +262,18 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
             free(index);
             free(value);
         }*/
+    
+        // Post heuristic
+        if (inst->param1 >= 2) {
+
+            // Get the current time
+            double time;
+            CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_TIME, &time);
+            
+            post_heuristic(inst, context, succ, comp, ncomp, (inst->timelimit - time));
+
+        }
+
     }
     
     // Free memory
@@ -284,7 +283,6 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
     
     return 0;
 }
-
 
 int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const int *comp, const int ncomp, const int tree_node) {
     
@@ -320,6 +318,44 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
 
 	free(value);
     free(index);
+
+    return 0;
+
+}
+
+int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *succ, int *comp, int ncomp, const double timelimit) {
+
+    double t_start = get_time_in_milliseconds();
+
+    solution sol;
+    initialize_solution(&sol);
+    allocate_solution(&sol, inst->nnodes);
+
+    patch_heuristic(inst, &sol, succ, comp, ncomp, (timelimit - get_elapsed_time(t_start)));
+
+    build_solution_from_CPLEX(inst, &sol, succ);
+
+    double *xheu = (double *) calloc(inst->ncols, sizeof(double));
+    if (xheu == NULL) {
+        free_solution(&sol);
+        return 1;
+    }
+
+    build_CPLEXsol_from_solution(inst, &sol, xheu);
+
+    int *ind = (int *) malloc(inst->ncols * sizeof(int));
+    if (xheu == NULL) { 
+        free(xheu);
+        free_solution(&sol);
+        return 1;
+    }
+
+	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
+	if ( CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK) ) print_error("CPXcallbackpostheursoln() error");
+	
+    free(ind);
+    free(xheu);
+    free_solution(&sol);
 
     return 0;
 

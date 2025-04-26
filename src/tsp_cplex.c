@@ -30,6 +30,23 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
 }
 
+void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp) {
+
+    double *xheu = (double *) calloc(inst->ncols, sizeof(double));
+    build_CPLEXsol_from_solution(inst, sol, xheu);
+
+    int *ind = (int *) malloc(inst->ncols * sizeof(int));
+	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
+	int effortlevel = CPX_MIPSTART_NOCHECK;  
+	int beg = 0;
+
+	if (CPXaddmipstarts(env, lp, 1, inst->ncols, &beg, ind, xheu, &effortlevel, NULL)) print_error("CPXaddmipstarts() error");
+
+	free(ind);
+    free(xheu);
+
+}
+
 int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
     
 	// Solve the model
@@ -211,16 +228,17 @@ void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *
     }
 }
 
-void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ) {
-
+void build_solution_from_CPLEX(const instance *inst, solution *sol, int *succ) {
+    
     sol->visited_nodes[0] = 0;
     int s = succ[0];
-    for (int i = 1; i <= inst->nnodes; i++) {
+    for (int i = 1; i <= inst->nnodes+1; i++) {
         sol->visited_nodes[i] = s;
         s = succ[s];
     }
     sol->cost = compute_solution_cost(inst, sol);
     check_sol(inst, sol);
+
 }
 
 void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, double *xheu) {

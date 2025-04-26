@@ -86,7 +86,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
             update_sol(inst, &temp_best_sol, &temp_sol, true);
 
             if (inst->verbose >= GOOD) {
-                sprintf_s(temp_sol.method, METH_NAME_LEN, "PatchHeuristic_subtours_iter%d", iter);
+                sprintf_s(temp_sol.method, METH_NAME_LEN, "PatchHeuristic_iter%d", iter);
                 plot_solution(inst, &temp_sol);
             }
 
@@ -97,7 +97,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     // Check if solution is optimal
     if (CPXgetstat(env, lp) == CPX_STAT_ABORT_TIME_LIM) 
     {   
-        build_solution_form_CPLEX(inst, &temp_sol, succ);
+        build_solution_from_CPLEX(inst, &temp_sol, succ);
         update_sol(inst, &temp_best_sol, &temp_sol, true);
     }  
 
@@ -240,7 +240,7 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
     }
 
     // Obtain the solution that corresponds to the patch
-    build_solution_form_CPLEX(inst, sol, succ);
+    build_solution_from_CPLEX(inst, sol, succ);
 
     // Improve the solution using 2-opt refinement
     two_opt(inst, sol, timelimit - get_elapsed_time(t_start), false);
