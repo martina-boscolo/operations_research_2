@@ -79,11 +79,8 @@ void random_instance_generator(instance *inst) {
 }
 
 void basic_TSPLIB_parser(const char *filename, instance *inst) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        perror("Error opening file");
-        exit(EXIT_FAILURE);
-    }
+    FILE *file;
+    if (fopen_s(&file, filename, "r")) print_error("basic_TSPLIB_parser(): Error opening file");
     
     char line[256]; // To store a line of the file
     inst->nnodes = 0; // Safety measure: avoid using uninitialized value 
@@ -140,12 +137,12 @@ void name_instance(instance *inst) {
             point_pos = point - inst->input_file;
         }
 
-        strncpy(inst->name, inst->input_file + bar_pos + 1, point_pos - bar_pos - 1);
+        strncpy_s(inst->name, INST_NAME_LEN, inst->input_file + bar_pos + 1, point_pos - bar_pos - 1);
 
     } else {
         
         // random instance
-        sprintf(inst->name, "random_n%d_s%d", inst->nnodes, inst->seed);
+        sprintf_s(inst->name, INST_NAME_LEN, "random_n%d_s%d", inst->nnodes, inst->seed);
 
     }
 

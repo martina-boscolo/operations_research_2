@@ -23,40 +23,43 @@
 
 // useful constants
 #define EPSILON 1e-5
+#define METH_NAME_LEN 30
+#define INST_NAME_LEN 50
+#define FILE_NAME_LEN 1000
 
 typedef struct {
 
-    double x;                   // x coordinate
-    double y;                   // y coordinate
+    double x;                           // x coordinate
+    double y;                           // y coordinate
 
 } coordinate;
 
 typedef struct {
 
-    double cost;                // cost of the solution
-    int *visited_nodes;         // sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
-    char method[30];            // name of method to compute the solution
+    double cost;                        // cost of the solution
+    int *visited_nodes;                 // sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
+    char method[METH_NAME_LEN];         // name of method to compute the solution
 
 } solution;
 
 typedef struct {
 
-    int nnodes;                 // how many nodes the graph has
-    coordinate *coord;          // (x,y) coordinate of the nodes
-    double *costs;              // array of distances between nodes
-    solution *best_solution;    // best current solution
+    int nnodes;                         // how many nodes the graph has
+    coordinate *coord;                  // (x,y) coordinate of the nodes
+    double *costs;                      // array of distances between nodes
+    solution *best_solution;            // best current solution
 
-    char name[50];              // name of instance
-    int seed;                   // random seed used to generate random instance
-    char input_file[1000];      // input file 
-    char asked_method[30];      // method to compute the solution
-    int param1;                  // parameter for the method
-    int param2;                 // second parameter for the method
+    char name[INST_NAME_LEN];           // name of instance
+    int seed;                           // random seed used to generate random instance
+    char input_file[FILE_NAME_LEN];     // input file 
+    char asked_method[METH_NAME_LEN];   // method to compute the solution
+    int param1;                         // parameter for the method
+    int param2;                         // second parameter for the method
 
-    int verbose;                // printing level
-    double timelimit;           // numer of seconds to find the solution, if < 0 means no time limit
-    double t_start;             // initial time
-    int ncols;               // number of columns in the model
+    int verbose;                        // printing level
+    double timelimit;                   // numer of seconds to find the solution, if < 0 means no time limit
+    double t_start;                     // initial time
+    int ncols;                          // number of columns in the model
 
 } instance;
 

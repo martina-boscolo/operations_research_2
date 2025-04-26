@@ -22,7 +22,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
     for (int i = 1; i < argc; i++) {
 
         if (strcmp(argv[i], "-file") == 0 || strcmp(argv[i], "-f") == 0)                                                                     // input file
-            { strcpy(inst->input_file,argv[++i]); continue; }
+            { strncpy_s(inst->input_file, FILE_NAME_LEN, argv[++i], _TRUNCATE); continue; }
         if (strcmp(argv[i], "-n") == 0)                                                                         // number of nodes
             { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; } continue; }          
         if (strcmp(argv[i], "-seed") == 0)                                                                      // random seed
@@ -32,7 +32,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "-verbose") == 0)                                                                   // verbosity level
             { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
-            { strcpy(inst->asked_method,argv[++i]); continue; }
+            { strncpy_s(inst->asked_method, METH_NAME_LEN, argv[++i], _TRUNCATE); continue; }
         if (strcmp(argv[i], "-param") == 0 || strcmp(argv[i], "-param1") == 0)                                                                    // first parameter for the method          
             {  inst->param1 = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-param2") == 0)                                                                    // second parameter for the method          

@@ -1,6 +1,6 @@
 #include "branch_and_cut.h"
 
-void branch_and_cut(instance *inst, solution *sol, const double timelimit)
+void branch_and_cut(const instance *inst, solution *sol, const double timelimit)
 {
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -29,7 +29,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     CPXsetintparam(env, CPX_PARAM_PROBE, 2);
     CPXsetintparam(env, CPX_PARAM_HEURFREQ, 10);
     
-    inst->ncols = CPXgetnumcols(env, lp);
+    inst->ncols == CPXgetnumcols(env, lp);
 
     double *xstar = (double *) malloc(inst->ncols * sizeof(double));
     if (xstar == NULL) print_error("branch_and_cut(): Impossible to allocate memory for xstar.");
@@ -40,14 +40,12 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         print_error("CPXcallbacksetfunc() error");
     
     // Set up file output for statistics if needed
-    FILE* f = NULL;
+    FILE *f;
     if (inst->verbose >= ONLY_INCUMBMENT) {
-        char filename[65];
-        sprintf(filename, "results/branch_and_cut.csv");
-        f = fopen(filename, "w+");
-        if (f != NULL) {
-            fprintf(f, "time,objective,elapsed_ms\n");
-        }
+        char filename[FILE_NAME_LEN];
+        sprintf_s(filename, FILE_NAME_LEN, "results/branch_and_cut.csv");
+        if(fopen_s(&f, filename, "w+")) print_error("branch_and_cut(): Cannot open file");
+        fprintf(f, "time,objective,elapsed_ms\n");
     }
 
     // Check remaining time and set time limit
@@ -108,7 +106,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
             }
         }
         
-        strcpy(temp_best_sol.method, "BranchAndCut");
+        strncpy_s(temp_best_sol.method, METH_NAME_LEN, "BranchAndCut", _TRUNCATE);
         
         // Output final stats
         if (inst->verbose >= ONLY_INCUMBMENT && f != NULL) {
@@ -243,7 +241,7 @@ static int CPXPUBLIC my_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contexti
             double rhs = 0.0;
             
             // Use the build_SEC function from tsp_cplex.h
-            build_SEC(inst, comp, ncomp, c+1, index, value, &nnz, &rhs);
+            build_SEC(inst, comp, c+1, index, value, &nnz, &rhs);
 
             // Add the SEC to the model
             if (nnz > 0)

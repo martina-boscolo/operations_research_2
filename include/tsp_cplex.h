@@ -7,6 +7,8 @@
 #include <ilcplex/cplex.h>
 #include <stdbool.h>
 
+#define CONS_NAME_LEN 100
+
 /**
  * Initialize the CPLEX enviroment and build the base model of TSP (w/o SEC's)
  * 
@@ -35,14 +37,13 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
  * 
  * @param inst The instance pointer of the problem
  * @param comp Component associated for each nodes
- * @param ncomp Number of components in the solution
  * @param sec_comp Number of connected component
  * @param index Index for non zero coefficients
  * @param value Value for non zero coefficients
  * @param nnz Number of non-zero coefficients
  * @param rhs Right hand side
  */
-void build_SEC(const instance *inst,  const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
+void build_SEC(const instance *inst,  const int *comp, const int sec_comp, int *index, double *value, int *nnz, double *rhs);
 
 /**
  * Return the index of CPLEX solution array from the edge between two nodes

@@ -152,7 +152,7 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start)
         check_sol(inst, &temp_sol);
     }
 
-    strcpy(temp_sol.method, NEAREST_NEIGHBOR);
+    strncpy_s(temp_sol.method, METH_NAME_LEN, NEAREST_NEIGHBOR, _TRUNCATE);
     copy_sol(sol, &temp_sol, inst->nnodes);
     free_solution(&temp_sol);
 }
@@ -173,7 +173,7 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
         elapsed_time = get_elapsed_time(t_start);
 
         if (inst->verbose >= GOOD) {
-            printf("Remaining time %d\n", timelimit-elapsed_time);
+            printf("Remaining time %f\n", timelimit-elapsed_time);
         }
         
         if (elapsed_time >= timelimit) { // Stop if time limit is reached
@@ -194,7 +194,7 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
         update_sol(inst, &temp_best_sol, &temp_sol, true);
     }
 
-    strcpy(temp_best_sol.method, NN_TWOOPT);
+    strncpy_s(temp_best_sol.method, METH_NAME_LEN, NN_TWOOPT, _TRUNCATE);
     update_sol(inst, sol, &temp_best_sol, false);
     free_solution(&temp_sol);
     free_solution(&temp_best_sol);
@@ -245,7 +245,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
         check_sol(inst, &temp_sol);
     }
 
-    strcpy(temp_sol.method, TWO_OPT);
+    strncpy_s(temp_sol.method, METH_NAME_LEN, TWO_OPT, _TRUNCATE);
     update_sol(inst, sol, &temp_sol, print);
     free_solution(&temp_sol);
 }

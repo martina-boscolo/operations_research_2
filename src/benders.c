@@ -23,12 +23,13 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
     if (succ == NULL || comp == NULL || xstar == NULL) print_error("benders_loop(): Impossible to allocate memory.");
 
-    FILE* f;
+    FILE *f;
     if (inst->verbose >= ONLY_INCUMBMENT) {
-        char filename[65];
-        sprintf(filename, "results/benders.csv");
-        f = fopen(filename, "w+");
+        char filename[FILE_NAME_LEN];
+        sprintf_s(filename, FILE_NAME_LEN, "results/benders.csv");
+        if (fopen_s(&f, filename, "w+")) print_error("benders_loop(): Cannot open file");
     }
+
     do {
         
         iter++;
@@ -77,7 +78,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
             update_sol(inst, &temp_best_sol, &temp_sol, true);
 
             if (inst->verbose >= GOOD) {
-                sprintf(temp_sol.method, "PatchHeuristic_subtours_iter%d", iter);
+                sprintf_s(temp_sol.method, METH_NAME_LEN, "PatchHeuristic_subtours_iter%d", iter);
                 plot_solution(inst, &temp_sol);
             }
 
@@ -87,7 +88,7 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
 
     build_solution_form_CPLEX(inst, &temp_sol, succ);
     update_sol(inst, &temp_best_sol, &temp_sol, true);
-    sprintf(temp_best_sol.method, BENDERS);
+    sprintf_s(temp_best_sol.method, METH_NAME_LEN, BENDERS);
 
     update_sol(inst, sol, &temp_best_sol, false);
 
@@ -128,9 +129,9 @@ void add_SECs(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp,
 
     for (int k=1; k<=ncomp; k++) {
         
-        sprintf(cname[0], "%dSEC(%d)", iter, k); 
+        sprintf_s(cname[0], CONS_NAME_LEN, "%dSEC(%d)", iter, k); 
 
-        build_SEC(inst, comp, ncomp, k, index, value, &nnz, &rhs);
+        build_SEC(inst, comp, k, index, value, &nnz, &rhs);
 
         if ( CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, index, value, NULL, &cname[0]) ) print_error(" wrong CPXaddrows [SEC]");
 

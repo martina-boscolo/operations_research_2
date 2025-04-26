@@ -151,14 +151,14 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
     int max_tenure = (int)(1 + 0.6 * inst->nnodes); // Max number of iterations node remains tabu
     init_tabu_params(&params, inst->nnodes, min_tenure, max_tenure, inst->param1);
 
-    char filename[50];
-    sprintf(filename, "TS_p%d", inst->param1);
-    FILE *f = NULL;
+    char filename[FILE_NAME_LEN];
+    sprintf_s(filename, FILE_NAME_LEN, "TS_p%d", inst->param1);
+    FILE *f;
     if (inst->verbose >= ONLY_INCUMBMENT)
     {
-        char filename_results[50];
-        sprintf(filename_results, "results/%s.csv", filename);
-        f = fopen(filename_results, "w+");
+        char filename_results[FILE_NAME_LEN];
+        sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
+        if (fopen_s(&f, filename_results, "w+")) print_error("tabu_search(): Cannot open file");
     }
 
     // Main loop
@@ -183,7 +183,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         params.current_iter++;
     }
 
-    sprintf(sol->method, filename);
+    sprintf_s(sol->method, METH_NAME_LEN, filename);
 
     if (inst->verbose >= ONLY_INCUMBMENT){
         plot_stats_in_file(filename);

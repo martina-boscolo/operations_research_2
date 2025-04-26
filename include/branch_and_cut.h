@@ -12,7 +12,7 @@
 
 #define BRANCH_AND_CUT "C"
 
-void branch_and_cut(const instance *inst, solution *sol, const double timelimit);
+void branch_and_cut(instance *inst, solution *sol, const double timelimit);
 
 int CPXPUBLIC my_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle );
 

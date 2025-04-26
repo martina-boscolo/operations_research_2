@@ -48,7 +48,7 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
 
 }
 
-void build_SEC(const instance *inst, const int *comp, const int ncomp, const int sec_comp, int *index, double *value, int *nnz, double *rhs) {
+void build_SEC(const instance *inst, const int *comp, const int sec_comp, int *index, double *value, int *nnz, double *rhs) {
 
     *nnz = 0;
     *rhs = -1;
@@ -91,14 +91,14 @@ void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp)
     char binary = 'B'; 
     
     char **cname = (char **) calloc(1, sizeof(char*));
-    cname[0] = (char *) calloc(100, sizeof(char));
+    cname[0] = (char *) calloc(CONS_NAME_LEN, sizeof(char));
 
     // add binary var.s x(i,j) for i < j  
     for ( int i = 0; i < inst->nnodes; i++ )
     {
         for ( int j = i+1; j < inst->nnodes; j++ ) 
         {
-            sprintf(cname[0], "x(%d,%d)", i+1,j+1);
+            sprintf_s(cname[0], CONS_NAME_LEN, "x(%d,%d)", i+1,j+1);
             double obj = cost(i,j,inst); // cost == distance   
             double lb = 0.0;
             double ub = 1.0;
@@ -116,7 +116,7 @@ void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp)
     {
         double rhs = 2.0;
         char sense = 'E'; // Equality constraint 
-        sprintf(cname[0], "degree(%d)", h+1); 
+        sprintf_s(cname[0], CONS_NAME_LEN, "degree(%d)", h+1); 
         int nnz = 0;
         for ( int i = 0; i < inst->nnodes; i++ )
         {

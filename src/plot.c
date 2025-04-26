@@ -91,8 +91,8 @@ void plot_stats_in_file(const char* filename){
     
     FILE *plot = open_plot();
     plot_in_file(plot, filename);
-    char filepath[50];
-    sprintf(filepath, "results/%s.csv", filename);
+    char filepath[FILE_NAME_LEN];
+    sprintf_s(filepath, FILE_NAME_LEN, "results/%s.csv", filename);
     plot_cost_evolution(plot, filepath);
     free_plot(plot);
 
@@ -103,8 +103,8 @@ void plot_stats_in_file_base(const char* filename){
     
     FILE *plot = open_plot();
     plot_in_file(plot, filename);
-    char filepath[50];
-    sprintf(filepath, "results/%s.csv", filename);
+    char filepath[FILE_NAME_LEN];
+    sprintf_s(filepath, FILE_NAME_LEN, "results/%s.csv", filename);
     plot_cost_evolution_base(plot, filepath);
     free_plot(plot);
 
@@ -113,8 +113,8 @@ void plot_stats_in_file_base(const char* filename){
 void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, int nsubtours, int iter) {
     FILE *gnuplot = open_plot();
 
-    char filename[100];
-    sprintf(filename, "%s_subtours_iter%d", inst->name, iter);
+    char filename[FILE_NAME_LEN];
+    sprintf_s(filename, FILE_NAME_LEN, "%s_subtours_iter%d", inst->name, iter);
     plot_in_file(gnuplot, filename);
 
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7");

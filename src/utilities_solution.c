@@ -157,7 +157,7 @@ void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool
             printf("Incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol1->cost, sol2->cost);
         }
         sol1->cost = sol2->cost;
-        strcpy(sol1->method, sol2->method);
+        strncpy_s(sol1->method, METH_NAME_LEN, sol2->method, _TRUNCATE);
         memcpy(sol1->visited_nodes, sol2->visited_nodes, (inst->nnodes + 1) * sizeof(int));
     }
 }
@@ -166,7 +166,7 @@ void copy_sol(solution *sol1, const solution *sol2, const int nnodes) {
     initialize_solution(sol1);
     allocate_solution(sol1, nnodes);
     sol1->cost = sol2->cost;
-    strcpy(sol1->method, sol2->method);
+    strncpy_s(sol1->method, METH_NAME_LEN, sol2->method, _TRUNCATE);
     memcpy(sol1->visited_nodes, sol2->visited_nodes, (nnodes + 1) * sizeof(int));
 }
 
@@ -176,8 +176,8 @@ void plot_solution(const instance *inst, const solution *sol) {
     FILE *gnuplot = open_plot();
 
     // in a file
-    char filename[50];
-    sprintf(filename, "%s_%s", inst->name, sol->method);
+    char filename[FILE_NAME_LEN];
+    sprintf_s(filename, FILE_NAME_LEN, "%s_%s", inst->name, sol->method);
     plot_in_file(gnuplot, filename);
 
     // specify the customization
