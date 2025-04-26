@@ -20,7 +20,7 @@
  * @param sol The solution pointer of the instance
  * @param timelimit Time limit for the algorithm
  */
-void benders_loop(const instance *inst, solution *sol, const double timelimit);
+void benders_loop(instance *inst, solution *sol, const double timelimit);
 
 /**
  * For each connected component add the correspondent SEC to the lp model

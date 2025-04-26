@@ -1,14 +1,14 @@
 #include "benders.h"
 
-void benders_loop(const instance *inst, solution *sol, const double timelimit) {
+void benders_loop(instance *inst, solution *sol, const double timelimit) {
+
+    double t_start = get_time_in_milliseconds();
 
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
 
     solution temp_best_sol;
     copy_sol(&temp_best_sol, sol, inst->nnodes);
-
-    double t_start = get_time_in_milliseconds();
 
     // Open CPLEX model
     CPXENVptr env;
@@ -18,11 +18,12 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
     // Instantiate memory
     int *succ = (int *) malloc(inst->nnodes * sizeof(int));
     int *comp = (int *) malloc(inst->nnodes * sizeof(int));
-    double *xstar = (double *) malloc(CPXgetnumcols(env, lp) * sizeof(double));
+    double *xstar = (double *) malloc(inst->ncols * sizeof(double));
+
+    if (succ == NULL || comp == NULL || xstar == NULL) print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
+
     int ncomp = -1, iter = 0;
     double z = 0.0;
-
-    if (succ == NULL || comp == NULL || xstar == NULL) print_error("benders_loop(): Impossible to allocate memory.");
 
     // Save results in a file, if required
     FILE *f;
@@ -120,6 +121,11 @@ void benders_loop(const instance *inst, solution *sol, const double timelimit) {
         plot_stats_in_file_base("benders");
     }
 
+    // Close the file if it was opened
+    if (f != NULL){
+        fclose(f);
+    }
+    
 }
 
 void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const int *comp, const int ncomp, const int iter) {
@@ -129,16 +135,17 @@ void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const i
     char sense = 'L'; 
 
     char **cname = (char **) calloc(1, sizeof(char*));
-    cname[0] = (char *) calloc(100, sizeof(char));
+    if (cname == NULL) print_error("Impossible to allocate memory, add_SECs_to_model()");
+    cname[0] = (char *) calloc(CONS_NAME_LEN, sizeof(char));
     
-    int *index = (int *) malloc(CPXgetnumcols(env,lp) * sizeof(int));
-    double *value = (double *) malloc(CPXgetnumcols(env,lp) * sizeof(double)); 
+    int *index = (int *) malloc(inst->ncols * sizeof(int));
+    double *value = (double *) malloc(inst->ncols * sizeof(double)); 
 
     int nnz;
     double rhs;
 
-	if (cname==NULL || cname[0]==NULL || index==NULL || value==NULL) 
-		print_error("Impossible to allocate memory, build_SECs()");
+	if (cname[0]==NULL || index==NULL || value==NULL) 
+		print_error("Impossible to allocate memory, add_SECs_to_model()");
 
     // For each connected component add the correspondent SEC to the model
     for (int k=1; k<=ncomp; k++) {
