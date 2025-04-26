@@ -16,10 +16,10 @@
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-void initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
+void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
- * Obtain the optimal solution of lp w.r.t. instance, store it in xstar, succ, comp, ncomp
+ * Obtain the optimal solution of lp w.r.t. instance and lp, store it in xstar, succ, comp, ncomp
  * 
  * @param inst The instance pointer of the problem
  * @param env CPLEX environment
@@ -28,8 +28,10 @@ void initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp);
  * @param succ Solution as successors
  * @param comp Component associated for each nodes
  * @param ncomp Number of components in the solution
+ * 
+ * @return 0 if the solution is optimal, CPLEX status otherwise
  */
-void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
+int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
 
 /**
  * Build the SEC correspondent to the given connected component (identified with sec_comp)
@@ -62,7 +64,7 @@ int xpos(int i, int j, const instance *inst);
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp);
+void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
 
 /**
  * Build the solution based on the edges selected in xstar
@@ -84,6 +86,16 @@ void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *
  * @param succ Solution as successors
  */
 void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ);
+
+/**
+ * From solution struct to CPLEX solution, as selected edges
+ * Note: assuming that xheu contains all zeros
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ * @param xheu Solution as selected edges
+ */
+void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, double *xheu);
 
 /**
  * Deallocate memory associated with CPLEX

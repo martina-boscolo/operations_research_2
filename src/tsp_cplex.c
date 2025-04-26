@@ -2,7 +2,7 @@
 
 #define DEBUG_CPLEX
 
-void initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp) {
+void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
     // Open CPLEX model
     int error;
@@ -18,18 +18,25 @@ void initialize_CPLEX(const instance *inst, CPXENVptr *env, CPXLPptr *lp) {
         print_error("Failed to create CPLEX problem object.");
     }
 
-    //if (CPXsetdblparam(env, CPX_PARAM_EPAGAP, 1e-9)) print_error("CPXsetdblparam(): Cannot set relative tollerance");
-    //if (CPXsetdblparam(env, CPX_PARAM_EPGAP, 1e-9)) print_error("CPXsetdblparam(): Cannot set absolute tollerance");
+    // Set CPLEX parameters for better performance
+    CPXsetdblparam(*env, CPX_PARAM_EPGAP, 1e-9);
+    CPXsetintparam(*env, CPX_PARAM_MIPEMPHASIS, CPX_MIPEMPHASIS_BALANCED);
+    CPXsetintparam(*env, CPX_PARAM_PROBE, 2);
+    CPXsetintparam(*env, CPX_PARAM_HEURFREQ, 10);
+    CPXsetintparam(*env, CPX_PARAM_THREADS, 1);
 
     // Build the model
     build_model_CPLEX(inst, *env, *lp);
 
 }
 
-void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
+int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp) {
     
 	// Solve the model
 	if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
+
+    int status = CPXgetstat(env, lp);
+    if (!(status == CPXMIP_OPTIMAL || status == CPXMIP_OPTIMAL_TOL || status == CPXMIP_TIME_LIM_FEAS)) return status;
 
     // Retrieve the optimal solution
     int ncols = CPXgetnumcols(env, lp);
@@ -45,6 +52,8 @@ void get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp
             printf("Node %d -> Successor: %d, Component: %d\n", i + 1, succ[i] + 1, comp[i]);
         }
     }
+
+    return 0;
 
 }
 
@@ -84,7 +93,7 @@ int xpos(int i, int j, const instance *inst)
     return pos;
 }
 
-void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp)
+void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp)
 {    
 
     int izero = 0;
@@ -137,9 +146,11 @@ void build_model_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp)
     free(cname[0]);
     free(cname);
 
+    inst->ncols = CPXgetnumcols(env, lp);
+
 }
 
-void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *comp, int *ncomp) // build succ() and comp() wrt xstar()...
+void build_sol_CPLEX(const double *xstar, const instance *inst, int *succ, int *comp, int *ncomp)
 {   
 
 #ifdef DEBUG_CPLEX
@@ -210,6 +221,16 @@ void build_solution_form_CPLEX(const instance *inst, solution *sol, int *succ) {
     }
     sol->cost = compute_solution_cost(inst, sol);
     check_sol(inst, sol);
+}
+
+void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, double *xheu) {
+
+    for ( int i = 0; i < inst->nnodes; i++ ) {
+
+        xheu[xpos(sol->visited_nodes[i],sol->visited_nodes[i+1],inst)] = 1.0;
+
+    }
+
 }
 
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp) {
