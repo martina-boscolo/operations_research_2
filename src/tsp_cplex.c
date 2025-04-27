@@ -23,7 +23,7 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
     CPXsetintparam(*env, CPX_PARAM_MIPEMPHASIS, CPX_MIPEMPHASIS_BALANCED);
     CPXsetintparam(*env, CPX_PARAM_PROBE, 2);
     CPXsetintparam(*env, CPX_PARAM_HEURFREQ, 10);
-    CPXsetintparam(*env, CPX_PARAM_THREADS, 1);
+    //CPXsetintparam(*env, CPX_PARAM_THREADS, 1); //only for debug
 
     // Build the model
     build_model_CPLEX(inst, *env, *lp);
