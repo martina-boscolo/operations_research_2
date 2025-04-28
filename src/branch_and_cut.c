@@ -267,8 +267,7 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
         if (inst->param1 >= 2) {
 
             // Get the current time
-            double time;
-            CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_TIME, &time);
+            double time = get_elapsed_time(inst->t_start);
             
             post_heuristic(inst, context, succ, comp, ncomp, (inst->timelimit - time));
 
