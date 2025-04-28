@@ -32,6 +32,10 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
 void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp) {
 
+    if (inst->verbose >= GOOD) {
+        printf("Warmup with cost %lf\n", sol->cost);
+    }
+
     double *xheu = (double *) calloc(inst->ncols, sizeof(double));
     build_CPLEXsol_from_solution(inst, sol, xheu);
 

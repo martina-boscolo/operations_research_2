@@ -309,10 +309,6 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
         if (CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &izero, index, value)) 
             print_error("CPXcallbackrejectcandidate() error");
 
-        if (inst->verbose >= DEBUG)
-        {
-            printf("   --> Node %d: Added SEC for component %d\n", tree_node, k);
-        }
     }
 
 	free(value);
@@ -351,7 +347,13 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
 
 	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
 	if ( CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK) ) print_error("CPXcallbackpostheursoln() error");
-	else printf("   --> Node %d: Post heuristic solution with cost %lf\n", inst->ncols, sol.cost);
+	
+    if (inst->verbose >= GOOD) {
+        int mynode = -1;
+        CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
+        printf("   --> Node %d: Post heuristic solution with cost %lf\n", mynode, sol.cost);
+    }
+    
     free(ind);
     free(xheu);
     free_solution(&sol);

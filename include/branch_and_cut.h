@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <ilcplex/cplex.h>
 
-#define BRANCH_AND_CUT "C"
+#define BRANCH_AND_CUT "BC"
 
 void branch_and_cut(instance *inst, solution *sol, const double timelimit);
 
