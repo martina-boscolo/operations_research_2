@@ -300,8 +300,7 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
         if (inst->param1 >= 2) {
 
             // Get the current time
-            double time;
-            CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_TIME, &time);
+            double time = get_elapsed_time(inst->t_start);
             
             post_heuristic(inst, context, succ, comp, ncomp, (inst->timelimit - time));
 
@@ -401,7 +400,13 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
 
 	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
 	if ( CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK) ) print_error("CPXcallbackpostheursoln() error");
-	else printf("   --> Node %d: Post heuristic solution with cost %lf\n", inst->ncols, sol.cost);
+	
+    if (inst->verbose >= GOOD) {
+        int mynode = -1;
+        CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
+        printf("   --> Node %d: Post heuristic solution with cost %lf\n", mynode, sol.cost);
+    }
+    
     free(ind);
     free(xheu);
     free_solution(&sol);
