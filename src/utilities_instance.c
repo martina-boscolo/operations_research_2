@@ -124,22 +124,29 @@ void name_instance(instance *inst) {
         // file instance
 
         // search for the name of the file without path and extension
-        char *bar = strrchr(inst->input_file, '/');
+        char *fslash = strrchr(inst->input_file, '/');    // Forward slash for Unix paths
+        char *bslash = strrchr(inst->input_file, '\\');   // Backslash for Windows paths
         char *point = strrchr(inst->input_file, '.');
 
-        __int64 bar_pos = -1;
+        __int64 slash_pos = -1;
         __int64 point_pos = strlen(inst->input_file);
 
-        if (bar) {
-            bar_pos = bar - inst->input_file;
+        // Use the last slash/backslash found (whichever is furthest in the string)
+        if (fslash && bslash) {
+            slash_pos = (fslash > bslash) ? (fslash - inst->input_file) : (bslash - inst->input_file);
+        } else if (fslash) {
+            slash_pos = fslash - inst->input_file;
+        } else if (bslash) {
+            slash_pos = bslash - inst->input_file;
         }
+
         if (point) {
             point_pos = point - inst->input_file;
         }
 
-        strncpy_s(inst->name, INST_NAME_LEN, inst->input_file + bar_pos + 1, point_pos - bar_pos - 1);
+        strncpy_s(inst->name, INST_NAME_LEN, inst->input_file + slash_pos + 1, point_pos - slash_pos - 1);
 
-    } else {
+        } else {
         
         // random instance
         sprintf_s(inst->name, INST_NAME_LEN, "random_n%d_s%d", inst->nnodes, inst->seed);
