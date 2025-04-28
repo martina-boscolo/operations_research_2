@@ -31,7 +31,7 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
-        nearest_neighbor(inst, sol, 0);
+        nearest_neighbor(inst, sol, rand() % inst->nnodes);
         if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = DEAULT_K; }
         if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
         double elapsed_time = get_elapsed_time(inst->t_start);
@@ -40,7 +40,7 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
 
         printf("Solving with TABU_SEARCH method.\n");
-        nearest_neighbor(inst, sol, 0);
+        nearest_neighbor(inst, sol, rand() % inst->nnodes);
         tabu_search(inst, sol, timelimit);
         
     } else if (strcmp(inst->asked_method, BENDERS) == 0) {

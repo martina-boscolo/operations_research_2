@@ -352,7 +352,7 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
 
 	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
 	if ( CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK) ) print_error("CPXcallbackpostheursoln() error");
-	
+	else printf("   --> Node %d: Post heuristic solution with cost %lf\n", inst->ncols, sol.cost);
     free(ind);
     free(xheu);
     free_solution(&sol);
