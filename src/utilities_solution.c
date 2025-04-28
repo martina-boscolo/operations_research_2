@@ -166,7 +166,8 @@ void copy_sol(solution *sol1, const solution *sol2, const int nnodes) {
     initialize_solution(sol1);
     allocate_solution(sol1, nnodes);
     sol1->cost = sol2->cost;
-    strncpy_s(sol1->method, METH_NAME_LEN, sol2->method, _TRUNCATE);
+    strncpy(sol1->method, sol2->method, METH_NAME_LEN - 1);
+sol1->method[METH_NAME_LEN - 1] = '\0'; // ensure null-termination
     memcpy(sol1->visited_nodes, sol2->visited_nodes, (nnodes + 1) * sizeof(int));
 }
 
@@ -234,10 +235,10 @@ void allocate_solution(solution *sol, const int nnodes) {
 }
 
 void free_solution(solution *sol) {
-
+    if (sol == NULL) return;
+    
     if (sol->visited_nodes != NULL) {
         free(sol->visited_nodes);
         sol->visited_nodes = NULL;
     }
-
 }

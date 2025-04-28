@@ -4,11 +4,13 @@
 #include "tsp.h"
 #include "tsp_cplex.h"
 #include "utilities.h"
+#include "../concorde/mincut.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ilcplex/cplex.h>
+
 
 #define BRANCH_AND_CUT "C"
 
@@ -60,4 +62,9 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
  */
 int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *succ, int *comp, int ncomp, const double timelimit);
 
+static int CPXPUBLIC callback_branch_and_cut(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle);
+static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle);
+int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr context, double *xstar);
+
+int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pass_param);
 #endif // BRANCH_AND_CUT_H

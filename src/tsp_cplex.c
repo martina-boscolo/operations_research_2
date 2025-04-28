@@ -254,7 +254,12 @@ void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, dou
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp) {
 
     // Free and close CPLEX model
-    CPXfreeprob(*env, lp);
-    CPXcloseCPLEX(env);
-
+    if (env != NULL && *env != NULL) {
+        if (lp != NULL && *lp != NULL) {
+            CPXfreeprob(*env, lp);
+            *lp = NULL;
+        }
+        CPXcloseCPLEX(env);
+        *env = NULL;
+    }
 }
