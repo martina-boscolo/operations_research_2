@@ -143,7 +143,7 @@ void check_sol(const instance *inst, solution *sol)
         exit(EXIT_FAILURE);
     }
     // Solution is valid
-    if (inst->verbose >= DEBUG) {
+    if (inst->verbose >= DEBUG_V) {
         printf("Solution is valid\n");
     }
 

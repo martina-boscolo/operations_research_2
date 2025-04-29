@@ -24,7 +24,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
-        if (inst->verbose >= DEBUG){
+        if (inst->verbose >= DEBUG_V){
             printf("Time left: %f \n", timelimit - elapsed_time);
         }
 
@@ -76,7 +76,7 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 int idx1, idx2, idx3;
                 select_three_indices(inst->nnodes, &idx1, &idx2, &idx3);
 
-                if (inst->verbose >= DEBUG) {
+                if (inst->verbose >= DEBUG_V) {
                     printf("Kick with %d, %d, %d\n", idx1, idx2, idx3);
                 }
                 
@@ -104,7 +104,7 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 int idx1, idx2, idx3, idx4, idx5;
                 select_five_indices(inst->nnodes, &idx1, &idx2, &idx3, &idx4, &idx5);
 
-                if (inst->verbose >= DEBUG) {
+                if (inst->verbose >= DEBUG_V) {
                     printf("Kick with %d, %d, %d, %d, %d\n", idx1, idx2, idx3,idx4, idx5);
                 }
         

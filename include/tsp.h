@@ -19,7 +19,7 @@
 // verbose levels
 #define ONLY_INCUMBMENT 10 
 #define GOOD 50
-#define DEBUG 100
+#define DEBUG_V 100
 
 // useful constants
 #define EPSILON 1e-5

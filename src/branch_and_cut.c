@@ -23,19 +23,6 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
 
     install_callback(inst, env, lp);
 
-    // Set up file output for statistics if needed
-    FILE *f = NULL; // Initialize to NULL
-    if (inst->verbose >= DEBUG)
-    {
-        char filename[FILE_NAME_LEN];
-        sprintf(filename, "results/branch_and_cut.csv");
-        f = fopen(filename, "w+");
-        fprintf(f, "time,objective,elapsed_ms\n");
-        // Initialize mutex when first needed 
-
-
-    }
-
     // Check remaining time and set time limit
     double residual_time = timelimit - get_elapsed_time(t_start);
     if (residual_time <= 0)
@@ -44,8 +31,6 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         free_CPLEX(&env, &lp);
         free_solution(&temp_best_sol);
         free_solution(&temp_sol);
-        if (f != NULL)
-            fclose(f);
         return;
     }
     CPXsetdblparam(env, CPX_PARAM_TILIM, residual_time);
@@ -71,34 +56,14 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         {
             build_solution_from_CPLEX(inst, &temp_sol, succ);
             update_sol(inst, &temp_best_sol, &temp_sol, true);
-            
-
-            /*
-            // Apply optional improvement with 2-opt if time remains
-            residual_time = timelimit - get_elapsed_time(t_start);
-            if (residual_time > 0) {
-                two_opt(inst, &temp_best_sol, residual_time, false);
-            }*/
         }
         else
         {
-
-            fprintf(stderr, "[WARNING] Final solution has %d components instead of 1\n", ncomp);
-
-        
+            fprintf(stderr, "[WARNING] Final solution has %d components instead of 1\n", ncomp);  
         }
 
         strncpy(temp_best_sol.method, "BranchAndCut", METH_NAME_LEN - 1);
         temp_best_sol.method[METH_NAME_LEN - 1] = '\0'; // Ensure null-termination
-
-        // Output final stats
-        if (inst->verbose >= DEBUG && f != NULL)
-        {
-            double obj_val;
-            CPXgetobjval(env, lp, &obj_val);
-            fprintf(f, "final,%f,%f\n", obj_val, get_time_in_milliseconds() - t_start);
-            fflush(f);  // Force write to disk
-        }
 
         // Optional visualization if verbose mode is on
         if (inst->verbose >= GOOD)
@@ -115,7 +80,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         printf("Time limit reached without finding a feasible solution.\n");
 
         // Keep input solution as is (which could be a heuristic solution)
-        if (inst->verbose >= DEBUG)
+        if (inst->verbose >= DEBUG_V)
         {
             printf("Keeping original solution as no better solution was found.\n");
         }
@@ -127,12 +92,9 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     }
 
     // Free allocated memory
-    if (xstar != NULL)
-        free(xstar);
-    if (comp != NULL)
-        free(comp);
-    if (succ != NULL)
-        free(succ);
+    free(xstar);
+    free(comp);
+    free(succ);
 
     // Free and close CPLEX model
     int status = CPXcallbacksetfunc(env, lp, 0, NULL, NULL);
@@ -141,11 +103,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
         printf("Warning: Failed to unregister callbacks, status %d\n", status);
     }
     free_CPLEX(&env, &lp);
-    if (f != NULL)
-    {
-        fflush(f); // Ensure all buffered data is written
-        fclose(f);
-    }
+
     //THIS IS A MEMORY LEAK, DO NOT FREE THE SOLUTION HERE
     //  free_solution(&temp_best_sol);
     //  free_solution(&temp_sol);
@@ -154,13 +112,16 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
 
 static int CPXPUBLIC callback_branch_and_cut(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle)
 {
+    instance *inst = (instance *) userhandle;
 	
 	switch (contextid)
 	{
 	case CPX_CALLBACKCONTEXT_CANDIDATE:
 		return lazy_callback(context, contextid, userhandle);
 	case CPX_CALLBACKCONTEXT_RELAXATION:
-		return relaxation_callback(context, contextid, userhandle);
+        if (inst->param2 == 1) 
+		    return relaxation_callback(context, contextid, userhandle);
+        return 0;
 	default:
         print_error("Callback error");
 		return 1;
@@ -176,8 +137,7 @@ void install_callback(instance *inst, CPXENVptr env, CPXLPptr lp) {
 
 static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contextid, void *userhandle)
 {
-    double t_start = get_time_in_milliseconds();
-
+    
     instance* inst = (instance*) userhandle;
     
     // Thread-local memory allocation
@@ -242,60 +202,6 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
             return 1;
         }
 
-        /*
-        // Find all components and add SECs for all of them
-        // This is more efficient than just adding one SEC per callback
-        for (int c = 0; c < ncomp; c++) {
-            // Count nodes in this component
-            int count = 0;
-            for (int i = 0; i < nnodes; i++) {
-                if (comp[i] == c+1) count++; // Components are 1-indexed
-            }
-            
-            // Skip trivial components (single nodes)
-            if (count <= 1) continue;
-            
-            // Skip large components (likely to be the main tour)
-            if (count > nnodes/2) continue;
-            
-            // Allocate memory for SEC constraint
-            int *index = (int*) malloc(nnodes * nnodes * sizeof(int));
-            double *value = (double*) malloc(nnodes * nnodes * sizeof(double));
-            if (index == NULL || value == NULL) {
-                if (index != NULL) free(index);
-                if (value != NULL) free(value);
-                free(xstar);
-                free(succ);
-                free(comp);
-                return 1;
-            }
-            
-            int nnz = 0;
-            double rhs = 0.0;
-            
-            // Use the build_SEC function from tsp_cplex.h
-            build_SEC(inst, comp, c+1, index, value, &nnz, &rhs);
-
-            // Add the SEC to the model
-            if (nnz > 0)
-            {
-                char sense = 'L';
-                int izero = 0; // Used for rmatbeg
-
-                if (CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &izero, index, value))
-                    print_error("CPXcallbackrejectcandidate() error");
-
-                if (inst->verbose >= DEBUG)
-                {
-                    printf("   --> Thread %d: Added SEC for component %d with %d nodes\n",
-                           mythread, c + 1, count);
-                }
-            }
-
-            free(index);
-            free(value);
-        }*/
-    
         // Post heuristic
         if (inst->param1 >= 2) {
 
@@ -355,7 +261,7 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
 
         cuts_added++;
         
-        if (inst->verbose >= DEBUG) {
+        if (inst->verbose >= DEBUG_V) {
             printf("   --> Node %d: Added SEC for component %d with %d nodes\n", 
                    tree_node, k, count);
         }
@@ -392,7 +298,7 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
     build_CPLEXsol_from_solution(inst, &sol, xheu);
 
     int *ind = (int *) malloc(inst->ncols * sizeof(int));
-    if (xheu == NULL) { 
+    if (ind == NULL) { 
         free(xheu);
         free_solution(&sol);
         return 1;
@@ -420,7 +326,6 @@ static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG 
 {
     instance* inst = (instance*) userhandle;
 
-    
     // Performance optimization - skip some callback invocations
     int depth = -1;
     int nodes = -1;
@@ -444,6 +349,9 @@ static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG 
     
     // Get the relaxation solution
     double *xstar = (double *)calloc(inst->ncols, sizeof(double));
+    if (xstar == NULL)
+        return 1;
+
     double objval = CPX_INFBOUND;
     
     if (CPXcallbackgetrelaxationpoint(context, xstar, 0, inst->ncols - 1, &objval)) {
@@ -480,8 +388,8 @@ static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pas
     int *index = (int *) malloc(sizeof(int) * cutcount * (cutcount - 1) / 2);
     double *coef = (double *) malloc(sizeof(double) * cutcount * (cutcount - 1) / 2);
     if (index == NULL || coef == NULL) {
-        if (index) free(index);
-        if (coef) free(coef);
+        if (index != NULL) free(index);
+        if (coef != NULL) free(coef);
         return 1;
     }
 
@@ -612,7 +520,7 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
                     cnt++;
                 }
             }
-            if (inst->verbose >= DEBUG) {
+            if (inst->verbose >= DEBUG_V) {
                 printf("Relaxation callback: Adding SEC for component %d with %d nodes\n", c + 1, compscount[c]);
             }
             int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep

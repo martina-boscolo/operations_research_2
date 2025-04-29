@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) {
     // compute the solution
     solve_with_method(&inst, inst.best_solution); 
 
-    if (inst.verbose >= DEBUG) {
+    if (inst.verbose >= DEBUG_V) {
         // print solution
         printf("\n\n*********SOLUTION*********\n\n");
         print_solution(inst.best_solution, inst.nnodes);

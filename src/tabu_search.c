@@ -80,7 +80,7 @@ void reset_tabu_list_if_full(tabu_params *params, const instance *inst) {
         for (int i = 0; i < inst->nnodes; i++) {
             params->tabu_list[i] = -1;
         }
-        if (inst->verbose >= DEBUG)
+        if (inst->verbose >= DEBUG_V)
             printf("Tabu list was reset at iteration %d\n", params->current_iter);
     }
 }

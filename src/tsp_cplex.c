@@ -24,6 +24,8 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
     CPXsetintparam(*env, CPX_PARAM_PROBE, 2);
     CPXsetintparam(*env, CPX_PARAM_HEURFREQ, 10);
     //CPXsetintparam(*env, CPX_PARAM_THREADS, 1); //only for debug
+    if(inst->verbose >= GOOD)
+        CPXsetintparam(*env, CPX_PARAM_SCRIND, CPX_ON);
 
     // Build the model
     build_model_CPLEX(inst, *env, *lp);
@@ -66,7 +68,7 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
     // Build the solution (succ, comp, ncomp)
     build_sol_CPLEX(xstar, inst, succ, comp, ncomp);
 
-    if (inst->verbose >= DEBUG) {
+    if (inst->verbose >= DEBUG_V) {
         // Print the solution components
         printf("Number of components: %d\n", *ncomp);
         for (int i = 0; i < inst->nnodes; i++) {
@@ -85,7 +87,7 @@ void build_SEC(const instance *inst, const int *comp, const int sec_comp, int *i
 
     for (int i=0; i<inst->nnodes; i++) {
 
-		if (inst->verbose >= DEBUG) printf("comp[%d] = %d\n", i+1, comp[i]);
+		if (inst->verbose >= DEBUG_V) printf("comp[%d] = %d\n", i+1, comp[i]);
         if (comp[i] != sec_comp) continue;
 
         (*rhs)++;
@@ -94,7 +96,7 @@ void build_SEC(const instance *inst, const int *comp, const int sec_comp, int *i
 
             if (comp[j] != sec_comp) continue;
 
-			if (inst->verbose >= DEBUG) printf("Add edge %d %d to SEC %d\n", i+1, j+1, sec_comp);
+			if (inst->verbose >= DEBUG_V) printf("Add edge %d %d to SEC %d\n", i+1, j+1, sec_comp);
 
 			index[*nnz] = xpos(i, j, inst);
 			value[*nnz] = 1.0;
