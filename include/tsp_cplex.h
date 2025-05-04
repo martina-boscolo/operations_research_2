@@ -116,4 +116,6 @@ void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, dou
  */
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp);
 
+void press_a_key();
+
 #endif //TSP_CPLEX_H

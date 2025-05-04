@@ -24,8 +24,8 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     install_callback(inst, env, lp);
 
     // Check remaining time and set time limit
-    double residual_time = timelimit - get_elapsed_time(t_start);
-    if (residual_time <= 0)
+    double residual_time = timelimit - get_elapsed_time(t_start) + EPSILON;
+    if (residual_time < 0)
     {
         printf("Time limit reached before solving\n");
         free_CPLEX(&env, &lp);
@@ -40,8 +40,13 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     int *comp = (int *)malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
 
-    if (succ == NULL || comp == NULL || xstar == NULL)
+    if (succ == NULL || comp == NULL || xstar == NULL){
+        free(succ);
+        free(comp);
+        free(xstar);
+        free_CPLEX(&env, &lp);
         print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
+    }
 
     int ncomp;
 
@@ -52,26 +57,25 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     {
 
         // Ensure we have a valid solution (single tour)
-        if (ncomp == 1)
-        {
-            build_solution_from_CPLEX(inst, &temp_sol, succ);
-            update_sol(inst, &temp_best_sol, &temp_sol, true);
-        }
-        else
-        {
-            fprintf(stderr, "[WARNING] Final solution has %d components instead of 1\n", ncomp);  
-        }
+            if (ncomp == 1)
+            {
+                build_solution_from_CPLEX(inst, &temp_sol, succ);
+                update_sol(inst, &temp_best_sol, &temp_sol, true);
+            }
+            else
+            {
+                fprintf(stderr, "[WARNING] Final solution has %d components instead of 1\n", ncomp);  
+            }
 
-        strncpy(temp_best_sol.method, "BranchAndCut", METH_NAME_LEN - 1);
-        temp_best_sol.method[METH_NAME_LEN - 1] = '\0'; // Ensure null-termination
+            strncpy(temp_best_sol.method, "BranchAndCut", METH_NAME_LEN - 1);
+            temp_best_sol.method[METH_NAME_LEN - 1] = '\0';
 
-        // Optional visualization if verbose mode is on
-        if (inst->verbose >= GOOD)
-        {
-            plot_solution(inst, &temp_best_sol);
-        }
-        
-        update_sol(inst, sol, &temp_best_sol, false);
+            if (inst->verbose >= GOOD)
+            {
+                plot_solution(inst, &temp_best_sol);
+            }
+            
+            update_sol(inst, sol, &temp_best_sol, false);
     
     }
     else if (solstat == CPXMIP_TIME_LIM_INFEAS)
@@ -104,9 +108,10 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     }
     free_CPLEX(&env, &lp);
 
-    //THIS IS A MEMORY LEAK, DO NOT FREE THE SOLUTION HERE
-    //  free_solution(&temp_best_sol);
-    //  free_solution(&temp_sol);
+    // print_solution(&temp_best_sol, inst->nnodes);
+    // print_solution(&temp_sol, inst->nnodes);
+     free_solution(&temp_best_sol);
+     free_solution(&temp_sol);
 
 }
 
@@ -256,8 +261,12 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
         
         build_SEC(inst, comp, k, index, value, &nnz, &rhs);
 
-        if (CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &izero, index, value)) 
+        if (CPXcallbackrejectcandidate(context, 1, nnz, &rhs, &sense, &izero, index, value)){
+            free(value);
+            free(index);
             print_error("CPXcallbackrejectcandidate() error");
+        }
+
 
         cuts_added++;
         
@@ -407,8 +416,11 @@ static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pas
         int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep
         int local = 0; // Global cut (valid for the entire problem)
 
-        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local))
+        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)){
+            free(index);
+            free(coef);
             print_error("CPXcallbackaddusercuts() error in add_violated_sec");
+        }
     }
 
     free(index);
@@ -526,8 +538,16 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
             int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep
             int local = 0; // Global cut (valid for the entire problem)
 
-            if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local))
+            if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)){
+                free(index);
+                free(coef);
+                free(nodes_in_comp);
+                free(elist);
+                free(elist_val);
+                free(comps);
+                free(compscount);
                 print_error("CPXcallbackaddusercuts() error in multi-component SEC");
+            }
 
             free(index);
             free(coef);

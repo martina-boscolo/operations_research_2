@@ -235,7 +235,10 @@ void allocate_solution(solution *sol, const int nnodes) {
 }
 
 void free_solution(solution *sol) {
-    if (sol == NULL) return;
+    if (sol == NULL){
+        printf("Solution is NULL\n");
+        return;
+    } 
     
     if (sol->visited_nodes != NULL) {
         free(sol->visited_nodes);

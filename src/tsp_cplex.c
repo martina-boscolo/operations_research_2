@@ -269,3 +269,10 @@ void free_CPLEX(CPXENVptr *env, CPXLPptr *lp) {
         *env = NULL;
     }
 }
+
+void press_a_key(){
+    printf("Press any key to continue...\n");
+    char ch = getchar();
+    fflush(NULL);
+}
+
