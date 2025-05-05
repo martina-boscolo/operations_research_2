@@ -1,7 +1,5 @@
 #include "branch_and_cut.h"
 
-
-
 void branch_and_cut(instance *inst, solution *sol, const double timelimit)
 {
 
@@ -18,8 +16,8 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
 
-    if (inst->param1 >= 1)
-        warm_up(inst, sol, env, lp);
+    if (inst->param1 == 1)
+        warm_up(inst, sol, env, lp, (timelimit - get_elapsed_time(t_start)));
 
     install_callback(inst, env, lp);
 
@@ -41,9 +39,9 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
 
     if (succ == NULL || comp == NULL || xstar == NULL){
-        free(succ);
-        free(comp);
-        free(xstar);
+        if (succ != NULL) free(succ);
+        if (comp != NULL) free(comp);
+        if (xstar != NULL) free(xstar);
         free_CPLEX(&env, &lp);
         print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
     }
@@ -110,8 +108,8 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
 
     // print_solution(&temp_best_sol, inst->nnodes);
     // print_solution(&temp_sol, inst->nnodes);
-     free_solution(&temp_best_sol);
-     free_solution(&temp_sol);
+    free_solution(&temp_best_sol);
+    free_solution(&temp_sol);
 
 }
 
@@ -208,7 +206,7 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
         }
 
         // Post heuristic
-        if (inst->param1 >= 2) {
+        if (inst->param3 == 1) {
 
             // Get the current time
             double time = get_elapsed_time(inst->t_start);

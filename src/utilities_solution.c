@@ -51,12 +51,7 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, BRANCH_AND_CUT) == 0) {
 
         printf("Solving with Branch and Cut method.\n");
-        if (inst->param1 >= 1) {
-            double timelimit1 = timelimit * 0.1;
-            multi_start_nn(inst, sol, timelimit1); 
-        }
-        double timelimit2 = timelimit - get_elapsed_time(inst->t_start);
-        branch_and_cut(inst, sol, timelimit2);
+        branch_and_cut(inst, sol, timelimit);
             
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);

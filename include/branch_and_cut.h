@@ -4,6 +4,7 @@
 #include "tsp.h"
 #include "tsp_cplex.h"
 #include "utilities.h"
+#include "heuristics.h"
 #include "../concorde/mincut.h"
 
 #include <stdlib.h>
