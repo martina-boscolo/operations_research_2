@@ -34,9 +34,11 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
             { strncpy_s(inst->asked_method, METH_NAME_LEN, argv[++i], _TRUNCATE); continue; }
         if (strcmp(argv[i], "-param1") == 0)                                                                    // first parameter for the method          
-            {  inst->param1 = atoi(argv[++i]); continue; }
+            { inst->param1 = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-param2") == 0)                                                                    // second parameter for the method          
-            {  inst->param2 = atoi(argv[++i]); continue; }  
+            { inst->param2 = atoi(argv[++i]); continue; }  
+        if (strcmp(argv[i], "-param3") == 0)                                                                    // third parameter for the method
+            { inst->param3 = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "--help") == 0)                                                                     // help
             { help = 1; continue; } 
 
@@ -63,8 +65,9 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         printf("-timelimit <time>         The time limit in seconds, must be positive\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
-        printf("-param1 <param>    The first parameter for the method\n");
+        printf("-param1 <param>           The first parameter for the method\n");
         printf("-param2 <param>           The second parameter for the method\n");
+        printf("-param3 <param>           The third parameter for the method\n");
 
         exit(0);
 
