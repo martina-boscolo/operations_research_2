@@ -288,6 +288,10 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
 
     double t_start = get_time_in_milliseconds();
 
+    // Get current incumbent value
+    double incumbent = CPX_INFBOUND;
+    CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_BEST_SOL, &incumbent);
+
     solution sol;
     initialize_solution(&sol);
     allocate_solution(&sol, inst->nnodes);
@@ -295,6 +299,18 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
     patch_heuristic(inst, &sol, succ, comp, ncomp, (timelimit - get_elapsed_time(t_start)));
 
     build_solution_from_CPLEX(inst, &sol, succ);
+
+    // Check if the solution we found is better than the incumbent
+    if (sol.cost >= incumbent && incumbent < CPX_INFBOUND) {
+        if (inst->verbose >= GOOD) {
+            int mynode = -1;
+            CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
+            printf("   --> Node %d: Heuristic solution (%lf) not better than incumbent (%lf), skipping\n", 
+                   mynode, sol.cost, incumbent);
+        }
+        free_solution(&sol);
+        return 0;
+    }
 
     double *xheu = (double *) calloc(inst->ncols, sizeof(double));
     if (xheu == NULL) {
@@ -311,13 +327,19 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
         return 1;
     }
 
-	for ( int j = 0; j < inst->ncols; j++ ) ind[j] = j;
-	if ( CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK) ) print_error("CPXcallbackpostheursoln() error");
-	
+    for (int j = 0; j < inst->ncols; j++) ind[j] = j;
+    if (CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK))
+        print_error("CPXcallbackpostheursoln() error");
+    
     if (inst->verbose >= GOOD) {
         int mynode = -1;
         CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
-        printf("   --> Node %d: Post heuristic solution with cost %lf\n", mynode, sol.cost);
+        printf("   --> Node %d: Post heuristic solution with cost %lf", mynode, sol.cost);
+        if (incumbent < CPX_INFBOUND) {
+            printf(" (incumbent: %lf)\n", incumbent );
+        } else {
+            printf(" (first feasible solution)\n");
+        }
     }
     
     free(ind);
@@ -325,7 +347,6 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
     free_solution(&sol);
 
     return 0;
-
 }
 
 
