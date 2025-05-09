@@ -34,16 +34,6 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
 void warm_up(const instance *inst, solution *sol, CPXENVptr env, CPXLPptr lp, double timelimit) {
 
-    solution temp_sol;
-    copy_sol(&temp_sol, sol, inst->nnodes);
-            
-    nearest_neighbor(inst, &temp_sol, rand() % inst->nnodes);
-    double timelimit1 = timelimit * 0.1;
-    timelimit1 = (timelimit1 > 1) ? 1 : timelimit1;
-    two_opt(inst, &temp_sol, timelimit1, false);
-
-    update_sol(inst, sol, &temp_sol, false);
-
     if (inst->verbose >= GOOD) {
         printf("Warmup with cost %lf\n", sol->cost);
     }
