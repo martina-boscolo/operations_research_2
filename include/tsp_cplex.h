@@ -27,7 +27,7 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
  * @param env CPLEX environment
  * @param lp CPLEX LP
  */
-void warm_up(const instance *inst, solution *sol, CPXENVptr env, CPXLPptr lp, double timelimit);
+void warm_up(const instance *inst, solution *sol, CPXENVptr env, CPXLPptr lp);
 
 /**
  * Obtain the optimal solution of lp w.r.t. instance and lp, store it in xstar, succ, comp, ncomp

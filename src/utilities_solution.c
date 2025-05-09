@@ -59,9 +59,21 @@ void solve_with_method(instance *inst, solution *sol) {
         }
         branch_and_cut(inst, sol, timelimit);
             
+    } else if (strcmp(inst->asked_method, HF) == 0) {
+
+        printf("Solving with Hard fixing method.\n");
+        
+        // Warm-up if needed
+        nearest_neighbor(inst, sol, rand() % inst->nnodes);
+        double timelimit1 = timelimit * 0.1;
+        timelimit1 = (timelimit1 > 1) ? 1 : timelimit1;
+        two_opt(inst, sol, timelimit1, false);
+        
+        hard_fixing(inst, sol, timelimit);
+            
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT);
+        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HF);
         exit(EXIT_FAILURE);
     }
     

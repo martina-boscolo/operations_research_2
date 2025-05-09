@@ -18,6 +18,7 @@
 
 // verbose levels
 #define ONLY_INCUMBMENT 10 
+#define LOW 30
 #define GOOD 50
 #define DEBUG_V 100
 

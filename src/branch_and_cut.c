@@ -17,7 +17,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     initialize_CPLEX(inst, &env, &lp);
 
     if (inst->param1 == 1)
-        warm_up(inst, sol, env, lp, (timelimit - get_elapsed_time(t_start)));
+        warm_up(inst, sol, env, lp);
 
     install_callback(inst, env, lp);
 

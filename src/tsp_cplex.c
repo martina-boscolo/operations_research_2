@@ -32,13 +32,15 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp) {
 
 }
 
-void warm_up(const instance *inst, solution *sol, CPXENVptr env, CPXLPptr lp, double timelimit) {
+void warm_up(const instance *inst, solution *sol, CPXENVptr env, CPXLPptr lp) {
 
     if (inst->verbose >= GOOD) {
         printf("Warmup with cost %lf\n", sol->cost);
     }
 
     double *xheu = (double *) calloc(inst->ncols, sizeof(double));
+    if (xheu == NULL) print_error("warm_up(): Cannot allocate memory");
+
     build_CPLEXsol_from_solution(inst, sol, xheu);
 
     int *ind = (int *) malloc(inst->ncols * sizeof(int));
@@ -249,10 +251,12 @@ void build_solution_from_CPLEX(const instance *inst, solution *sol, int *succ) {
 
 void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, double *xheu) {
 
-    for ( int i = 0; i < inst->nnodes; i++ ) {
+    for (int i=0; i<inst->ncols; i++) {
+        xheu[i] = 0.0;
+    }
 
+    for (int i=0; i<inst->nnodes; i++) {
         xheu[xpos(sol->visited_nodes[i],sol->visited_nodes[i+1],inst)] = 1.0;
-
     }
 
 }
