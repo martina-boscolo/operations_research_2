@@ -64,4 +64,10 @@ double random01(void);
  */
 double dist(const coordinate point1, const coordinate point2);
 
+/**
+ * Draw a random value between 0 and 1 being thread safe
+ * 
+ * @return The random value
+ */
+double thread_safe_rand_01();
 #endif //UTILITIES_H

@@ -111,6 +111,27 @@ double random01(void)
     return ((double) rand() / RAND_MAX);
 }
 
+// Thread-local storage for random seed
+__declspec(thread) unsigned int tls_seed = 0;
+
+// Thread-safe random function that returns a value between 0 and 1
+double thread_safe_rand_01() {
+    if (tls_seed == 0) {
+        // Initialize seed once per thread
+        tls_seed = (unsigned int)(time(NULL) ^ (uintptr_t)&tls_seed);
+    }
+    int random_value = rand_r(&tls_seed);
+    // Divide by 0x7FFF (maximum value returned by rand_r in your implementation)
+    return (double)random_value / 0x7FFF;
+}
+
+// rand_r is not part of the MSVC standard, so we define it
+int rand_r(unsigned int *seed) {
+    // Simple implementation of rand_r (linear congruential generator)
+    *seed = *seed * 1103515245 + 12345;
+    return (*seed >> 16) & 0x7FFF;
+}
+
 double dist(const coordinate point1, const coordinate point2) {
 
     double deltax = point1.x-point2.x;

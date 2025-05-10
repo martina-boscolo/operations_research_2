@@ -63,13 +63,12 @@ void solve_with_method(instance *inst, solution *sol) {
 
         printf("Solving with Hard fixing method.\n");
         
-        // Warm-up if needed
+        // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
         double timelimit1 = timelimit * 0.1;
-        timelimit1 = (timelimit1 > 1) ? 1 : timelimit1;
-        two_opt(inst, sol, timelimit1, false);
-        
-        hard_fixing(inst, sol, timelimit);
+        //timelimit1 = (timelimit1 > 1) ? 1 : timelimit1; 
+        two_opt(inst, sol, timelimit1, false);       
+        hard_fixing(inst, sol, timelimit*0.9);
             
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);

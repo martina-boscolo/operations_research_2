@@ -33,18 +33,19 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     }
     
     int iter = 0;
-    double p = 0.8;
+    double percentage = 0.9;
 
-    double local_timelimit = timelimit/10;
+    warm_up(inst, &temp_best_sol, env, lp);
+    double local_timelimit = timelimit/5;
     double residual_time;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
-
-        warm_up(inst, &temp_best_sol, env, lp);
-
+        int fixed_count = 0;
         for (int i=0; i<inst->nnodes; i++) {
 
-            if (random01() < p) {
+            
+            double rand  = thread_safe_rand_01(); // not sure if it needs to be thread safe
+            if (rand < percentage) {
 
                 int indeces[1] = { xpos(temp_best_sol.visited_nodes[i], temp_best_sol.visited_nodes[i+1], inst) };
                 char lu[1] = {'L'};
@@ -53,9 +54,12 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
                 if (CPXchgbds(env, lp, 1, indeces, lu, bd)) {
                     print_error("hard_fixing(): Error in setting bounds");
                 }
-
+                fixed_count++; 
             }
-
+        }
+        if (inst->verbose >= GOOD){
+            printf("Iteration %d: Fixed %d out of %d edges (%.2f%%)\n",
+               iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
         }
 
         // Set local timelimit
@@ -63,14 +67,13 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
         // Solve with CPLEX
         int status = get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
-        if(status) {
-            if (inst->verbose >= LOW) {
-                printf("Unable to find optimal solution\n");
-            }
-        } else {
-            if (inst->verbose >= LOW) {
-                printf("Found optimal solution at iter %d\n", iter);
-            }
+        if (inst->verbose >= LOW)
+        {
+            printf("Hard fixing iteration %d, remaining time: %4.2f seconds. --->", iter, residual_time);
+            if (status)
+                printf("Unable to find solution\n");
+            else
+                printf("Found solution\n");
         }
 
         // Reset edges bounds
@@ -95,10 +98,18 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
         iter++;
 
+        percentage = percentage * 0.95; // Gradually reduce the fixing percentage
+        if (percentage < 0.5) percentage = 0.5; // Don't go below 50%
+   
     }
 
     strncpy_s(temp_best_sol.method, METH_NAME_LEN, "HardFixing", _TRUNCATE);
     update_sol(inst, sol, &temp_best_sol, false);
+    
+    if (inst->verbose >= GOOD)
+    {
+        plot_solution(inst, &temp_best_sol);
+    }
 
     // Free allocated memory
     free(xstar);
