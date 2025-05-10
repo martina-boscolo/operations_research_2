@@ -62,12 +62,15 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, HF) == 0) {
 
         printf("Solving with Hard fixing method.\n");
-        
+        inst->param1 = 1;
+        inst->param2 = 1;
+        inst->param3 = 1;
         // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
         double timelimit1 = timelimit * 0.1;
+        tabu_search(inst, sol, timelimit1);
         //timelimit1 = (timelimit1 > 1) ? 1 : timelimit1; 
-        two_opt(inst, sol, timelimit1, false);       
+        two_opt(inst, sol, 1, false);       
         hard_fixing(inst, sol, timelimit*0.9);
             
     } else {

@@ -154,7 +154,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
     char filename[FILE_NAME_LEN];
     sprintf_s(filename, FILE_NAME_LEN, "TS_p%d", inst->param1);
     FILE *f;
-    if (inst->verbose >= ONLY_INCUMBMENT)
+    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, TABU_SEARCH) == 0)
     {
         char filename_results[FILE_NAME_LEN];
         sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
@@ -176,7 +176,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         // Update best solution if needed
         update_sol(inst, sol, &temp_sol, true);
 
-        if (inst->verbose >= ONLY_INCUMBMENT){
+        if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, TABU_SEARCH) == 0){
             fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost, sol->cost);
         }
         check_sol(inst, sol);
@@ -185,7 +185,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     sprintf_s(sol->method, METH_NAME_LEN, filename);
 
-    if (inst->verbose >= ONLY_INCUMBMENT){
+    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, TABU_SEARCH) == 0){
         plot_stats_in_file(filename);
     }
     // Close the file if it was opened

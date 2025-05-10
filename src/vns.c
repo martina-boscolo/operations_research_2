@@ -14,7 +14,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     sprintf_s(method_name, METH_NAME_LEN, "%s_k%d_r%d", VNS, k, reps);
 
     FILE* f;
-    if (inst->verbose >= ONLY_INCUMBMENT) {
+    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
         char filename[FILE_NAME_LEN];
         sprintf_s(filename, FILE_NAME_LEN, "results/%s.csv", method_name);
         fopen_s(&f, filename, "w+");
@@ -34,14 +34,14 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         // update local best solution
         update_sol(inst, &temp_best_sol, &temp_sol, false);
         
-        if (inst->verbose >= ONLY_INCUMBMENT) {
+        if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
         }
 
         // escape local minima
         kick(inst, &temp_sol, k, reps);
 
-        if (inst->verbose >= ONLY_INCUMBMENT) {
+        if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
         }
         
@@ -50,7 +50,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
 
     strncpy_s(temp_best_sol.method, METH_NAME_LEN, method_name, _TRUNCATE);
     update_sol(inst, sol, &temp_best_sol, true);
-    if (inst->verbose >= ONLY_INCUMBMENT) {
+    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
         plot_stats_in_file(method_name);
     }
     
