@@ -22,7 +22,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit)
     install_callback(inst, env, lp);
 
     // Check remaining time and set time limit
-    double residual_time = timelimit - get_elapsed_time(t_start) + EPSILON;
+    double residual_time = timelimit - get_elapsed_time(t_start);
     if (residual_time < 0)
     {
         printf("Time limit reached before solving\n");

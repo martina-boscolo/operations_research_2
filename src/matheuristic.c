@@ -15,7 +15,6 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     CPXLPptr lp;
     initialize_CPLEX(inst, &env, &lp);
 
-    inst->param1 = 1;
     install_callback(inst, env, lp);
 
     // Instantiate memory
@@ -31,18 +30,19 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         free_CPLEX(&env, &lp);
         print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
     }
-    
+   
     int iter = 0;
-    double percentage = 0.9;
 
-    warm_up(inst, &temp_best_sol, env, lp);
+  
+    double percentage = ((double)inst->param1)/100.0; 
+    
     double local_timelimit = timelimit/5;
     double residual_time;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
         int fixed_count = 0;
+        warm_up(inst, &temp_best_sol, env, lp);
         for (int i=0; i<inst->nnodes; i++) {
-
             
             double rand  = thread_safe_rand_01(); // not sure if it needs to be thread safe
             if (rand < percentage) {
@@ -98,8 +98,10 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
         iter++;
 
-        percentage = percentage * 0.95; // Gradually reduce the fixing percentage
-        if (percentage < 0.5) percentage = 0.5; // Don't go below 50%
+        // not really improving the solution
+        // percentage = percentage * 0.95; // Gradually reduce the fixing percentage
+        // if (percentage < 0.5) percentage = 0.5; // Don't go below 50%
+
    
     }
 
