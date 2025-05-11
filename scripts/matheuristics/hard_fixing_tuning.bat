@@ -2,13 +2,14 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=1
-set SEED_END=5
-set PARAM1_START=70
-set PARAM1_END=90
+set SEED_START=11
+set SEED_END=15
+
+REM Fixed set of parameter values to test
+set PARAM_VALUES=1 40 50 60 80 
 
 set NODES=1000
-set TIMELIMIT=180
+set TIMELIMIT=120
 
 REM Empty the logs folder if it exists, otherwise create it
 if exist logs (
@@ -18,19 +19,19 @@ if exist logs (
     echo Creating logs folder...
     mkdir logs
 )
+
 REM Generate log files
 echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
-    for /l %%p in (%PARAM1_START%,10,%PARAM1_END%) do (
+    for %%p in (%PARAM_VALUES%) do (
         echo Running with seed=%%s, param1=%%p
-        ..\..\build\Release\tsp.exe -method HF -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p  -verbose 10 > logs\HF_n%NODES%_seed%%s_param1_%%p.log
-        
+        ..\..\build\Release\tsp.exe -method HF -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p -verbose 10 > logs\HF_n%NODES%_seed%%s_param1_%%p.log
     )
 )
 
-REM Create CSV with headers for each parameter combination
-echo 4,> hf_stats.csv
-for /l %%p in (%PARAM1_START%,10,%PARAM1_END%) do (
+REM Create CSV with headers for each parameter value
+echo 5> hf_stats.csv
+for %%p in (%PARAM_VALUES%) do (
     set "header=!header!,p1=%%p"
 )
 echo !header! >> hf_stats.csv
@@ -38,8 +39,8 @@ echo !header! >> hf_stats.csv
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     set "line=%%s"
-    for /l %%p in (%PARAM1_START%,10,%PARAM1_END%) do (
-        for /f "tokens=4 delims=;" %%a in ('findstr /C:"$STAT;TWO_OPT" logs\HF_n%NODES%_seed%%s_param1_%%p.log') do (
+    for %%p in (%PARAM_VALUES%) do (
+        for /f "tokens=4 delims=;" %%a in ('findstr /C:"$STAT;HardFixing" logs\HF_n%NODES%_seed%%s_param1_%%p.log') do (
             set "time=%%a"
             if "!time:~-1!"==";" set "time=!time:~0,-1!"
             set "line=!line!,!time!"
