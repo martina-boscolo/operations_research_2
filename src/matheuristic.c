@@ -22,28 +22,22 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int *comp = (int *)malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
     int ncomp;
-
-    if (succ == NULL || comp == NULL || xstar == NULL){
-        if (succ != NULL) free(succ);
-        if (comp != NULL) free(comp);
-        if (xstar != NULL) free(xstar);
-        free_CPLEX(&env, &lp);
-        print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
-    }
-
+    
     // Instantiate memory for bounds
     int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
     char *lu = (char *)malloc(inst->nnodes * sizeof(char));
     double *bd = (double *)malloc(inst->nnodes * sizeof(double));
 
-    if (edge_indices == NULL || lu == NULL || bd == NULL) {
-        if (edge_indices != NULL) free(edge_indices);
-        if (lu != NULL) free(lu);
-        if (bd != NULL) free(bd);
-        free(succ);
-        free(comp);
-        free(xstar);
+    if (succ == NULL || comp == NULL || xstar == NULL || edge_indices == NULL || lu == NULL || bd == NULL) {
+        if (edge_indices) free(edge_indices);
+        if (lu) free(lu);
+        if (bd) free(bd);
+        if (succ) free(succ);
+        if (comp) free(comp);
+        if (xstar) free(xstar);
         free_CPLEX(&env, &lp);
+        free_solution(&temp_best_sol);
+        free_solution(&temp_sol);
         print_error("Impossible to allocate memory.");
     }
    
@@ -67,7 +61,6 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         }
         int fixed_count = 0;
         
-
         for (int i = 0; i < inst->nnodes; i++)
         {
             int next_idx = (i + 1) % inst->nnodes;
