@@ -17,7 +17,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     install_callback(inst, env, lp);
 
-    // Instantiate memory
+    // Instantiate memory for cplex
     int *succ = (int *)malloc(inst->nnodes * sizeof(int));
     int *comp = (int *)malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
@@ -31,13 +31,19 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
     }
 
+    // Instantiate memory for bounds
     int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
     char *lu = (char *)malloc(inst->nnodes * sizeof(char));
     double *bd = (double *)malloc(inst->nnodes * sizeof(double));
+
     if (edge_indices == NULL || lu == NULL || bd == NULL) {
-        free(edge_indices);
-        free(lu);
-        free(bd);
+        if (edge_indices != NULL) free(edge_indices);
+        if (lu != NULL) free(lu);
+        if (bd != NULL) free(bd);
+        free(succ);
+        free(comp);
+        free(xstar);
+        free_CPLEX(&env, &lp);
         print_error("Impossible to allocate memory.");
     }
    
@@ -51,14 +57,16 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     double local_timelimit = timelimit/5;
     double residual_time;
 
+    warm_up(inst, &temp_best_sol, env, lp);
+
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
         if (inst->verbose >= LOW)
         {
-            printf("Hard fixing percentage = %.2f%%\n", percentage * 100);
+            printf("\n\nHard fixing percentage = %.2f%%\n", percentage * 100);
         }
         int fixed_count = 0;
-        warm_up(inst, &temp_best_sol, env, lp);
+        
 
         for (int i = 0; i < inst->nnodes; i++)
         {
@@ -80,10 +88,16 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         {
             if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
             {
-                print_error("hard_fixing(): Error in setting bounds");
                 free(edge_indices);
                 free(lu);
                 free(bd);
+                free(xstar);
+                free(comp);
+                free(succ);
+                free_CPLEX(&env, &lp);
+                free_solution(&temp_best_sol);
+                free_solution(&temp_sol);
+                print_error("hard_fixing(): Error in setting bounds");
             }
         }
 
@@ -102,9 +116,9 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         {
             printf("Hard fixing iteration %d, remaining time: %4.2f seconds. --->", iter, residual_time);
             if (status)
-                printf("Unable to find solution\n");
+                printf("Unable to find solution\n\n\n");
             else
-                printf("Found solution\n");
+                printf("Found solution\n\n\n");
         }
 
         // Reset edges bounds
@@ -118,16 +132,21 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
             if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
             {
-                print_error("hard_fixing(): Error in resetting bounds");
                 free(edge_indices);
                 free(lu);
                 free(bd);
+                free(xstar);
+                free(comp);
+                free(succ);
+                free_CPLEX(&env, &lp);
+                free_solution(&temp_best_sol);
+                free_solution(&temp_sol);
+                print_error("hard_fixing(): Error in resetting bounds");
             }
         }
 
         if (status == 0)
         {
-
             build_solution_from_CPLEX(inst, &temp_sol, succ);
             update_sol(inst, &temp_best_sol, &temp_sol, true);
         }
@@ -153,6 +172,9 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     }
 
     // Free allocated memory
+    free(edge_indices);
+    free(lu);
+    free(bd);
     free(xstar);
     free(comp);
     free(succ);
