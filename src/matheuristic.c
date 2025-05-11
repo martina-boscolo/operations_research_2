@@ -30,36 +30,64 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         free_CPLEX(&env, &lp);
         print_error("allocate_CPLEXsol(): Impossible to allocate memory.");
     }
+
+    int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
+    char *lu = (char *)malloc(inst->nnodes * sizeof(char));
+    double *bd = (double *)malloc(inst->nnodes * sizeof(double));
+    if (edge_indices == NULL || lu == NULL || bd == NULL) {
+        free(edge_indices);
+        free(lu);
+        free(bd);
+        print_error("Impossible to allocate memory.");
+    }
    
     int iter = 0;
+    double percentage = (inst->param1 > 0) ? ((double)inst->param1)/100.0: 0.80; 
 
-  
-    double percentage = ((double)inst->param1)/100.0; 
+    if( inst ->verbose >= LOW)
+    {
+        printf("Hard fixing percentage = %.2f%%\n", percentage * 100);
+    }
     
     double local_timelimit = timelimit/5;
     double residual_time;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
+
         int fixed_count = 0;
         warm_up(inst, &temp_best_sol, env, lp);
-        for (int i=0; i<inst->nnodes; i++) {
-            
-            double rand  = thread_safe_rand_01(); // not sure if it needs to be thread safe
-            if (rand < percentage) {
 
-                int indeces[1] = { xpos(temp_best_sol.visited_nodes[i], temp_best_sol.visited_nodes[i+1], inst) };
-                char lu[1] = {'L'};
-                double bd[1] = {1.0};
+        for (int i = 0; i < inst->nnodes; i++)
+        {
+            int next_idx = (i + 1) % inst->nnodes;
+            int edge_idx = xpos(temp_best_sol.visited_nodes[i], temp_best_sol.visited_nodes[next_idx], inst);
 
-                if (CPXchgbds(env, lp, 1, indeces, lu, bd)) {
-                    print_error("hard_fixing(): Error in setting bounds");
-                }
-                fixed_count++; 
+            double rand_val = thread_safe_rand_01();
+            if (rand_val < percentage)
+            {
+                edge_indices[fixed_count] = edge_idx;
+                lu[fixed_count] = 'L';
+                bd[fixed_count] = 1.0;
+                fixed_count++;
             }
         }
-        if (inst->verbose >= GOOD){
+
+        // Fix edges in one batch operation
+        if (fixed_count > 0)
+        {
+            if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
+            {
+                print_error("hard_fixing(): Error in setting bounds");
+                free(edge_indices);
+                free(lu);
+                free(bd);
+            }
+        }
+
+        if (inst->verbose >= GOOD)
+        {
             printf("Iteration %d: Fixed %d out of %d edges (%.2f%%)\n",
-               iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
+                   iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
         }
 
         // Set local timelimit
@@ -77,32 +105,34 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         }
 
         // Reset edges bounds
-        for (int i=0; i<inst->nnodes; i++) {
-
-            int indeces[1] = { xpos(temp_best_sol.visited_nodes[i], temp_best_sol.visited_nodes[i+1], inst) };
-            char lu[1] = {'L'};
-            double bd[1] = {0.0};
-
-            if (CPXchgbds(env, lp, 1, indeces, lu, bd)) {
-                print_error("hard_fixing(): Error in setting bounds");
+        if (fixed_count > 0)
+        {
+            for (int i = 0; i < fixed_count; i++)
+            {
+                lu[i] = 'L';
+                bd[i] = 0.0;
             }
 
+            if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
+            {
+                print_error("hard_fixing(): Error in resetting bounds");
+                free(edge_indices);
+                free(lu);
+                free(bd);
+            }
         }
 
-        if (status == 0) {
+        if (status == 0)
+        {
 
             build_solution_from_CPLEX(inst, &temp_sol, succ);
             update_sol(inst, &temp_best_sol, &temp_sol, true);
-
         }
-
         iter++;
 
         // not really improving the solution
         // percentage = percentage * 0.95; // Gradually reduce the fixing percentage
         // if (percentage < 0.5) percentage = 0.5; // Don't go below 50%
-
-   
     }
 
     strncpy_s(temp_best_sol.method, METH_NAME_LEN, "HardFixing", _TRUNCATE);
