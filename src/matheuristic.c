@@ -42,18 +42,21 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     }
    
     int iter = 0;
-    double percentage = (inst->param1 > 0) ? ((double)inst->param1)/100.0: 0.80; 
 
-    if( inst ->verbose >= LOW)
-    {
-        printf("Hard fixing percentage = %.2f%%\n", percentage * 100);
-    }
-    
+    const double percentages[] = {0.4, 0.5, 0.6, 0.8};
+    const int num_options = 4;
+
+    double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 0.80; 
+
     double local_timelimit = timelimit/5;
     double residual_time;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
+        if (inst->verbose >= LOW)
+        {
+            printf("Hard fixing percentage = %.2f%%\n", percentage * 100);
+        }
         int fixed_count = 0;
         warm_up(inst, &temp_best_sol, env, lp);
 
@@ -130,6 +133,12 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         }
         iter++;
 
+        if (inst->param1 == 1)
+        {
+            // Randomly change the fixing percentage
+            percentage = percentages[rand() % num_options];
+        }
+       
         // not really improving the solution
         // percentage = percentage * 0.95; // Gradually reduce the fixing percentage
         // if (percentage < 0.5) percentage = 0.5; // Don't go below 50%
