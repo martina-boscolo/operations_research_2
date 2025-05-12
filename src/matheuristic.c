@@ -27,6 +27,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
     char *lu = (char *)malloc(inst->nnodes * sizeof(char));
     double *bd = (double *)malloc(inst->nnodes * sizeof(double));
+    int fixed_count;
 
     if (succ == NULL || comp == NULL || xstar == NULL || edge_indices == NULL || lu == NULL || bd == NULL) {
         if (edge_indices) free(edge_indices);
@@ -48,7 +49,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 0.80; 
 
-    double local_timelimit = timelimit/5;
+    double local_timelimit = timelimit/10;
     double residual_time;
 
     warm_up(inst, &temp_best_sol, env, lp);
@@ -59,40 +60,9 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         {
             printf("\n\nHard fixing percentage = %.2f%%\n", percentage * 100);
         }
-        int fixed_count = 0;
         
-        for (int i = 0; i < inst->nnodes; i++)
-        {
-            int next_idx = (i + 1) % inst->nnodes;
-            int edge_idx = xpos(temp_best_sol.visited_nodes[i], temp_best_sol.visited_nodes[next_idx], inst);
-
-            double rand_val = thread_safe_rand_01();
-            if (rand_val < percentage)
-            {
-                edge_indices[fixed_count] = edge_idx;
-                lu[fixed_count] = 'L';
-                bd[fixed_count] = 1.0;
-                fixed_count++;
-            }
-        }
-
-        // Fix edges in one batch operation
-        if (fixed_count > 0)
-        {
-            if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
-            {
-                free(edge_indices);
-                free(lu);
-                free(bd);
-                free(xstar);
-                free(comp);
-                free(succ);
-                free_CPLEX(&env, &lp);
-                free_solution(&temp_best_sol);
-                free_solution(&temp_sol);
-                print_error("hard_fixing(): Error in setting bounds");
-            }
-        }
+        // Fix edges in the model
+        set_lowerbounds(inst, &temp_best_sol, env, lp, percentage, &fixed_count, edge_indices, lu, bd);
 
         if (inst->verbose >= GOOD)
         {
@@ -115,28 +85,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         }
 
         // Reset edges bounds
-        if (fixed_count > 0)
-        {
-            for (int i = 0; i < fixed_count; i++)
-            {
-                lu[i] = 'L';
-                bd[i] = 0.0;
-            }
-
-            if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
-            {
-                free(edge_indices);
-                free(lu);
-                free(bd);
-                free(xstar);
-                free(comp);
-                free(succ);
-                free_CPLEX(&env, &lp);
-                free_solution(&temp_best_sol);
-                free_solution(&temp_sol);
-                print_error("hard_fixing(): Error in resetting bounds");
-            }
-        }
+        reset_lowerbounds(env, lp, fixed_count, edge_indices, lu, bd);
 
         if (status == 0)
         {
@@ -174,5 +123,55 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     free_CPLEX(&env, &lp);
     free_solution(&temp_best_sol);
     free_solution(&temp_sol);
+
+}
+
+void set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, 
+                     const double p, int *fixed_count, int *edge_indices, char *lu, double *bd) 
+{
+
+    *fixed_count = 0;
+        
+    for (int i = 0; i < inst->nnodes; i++)
+    {
+        int next_idx = (i + 1) % inst->nnodes;
+        int edge_idx = xpos(sol->visited_nodes[i], sol->visited_nodes[next_idx], inst);
+
+        double rand_val = thread_safe_rand_01();
+        if (rand_val < p)
+        {
+            edge_indices[*fixed_count] = edge_idx;
+            lu[*fixed_count] = 'L';
+            bd[*fixed_count] = 1.0;
+            (*fixed_count)++;
+        }
+    }
+
+    // Fix edges in one batch operation
+    if (*fixed_count > 0)
+    {
+        if (CPXchgbds(env, lp, *fixed_count, edge_indices, lu, bd))
+        {
+            print_error("hard_fixing(): Error in setting bounds");
+        }
+    }
+
+}
+
+void reset_lowerbounds(CPXENVptr env, CPXLPptr lp, const int fixed_count, const int *edge_indices, char *lu, double *bd) {
+
+    if (fixed_count > 0)
+    {
+        for (int i = 0; i < fixed_count; i++)
+        {
+            lu[i] = 'L';
+            bd[i] = 0.0;
+        }
+
+        if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
+        {
+            print_error("hard_fixing(): Error in resetting bounds");
+        }
+    }
 
 }
