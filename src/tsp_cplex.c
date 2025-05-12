@@ -61,8 +61,10 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
 	if (CPXmipopt(env, lp)) print_error("CPXmipopt() error");
 
     int status = CPXgetstat(env, lp);
-    if (!(status == CPXMIP_OPTIMAL || status == CPXMIP_OPTIMAL_TOL || status == CPXMIP_TIME_LIM_FEAS)) return status;
-
+    printf("status = %d\n", status);
+    if (!(status == CPXMIP_OPTIMAL || status == CPXMIP_OPTIMAL_TOL || status == CPXMIP_TIME_LIM_FEAS))// return status;
+        print_error("CPXmipopt() error: strange optimality status");
+        
     // Retrieve the optimal solution
     int ncols = CPXgetnumcols(env, lp);
     if (CPXgetx(env, lp, xstar, 0, ncols - 1)) print_error("CPXgetx() error");
