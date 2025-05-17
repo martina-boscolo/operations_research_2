@@ -10,6 +10,7 @@
 #include "benders.h"
 #include "branch_and_cut.h"
 #include "matheuristic.h"
+#include "local_branching.h"
 
 #include <stdio.h>
 #include <stdlib.h>

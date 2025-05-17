@@ -73,9 +73,22 @@ void solve_with_method(instance *inst, solution *sol) {
         double timelimit2 = timelimit - get_elapsed_time(start);
         hard_fixing(inst, sol, timelimit2);
             
+    } else if (strcmp(inst->asked_method, LB) == 0) {
+        double start = get_time_in_milliseconds();
+        printf("Solving with Local Branching method.\n");
+        inst->param2 = 1;
+        inst->param3 = 1;
+        // Warm-up always
+        nearest_neighbor(inst, sol, rand() % inst->nnodes);
+        double timelimit1 = timelimit * 0.1;
+        tabu_search(inst, sol, timelimit1);
+        two_opt(inst, sol, timelimit1, false); //will take less time
+        double timelimit2 = timelimit - get_elapsed_time(start);
+        local_branching(inst, sol, timelimit2 );
+            
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HF);
+        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HF, LB);
         exit(EXIT_FAILURE);
     }
     
