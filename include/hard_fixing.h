@@ -1,5 +1,5 @@
-#ifndef MATHEURISTIC_H
-#define MATHEURISTIC_H
+#ifndef HARD_FIXING_H
+#define HARD_FIXING_H
 
 #include "tsp.h"
 #include "utilities_solution.h"
@@ -56,4 +56,4 @@ void set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, C
  */
 void reset_lowerbounds(CPXENVptr env, CPXLPptr lp, const int fixed_count, const int *edge_indices, char *lu, double *bd);
 
-#endif //MATHEURISTIC_H
+#endif //HARD_FIXING_H
