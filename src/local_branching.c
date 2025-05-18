@@ -86,25 +86,13 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
         if (status == 0) {
             build_solution_from_CPLEX(inst, &temp_sol, succ);
-            
-            // Update best solution if improvement found
-            if (temp_sol.cost < temp_best_sol.cost) {
-                update_sol(inst, &temp_best_sol, &temp_sol, true);
-                
-                // If solution improved, we can use the same k for next iteration
-            } else {
-                // No improvement, try to diversify by increasing k
-                k = (int)(k * 1.5);
-                if (k > inst->nnodes) {
-                    k = (int)(0.2 * inst->nnodes); // Reset k if too large
-                }
-            }
-        } else {
-            // If no solution found, increase the neighborhood size
-            k = (int)(k * 1.5);
-            if (k > inst->nnodes) {
-                k = (int)(0.2 * inst->nnodes); // Reset k if too large
-            }
+            update_sol(inst, &temp_best_sol, &temp_sol, true);
+        } 
+
+        // always?
+        k = (int)(k * 1.5);
+        if (k > inst->nnodes) {
+            k = (int)(0.2 * inst->nnodes); // Reset k if too large
         }
         
         iter++;
@@ -137,36 +125,41 @@ int add_local_branching_constraint(const instance *inst, const solution *sol,
                                   CPXENVptr env, CPXLPptr lp, const int k,
                                   int *indices, double *values) {
     int cnt = 0;
-    char sense = 'L';  // Less than or equal
-    double rhs = k;    // Right-hand side value k
+    char sense = 'L';
     int matbeg = 0;
-    
-    // Identify edges in the current solution
+
+    // Track which edges are used
+    bool *in_solution = (bool *)calloc(inst->ncols, sizeof(bool));
     for (int i = 0; i < inst->nnodes; i++) {
         int next_idx = (i + 1) % inst->nnodes;
         int node1 = sol->visited_nodes[i];
         int node2 = sol->visited_nodes[next_idx];
         int edge_idx = xpos(node1, node2, inst);
-        
-        // Add the edge to the constraint
-        indices[cnt] = edge_idx;
-        values[cnt] = -1.0;  // Negative coefficient for edges in current solution
-        cnt++;
+        in_solution[edge_idx] = true;
     }
-    
-    int num_names = 0;
-    char *cname = NULL;
-    char **cnames = &cname;
-    
-    int status = CPXaddrows(env, lp, 0, 1, cnt, &rhs, &sense, 
-                           &matbeg, indices, values, NULL, cnames);
-    
+
+    for (int i = 0; i < inst->ncols; i++) {
+        if (in_solution[i]) {
+            indices[cnt] = i;
+            values[cnt] = -1.0;
+            cnt++;
+        } else {
+            indices[cnt] = i;
+            values[cnt] = 1.0;
+            cnt++;
+        }
+    }
+
+    double rhs = k - inst->nnodes;  // Since you added -x_e for current, and +x_e for rest
+
+    int status = CPXaddrows(env, lp, 0, 1, cnt, &rhs, &sense, &matbeg, indices, values, NULL, NULL);
+    free(in_solution);
+
     if (status) {
-        print_error("add_local_branching_constraint(): Failed to add constraint");
+        print_error("Failed to add local branching constraint");
         return -1;
     }
-    
-    // Return the index of the added constraint
+
     return CPXgetnumrows(env, lp) - 1;
 }
 
