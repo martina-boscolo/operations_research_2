@@ -176,7 +176,7 @@ void check_sol(const instance *inst, solution *sol)
 
 }
 
-void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print)
+bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print)
 {
     if (sol2->cost < (sol1->cost - EPSILON))
     {
@@ -186,7 +186,9 @@ void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool
         sol1->cost = sol2->cost;
         strncpy_s(sol1->method, METH_NAME_LEN, sol2->method, _TRUNCATE);
         memcpy(sol1->visited_nodes, sol2->visited_nodes, (inst->nnodes + 1) * sizeof(int));
+        return true;
     }
+    return false;
 }
 
 void copy_sol(solution *sol1, const solution *sol2, const int nnodes) {

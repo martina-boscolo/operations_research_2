@@ -86,15 +86,16 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
         if (status == 0) {
             build_solution_from_CPLEX(inst, &temp_sol, succ);
-            update_sol(inst, &temp_best_sol, &temp_sol, true);
-        } 
-
-        // always?
-        k = (int)(k * 1.5);
-        if (k > inst->nnodes) {
-            k = (int)(0.2 * inst->nnodes); // Reset k if too large
+            if (!update_sol(inst, &temp_best_sol, &temp_sol, true))
+            {
+                k = (int)(k * 1.1);
+                if (k > inst->nnodes)
+                {
+                    k = (int)(0.5 * inst->nnodes); // Reset k if too large
+                }
+            }
         }
-        
+       
         iter++;
     }
 

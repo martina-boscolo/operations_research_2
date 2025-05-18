@@ -88,8 +88,9 @@ void check_sol(const instance *inst, solution *sol);
  * @param sol1 The first solution pointer of the instance
  * @param sol2 The second solution pointer of the instance
  * @param print If it is false it forces to NOT print independently from verbose parameter
+ * @return true if the first solution is updated, false otherwise
  */
-void update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print);
+bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print);
 
 /**
  * Copy the second solution into the first solution
