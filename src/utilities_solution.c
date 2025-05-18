@@ -63,8 +63,6 @@ void solve_with_method(instance *inst, solution *sol) {
     } else if (strcmp(inst->asked_method, HF) == 0) {
         double start = get_time_in_milliseconds();
         printf("Solving with Hard fixing method.\n");
-        inst->param2 = 1;
-        inst->param3 = 1;
         // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
         double timelimit1 = timelimit * 0.1;

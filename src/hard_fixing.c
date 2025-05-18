@@ -4,6 +4,12 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
 
+    // do we really need this?
+    //int max_depth = (inst->param2 > 0) ? inst->param2 : 20;   
+    
+    inst->param2 = 1; 
+    inst->param3 = 1; 
+
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
 
@@ -51,7 +57,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     // Parameters for tree depth control
     int starting_depth = 0;  // Default starting tree depth
-    int max_depth = 20;//(inst->param2 > 0) ? inst->param2 : 20;  // 
+    
     int depth_increment = 5;  // Increase depth by this amount each iteration
     int current_depth = starting_depth;  // Track current depth
     
@@ -59,7 +65,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     double residual_time;
 
-    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0 && current_depth <= max_depth) {
+    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0 ){ // && current_depth <= max_depth) {
 
         if (inst->verbose >= LOW)
         {
@@ -90,8 +96,8 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         
         if (inst->verbose >= LOW)
         {
-            printf("Hard fixing iteration %d, tree depth: %d/%d --->", 
-                   iter, current_depth, max_depth);
+            printf("Hard fixing iteration %d, tree depth: %d --->", 
+                   iter, current_depth);
             if (status)
                 printf("Unable to find solution\n\n\n");
             else
