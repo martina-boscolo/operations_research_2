@@ -49,16 +49,22 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 1.0; //0.8
 
-    double local_timelimit = timelimit/10;
-    double residual_time;
-
+    // Parameters for tree depth control
+    int starting_depth = 0;  // Default starting tree depth
+    int max_depth = 20;//(inst->param2 > 0) ? inst->param2 : 20;  // 
+    int depth_increment = 5;  // Increase depth by this amount each iteration
+    int current_depth = starting_depth;  // Track current depth
+    
     warm_up(inst, &temp_best_sol, env, lp);
 
-    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
+    double residual_time;
+
+    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0 && current_depth <= max_depth) {
 
         if (inst->verbose >= LOW)
         {
             printf("\n\nHard fixing percentage = %.2f%%\n", percentage * 100);
+            printf("Current tree depth limit: %d\n", current_depth);
         }
         
         // Fix edges in the model
@@ -70,14 +76,22 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
                    iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
         }
 
-        // Set local timelimit
-        CPXsetdblparam(env, CPX_PARAM_TILIM, ((residual_time > local_timelimit) ? local_timelimit : residual_time));
-
+        // Set time limit (still needed as a safety measure)
+        CPXsetdblparam(env, CPX_PARAM_TILIM, residual_time);
+        
+        // Turn off node limit - we're controlling by depth instead
+        CPXsetintparam(env, CPX_PARAM_NODELIM, 2100000000);
+        
+        // Set tree depth limit for this iteration
+        CPXsetintparam(env, CPX_PARAM_TRELIM, current_depth);
+        
         // Solve with CPLEX
         int status = get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
+        
         if (inst->verbose >= LOW)
         {
-            printf("Hard fixing iteration %d, remaining time: %4.2f seconds. --->", iter, residual_time);
+            printf("Hard fixing iteration %d, tree depth: %d/%d --->", 
+                   iter, current_depth, max_depth);
             if (status)
                 printf("Unable to find solution\n\n\n");
             else
@@ -99,8 +113,9 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
             // Randomly change the fixing percentage
             percentage = percentages[rand() % num_options];
         }
-       
-   
+        
+        // Increase the depth for the next iteration
+        current_depth += depth_increment;
     }
 
     strncpy_s(temp_best_sol.method, METH_NAME_LEN, "HardFixing", _TRUNCATE);
@@ -160,6 +175,7 @@ void reset_lowerbounds(CPXENVptr env, CPXLPptr lp, const int fixed_count, const 
 
     if (fixed_count > 0)
     {
+        // to do : fix all the variables to 0 not only the one who changed 
         for (int i = 0; i < fixed_count; i++)
         {
             //lu[i] = 'L';
