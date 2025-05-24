@@ -28,6 +28,11 @@ void solve_with_method(instance *inst, solution *sol) {
         printf("Solving with Nearest Neighbor method.\n");
         multi_start_nn(inst, sol, timelimit); 
 
+    } else if (strcmp(inst->asked_method, EXTRA_MILEAGE) == 0) {
+        // this is just to test, would make more sense inside multi start
+        printf("Solving with Extra Mileage method.\n");
+        extra_mileage(inst, sol, rand() % inst->nnodes); 
+
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
         printf("Solving with VNS method.\n");
@@ -87,7 +92,7 @@ void solve_with_method(instance *inst, solution *sol) {
             
     } else {
         fprintf(stderr, "Error: Unknown method '%s'.\nPlease, select valid method\n", sol->method);
-        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HF, LB);
+        printf("Valid methods are:\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n-%s\n", NEAREST_NEIGHBOR, EXTRA_MILEAGE, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HF, LB);
         exit(EXIT_FAILURE);
     }
     

@@ -249,3 +249,81 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
     update_sol(inst, sol, &temp_sol, print);
     free_solution(&temp_sol);
 }
+
+
+void extra_mileage(const instance *inst, solution *sol, const int start) {
+    solution temp_sol;
+    initialize_solution(&temp_sol);
+    allocate_solution(&temp_sol, inst->nnodes);
+
+    // Initialize all nodes as unvisited
+    bool *visited = (bool *)calloc(inst->nnodes, sizeof(bool));
+    if (visited == NULL) print_error("extra_mileage(): Cannot allocate memory for visited array.");
+
+    // Start with a partial tour containing only the starting node
+    temp_sol.visited_nodes[0] = start;
+    temp_sol.visited_nodes[1] = start; // Close the tour initially
+    visited[start] = true;
+    
+    int tour_size = 1; // Number of nodes currently in the tour
+
+    // Iteratively add nodes to the tour
+    while (tour_size < inst->nnodes) {
+        double min_extra_cost = INFINITY;
+        int best_node = -1;
+        int best_position = -1;
+
+        // Find the unvisited node and position that minimizes extra mileage
+        for (int node = 0; node < inst->nnodes; node++) {
+            if (visited[node]) continue; // Skip visited nodes
+
+            // Try inserting this node at each possible position in the tour
+            for (int pos = 1; pos <= tour_size; pos++) {
+                int prev_node = temp_sol.visited_nodes[pos - 1];
+                int next_node = temp_sol.visited_nodes[pos];
+
+                // Calculate extra cost of inserting node between prev_node and next_node
+                double old_edge_cost = cost(prev_node, next_node, inst);
+                double new_edges_cost = cost(prev_node, node, inst) + cost(node, next_node, inst);
+                double extra_cost = new_edges_cost - old_edge_cost;
+
+                if (extra_cost < min_extra_cost) {
+                    min_extra_cost = extra_cost;
+                    best_node = node;
+                    best_position = pos;
+                }
+            }
+        }
+
+        // Insert the best node at the best position
+        if (best_node != -1) {
+            // Shift nodes to make room for insertion
+            for (int i = tour_size; i >= best_position; i--) {
+                temp_sol.visited_nodes[i + 1] = temp_sol.visited_nodes[i];
+            }
+            
+            // Insert the new node
+            temp_sol.visited_nodes[best_position] = best_node;
+            visited[best_node] = true;
+            tour_size++;
+        } else {
+            print_error("extra_mileage(): No valid node to insert found.");
+        }
+    }
+
+    // Ensure the tour is properly closed
+    temp_sol.visited_nodes[inst->nnodes] = start;
+
+    // Calculate the total cost of the complete tour
+    temp_sol.cost = compute_solution_cost(inst, &temp_sol);
+
+    if (inst->verbose >= GOOD) {
+        check_sol(inst, &temp_sol);
+    }
+
+    strncpy_s(temp_sol.method, METH_NAME_LEN, EXTRA_MILEAGE, _TRUNCATE);
+    copy_sol(sol, &temp_sol, inst->nnodes);
+    
+    free(visited);
+    free_solution(&temp_sol);
+}

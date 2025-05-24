@@ -17,6 +17,7 @@
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "TWO_OPT"
 #define NN_TWOOPT "NN_2OPT"
+#define EXTRA_MILEAGE "EM"
 
 //----------------------------------- heuristic utilities ------------------------------------
 
@@ -127,4 +128,13 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
  */
 void two_opt(const instance *inst, solution *sol, const double timelimit, bool print); 
 
+/**
+ * Extra Mileage algorithm
+ * 
+ * @param inst The instance pointer of the problem
+ * @param sol The solution pointer of the instance
+ * @param start Starting node
+ * 
+ */
+void extra_mileage(const instance *inst, solution *sol, const int start);
 #endif //HEURISTICS_H
