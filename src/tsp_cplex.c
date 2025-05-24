@@ -62,6 +62,7 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
 
     int status = CPXgetstat(env, lp);
     printf("status = %d\n", status);
+    // fare funzione is feasible solution
     if (!(status == CPXMIP_OPTIMAL || status == CPXMIP_OPTIMAL_TOL || status == CPXMIP_TIME_LIM_FEAS))// return status;
         print_error("CPXmipopt() error: strange optimality status");
         
@@ -80,7 +81,7 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
         }
     }
 
-    return 0;
+    return 0;//status
 
 }
 

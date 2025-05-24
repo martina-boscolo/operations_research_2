@@ -46,7 +46,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
     // If param1 is set and greater than 1, use it as k; otherwise use 20% of nodes as default
     int k = (inst->param1 > 1) ? inst->param1 : (int)(0.2 * inst->nnodes);
     
-    double local_timelimit = timelimit / 5;
+   
     double residual_time;
 
     // Warm up the model with initial solution
@@ -71,7 +71,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
         }
 
         // Set local timelimit
-        CPXsetdblparam(env, CPX_PARAM_TILIM, ((residual_time > local_timelimit) ? local_timelimit : residual_time));
+        CPXsetdblparam(env, CPX_PARAM_TILIM, (residual_time));
 
         // Solve with CPLEX
         int status = get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
@@ -171,3 +171,5 @@ void remove_local_branching_constraint(CPXENVptr env, CPXLPptr lp, const int con
         print_error("remove_local_branching_constraint(): Failed to remove constraint");
     }
 }
+
+// k starting from 30, no time limit at all
