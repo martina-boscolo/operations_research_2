@@ -32,7 +32,7 @@ void build_instance(instance *inst);
 
 /**
  * Generate a random instance.
- * NOTE: this function allocates the memory for the instance.
+ * NOTE: This function allocates the memory for the instance.
  * 
  * @param inst The instance to fill with the data (input/output)
  */
@@ -50,8 +50,8 @@ void basic_TSPLIB_parser(instance *inst);
 
 /**
  * Give a name to the instance:
- * - if the data are taken from a file the name would be the same of the file
- * - if the data are generated randomly the name form is "random_nnodes_seed"
+ * - if the data are taken from a file the name would be the same of the file;
+ * - if the data are generated randomly the name form is "random_nnodes_seed".
  * 
  * @param inst The instance to name (input/output)
  */
@@ -66,8 +66,7 @@ void compute_all_costs(instance *inst);
 
 /**
  * Return the distance between two nodes wrt the given instance.
- * NOTE: This function assumes that the costs have already been computed
- *       and that i and j are valid indices.
+ * NOTE: This function assumes that the costs have already been computed and that i and j are valid indices.
  * 
  * @param i The first node (input)
  * @param j The second node (input)

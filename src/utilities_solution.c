@@ -42,7 +42,7 @@ void solve_with_method(instance *inst, solution *sol) {
         // this is just to test, would make more sense inside multi start
         printf("Solving with Extra Mileage method.\n");
 
-        extra_mileage(inst, sol, rand() % inst->nnodes); 
+        extra_mileage(inst, sol); 
 
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 

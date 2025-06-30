@@ -35,7 +35,7 @@ void initialize_tour(int *visited_nodes, const int nnodes);
 
 /**
  * Select the method to solve the TSP and compute the solution.
- * NOTE: This function initializes the solution, allocates memory for it, and then calls the appropriate solving
+ * NOTE: This function initializes the solution, allocates memory for it, and then calls the appropriate solving.
  * 
  * @param inst The instance that contains the problem to solve (input)
  * @param sol The solution in which the result will be stored (output)
@@ -54,7 +54,7 @@ bool validate_node_visits(const instance *inst, const solution *sol);
 
 /**
  * Compute the total cost of the given solution path.
- * NOTE: This function assumes that the solution is a valid tour
+ * NOTE: This function assumes that the solution is a valid tour.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution of which to compute the cost (input)
@@ -75,7 +75,7 @@ bool validate_cost(const instance *inst, const solution *sol);
 
 /**
  * Check the feasibility of the solution.
- * NOTE: If the solution is not feasible exit
+ * NOTE: If the solution is not feasible exit.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution to check (input)
@@ -83,7 +83,7 @@ bool validate_cost(const instance *inst, const solution *sol);
 void check_sol(const instance *inst, const solution *sol); 
 
 /**
- * Check if the second solution is better than the first one, if so update the first solution
+ * Check if the second solution is better than the first one, if so update the first solution.
  * NOTE: Assumes that both solutions are valid tours, with correct costs.
  * 
  * @param inst The instance that contains the problem data (input)
@@ -114,7 +114,7 @@ void copy_sol(solution *sol1, const solution *sol2, const int nnodes);
 void plot_solution(const instance *inst, const solution *sol);
 
 /**
- * Print the solution
+ * Print the solution.
  * 
  * @param sol The solution to print (input)
  * @param nnodes The number of nodes (input)
