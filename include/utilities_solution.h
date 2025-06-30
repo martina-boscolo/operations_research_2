@@ -19,33 +19,34 @@
 
 /**
  * Initialize the solution with default values.
- * Note: this function doesn't allocate the memory.
+ * NOTE: This function doesn't allocate the memory.
  * 
- * @param sol The solution pointer
+ * @param sol The solution to initialize (output)
  */
 void initialize_solution(solution *sol);
 
 /**
- * Initialize array of nodes (ordered array) 
+ * Initialize array of nodes (ordered array).
  *  
- * @param visited_nodes array of nodes
- * @param nnodes number of nodes
+ * @param visited_nodes The array of visited nodes to initialize (output)
+ * @param nnodes The number of nodes (input)
  */
 void initialize_tour(int *visited_nodes, const int nnodes);
 
 /**
- * Select the method to solve the TSP
+ * Select the method to solve the TSP and compute the solution.
+ * NOTE: This function initializes the solution, allocates memory for it, and then calls the appropriate solving
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem to solve (input)
+ * @param sol The solution in which the result will be stored (output)
  */
 void solve_with_method(instance *inst, solution *sol); 
 
 /**
  * Check if all nodes are visited exactly once.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution to check (input)
  * 
  * @return true if valid, false otherwise
  */
@@ -53,82 +54,85 @@ bool validate_node_visits(const instance *inst, const solution *sol);
 
 /**
  * Compute the total cost of the given solution path.
+ * NOTE: This function assumes that the solution is a valid tour
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution of which to compute the cost (input)
  * 
- * @return the cost of the solution
+ * @return The cost of the solution
  */
 double compute_solution_cost(const instance *inst, const solution *sol);
 
 /**
- * Check if the cost in the solution is the expected one
+ * Check if the cost in the solution is the expected one.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution whose cost to check (input)
  * 
  * @return true if valid, false otherwise
  */
 bool validate_cost(const instance *inst, const solution *sol);
 
 /**
- * Main function to check the feasibility of the solution
- * If the solution is not feasible exit
+ * Check the feasibility of the solution.
+ * NOTE: If the solution is not feasible exit
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution to check (input)
  */
-void check_sol(const instance *inst, solution *sol); 
+void check_sol(const instance *inst, const solution *sol); 
 
 /**
- * Check if the second solution is better than the first one,
- * if so update the first solution
+ * Check if the second solution is better than the first one, if so update the first solution
+ * NOTE: Assumes that both solutions are valid tours, with correct costs.
  * 
- * @param inst The instance pointer of the problem
- * @param sol1 The first solution pointer of the instance
- * @param sol2 The second solution pointer of the instance
- * @param print If it is false it forces to NOT print independently from verbose parameter
+ * @param inst The instance that contains the problem data (input)
+ * @param sol1 The first solution to update (input/output)
+ * @param sol2 The solution to compare with the first one (input)
+ * @param print If it is false it forces to NOT print independently from verbose parameter (input)
+ * 
  * @return true if the first solution is updated, false otherwise
  */
-bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool print);
+bool update_sol(const instance *inst, solution *sol1, const solution *sol2, const bool print);
 
 /**
- * Copy the second solution into the first solution
+ * Copy the second solution into the first solution.
+ * NOTE: This function assumes that the first solution not initialized nor allocated.
  * 
- * @param sol1 The first solution pointer
- * @param sol2 The second solution pointer
- * @param nnodes The number of nodes in the instance
+ * @param sol1 The first solution to copy into (output)
+ * @param sol2 The second solution to copy from (input)
+ * @param nnodes The number of nodes of the problem (input)
  */
 void copy_sol(solution *sol1, const solution *sol2, const int nnodes);
 
 /**
- * Plot the solution using gnuplot
+ * Plot the solution using gnuplot.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution to plot (input)
  */
 void plot_solution(const instance *inst, const solution *sol);
 
 /**
- * Print the hyperparameter of the solution
+ * Print the solution
  * 
- * @param sol The solution pointer of the problem
- * @param nnodes The number of nodes
+ * @param sol The solution to print (input)
+ * @param nnodes The number of nodes (input)
  */
 void print_solution(const solution *sol, const int nnodes);
 
 /**
- * Initialize sol, setting cost to INF and allocating visited_nodes 
+ * Allocate the memory for the most space-consuming attributes of solution.
  *  
- * @param sol The solution pointer of the instance
- * @param nnodes The number of nodes
+ * @param sol The solution to allocate (output)
+ * @param nnodes The number of nodes in the problem (input)
  */
 void allocate_solution(solution *sol, const int nnodes);
 
 /**
- * Deallocates the most space-consuming attributes of solution from memory
+ * Free the most space-consuming attributes of solution from memory.
  * 
- * @param inst The solution pointer of the problem
+ * @param inst The solution to free (output)
  */
 void free_solution(solution *sol);
 

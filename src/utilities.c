@@ -2,23 +2,35 @@
 
 //--- main utilities ---
 
-void print_error(const char *err) 
-{ 
-	printf("\n\n ERROR: %s \n\n", err); 
+// Print "Error: " followed by the error message and exit the program.
+void print_error(const char *err) {
+
+    if (err == NULL || strlen(err) == 0) {
+
+        printf("\n\n ERROR: Unknown error occurred. \n\n");
+
+    } else {
+
+        printf("\n\n ERROR: %s \n\n", err); 
+
+    }
+
 	fflush(NULL); 
 	exit(1); 
+
 }
 
+// Parse the input from the command line and fill the instance structure with the parsed values.
 void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
-    // set default values
+    // Set default values
     initialize_instance(inst);
 
-    // flags
+    // Flags
     int need_help = 0;
     int help = 0;
 
-    // parsing
+    // Parse the command line arguments
     for (int i = 1; i < argc; i++) {
 
         if (strcmp(argv[i], "-file") == 0 || strcmp(argv[i], "-f") == 0)                                        // input file
@@ -42,12 +54,13 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "--help") == 0)                                                                     // help
             { help = 1; continue; } 
 
-        // if there is an unknown command
+        // If there is an unknown command
         need_help = 1;
+        break;
 
     }
 
-    // if something in the command line was written wrong
+    // If something in the command line was written wrong
     if (need_help) {
 
         printf("Type \"%s --help\" to see available commands\n", argv[0]);
@@ -56,7 +69,7 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
     }
 
-    // asked to see the available commands
+    // If asked, see the available commands
     if (help) {
 
         printf("-file|-f <file's path>    To pass the problem's path\n");
@@ -73,8 +86,8 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
     }
 
-    // if requested print the result of parsing
-    if (inst->verbose >= 50) {
+    // If asked, print the result of parsing
+    if (inst->verbose >= GOOD) {
 
         print_instance(inst);
 
@@ -86,29 +99,37 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
 
 //--- various utilities ---
 
+// Compute the time passed in seconds from starting time to current time.
 double get_elapsed_time(const double start) {
 
     return get_time_in_milliseconds() - start;
 
 }
 
+// Get the current time in seconds using high-resolution performance counter.
 double get_time_in_milliseconds() {
+
     static LARGE_INTEGER frequency;
     static BOOL initialized = FALSE;
     LARGE_INTEGER now;
 
     if (!initialized) {
+
         QueryPerformanceFrequency(&frequency);
         initialized = TRUE;
+
     }
 
     QueryPerformanceCounter(&now);
     return (double)now.QuadPart / (double)frequency.QuadPart;
+
 }
 
-double random01(void)
-{
+// Draw a random value between 0 and 1.
+double random01(void) {
+
     return ((double) rand() / RAND_MAX);
+
 }
 
 // Thread-local storage for random seed
@@ -116,22 +137,32 @@ __declspec(thread) unsigned int tls_seed = 0;
 
 // Thread-safe random function that returns a value between 0 and 1
 double thread_safe_rand_01() {
+
     if (tls_seed == 0) {
+
         // Initialize seed once per thread
         tls_seed = (unsigned int)(time(NULL) ^ (uintptr_t)&tls_seed);
+        
     }
+
     int random_value = rand_r(&tls_seed);
+
     // Divide by 0x7FFF (maximum value returned by rand_r in your implementation)
     return (double)random_value / 0x7FFF;
+
 }
 
 // rand_r is not part of the MSVC standard, so we define it
 int rand_r(unsigned int *seed) {
+
     // Simple implementation of rand_r (linear congruential generator)
     *seed = *seed * 1103515245 + 12345;
+
     return (*seed >> 16) & 0x7FFF;
+
 }
 
+// Compute the Euclidean distance between two points.
 double dist(const coordinate point1, const coordinate point2) {
 
     double deltax = point1.x-point2.x;

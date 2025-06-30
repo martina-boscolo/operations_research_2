@@ -14,81 +14,88 @@
 
 /**
  * Initialize the instance with default values.
- * Note: this function doesn't allocate the memory.
+ * NOTE: This function doesn't allocate the memory.
  * 
- * @param inst The instance pointer
+ * @param inst The instance to initialize (output)
  */
 void initialize_instance(instance *inst);
 
 /**
- * Instantiate a TSP problem 
+ * Instantiate a TSP problem: 
+ * - it allocates the memory for the instance;
+ * - if an input file is provided, it parses the file and fills the instance with the data;
+ *   otherwise it generates a random instance.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to fill with the data (input/output)
  */
 void build_instance(instance *inst);
 
 /**
- * Create a random instance
+ * Generate a random instance.
+ * NOTE: this function allocates the memory for the instance.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to fill with the data (input/output)
  */
 void random_instance_generator(instance *inst);
 
 /**
- * Parses a TSPLIB format file to extract only node coordinates.
- * Assumes a standard TSPLIB format where DIMENSION appears before NODE_COORD_SECTION
+ * Parse a TSPLIB format file to extract only node coordinates.
+ * NOTE: Assume a standard TSPLIB format where DIMENSION appears before NODE_COORD_SECTION.
+ * NOTE: The function assumes that the input file is already set in the instance structure.
+ * NOTE: This function allocates the memory for the instance.
  * 
- * @param filename Path to the TSPLIB format file to parse
- * @param inst The instance pointer of the problem
+ * @param inst The instance to fill with the data (input/output)
  */
-void basic_TSPLIB_parser(const char *filename, instance *inst);
+void basic_TSPLIB_parser(instance *inst);
 
 /**
  * Give a name to the instance:
  * - if the data are taken from a file the name would be the same of the file
  * - if the data are generated randomly the name form is "random_nnodes_seed"
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to name (input/output)
  */
 void name_instance(instance *inst);
 
 /**
- * Compute the distance between every node to every node in the instance
+ * Compute the distance between every node to every node in the instance.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to compute the costs for (input/output)
  */
 void compute_all_costs(instance *inst);
 
 /**
- * Compute the distance between two nodes wrt the given instance
+ * Return the distance between two nodes wrt the given instance.
+ * NOTE: This function assumes that the costs have already been computed
+ *       and that i and j are valid indices.
  * 
- * @param i The first node
- * @param j The second node
- * @param inst The instance pointer of the problem
+ * @param i The first node (input)
+ * @param j The second node (input)
+ * @param inst The instance containing the costs (input)
  * 
  * @return The distance between the two nodes
  */
 double cost(const int i, const int j, const instance *inst);
 
 /**
- * Print the hyperparameter of the instance
+ * Print the instance.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to print (input)
  */
-void print_instance(instance *inst);
+void print_instance(const instance *inst);
 
 /**
- * Allocates the memory for the most space-consuming attributes of instance. 
- * Note: this function also initialize the solution
+ * Allocate the memory for the most space-consuming attributes of instance. 
+ * NOTE: This function also initialize the solution.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to allocate (input/output)
  */
 void allocate_instance(instance *inst);
 
 /**
- * Deallocates the most space-consuming attributes of instance from memory
+ * Free the most space-consuming attributes of instance from memory.
  * 
- * @param inst The instance pointer of the problem
+ * @param inst The instance to free (output)
  */
 void free_instance(instance *inst);
 

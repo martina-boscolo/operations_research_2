@@ -1,5 +1,6 @@
 #include "utilities_instance.h"
 
+// Initialize the instance with default values.
 void initialize_instance(instance *inst) {
 
     inst->nnodes = DEFAULT_NNODES;
@@ -21,6 +22,7 @@ void initialize_instance(instance *inst) {
 
 }
 
+// Instantiate a TSP problem
 void build_instance(instance *inst) {
 
     name_instance(inst);
@@ -28,18 +30,23 @@ void build_instance(instance *inst) {
     if (inst->input_file[0] != EMPTY_STRING) {
 
         // Using input file
-        if (inst->verbose >= 50) {
+        if (inst->verbose >= GOOD) {
+
             printf("Input file provided.\n\n");
+
         }
 
-        basic_TSPLIB_parser(inst->input_file, inst);
+        basic_TSPLIB_parser(inst);
 
     } else {
 
         // Create a random instance
-        if (inst->verbose >= 50) {
+        if (inst->verbose >= GOOD) {
+
             printf("No input file provided. Using random instance\n\n");
+
         }
+
         random_instance_generator(inst);
 
     }
@@ -49,81 +56,95 @@ void build_instance(instance *inst) {
 
 }
 
+// Generate a random instance
 void random_instance_generator(instance *inst) {
 
     allocate_instance(inst);
 
     if (inst->verbose >= GOOD) {
+
         printf("Creating random instance:\n\n");
+
     }
 
-    // set random seed
+    // Set random seed
     srand(inst->seed);
 
-    // generate random coordinate for each node
+    // Generate random coordinate for each node
     for(int i=0; i<inst->nnodes; i++) {
 
         inst->coord[i].x = random01() * MAX_XCOORD;
         inst->coord[i].y = random01() * MAX_YCOORD;
 
-        if (inst->verbose >= 50) {
-            printf("Node %d \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
+        // If asked, print the coordinates
+        if (inst->verbose >= GOOD) {
+
+            printf("Node %5d \t x %.5lf,\ty %.5lf\n", i, inst->coord[i].x, inst->coord[i].y);
+
         }
 
     }
 
-    if (inst->verbose >= 50) {
+    if (inst->verbose >= GOOD) {
+
         printf("\n\n");
+
     }
 
 }
 
-void basic_TSPLIB_parser(const char *filename, instance *inst) {
+// Parse a TSPLIB format file to extract only node coordinates
+void basic_TSPLIB_parser(instance *inst) {
+    
     FILE *file;
-    if (fopen_s(&file, filename, "r")) print_error("basic_TSPLIB_parser(): Error opening file");
+    if (fopen_s(&file, inst->input_file, "r")) print_error("basic_TSPLIB_parser(): Error opening file");
     
     char line[256]; // To store a line of the file
     inst->nnodes = 0; // Safety measure: avoid using uninitialized value 
     inst->coord = NULL; // Safety measure: avoid using uninitialized value
     
     while (fgets(line, sizeof(line), file)) {
+
         // Find the dimension
         if (strstr(line, "DIMENSION")) {
+
             sscanf_s(line, "DIMENSION : %d", &inst->nnodes);
             
             // Allocate memory after finding dimension
             allocate_instance(inst);
-            if (!inst->coord) {
-                perror("Memory allocation failed");
-                fclose(file);
-                exit(EXIT_FAILURE);
-            }
+
         }
         
         // Read all coordinates
         if (strstr(line, "NODE_COORD_SECTION")) {
+
             int index = 0;
+
             while (index < inst->nnodes && fgets(line, sizeof(line), file)) {
+
                 if (strstr(line, "EOF")) break;
                 
                 int temp_id;
                 sscanf_s(line, "%d %lf %lf", &temp_id, &inst->coord[index].x, &inst->coord[index].y);
                 index++;
+
             }
+
             break; // Exit the main loop once we've read all coordinates
+
         }
     }
     
     fclose(file);
+
 }
 
+// Give a name to the instance
 void name_instance(instance *inst) {
 
-    if (inst->input_file[0] != EMPTY_STRING) {
+    if (inst->input_file[0] != EMPTY_STRING) { // File instance
 
-        // file instance
-
-        // search for the name of the file without path and extension
+        // Search for the name of the file without path and extension
         char *fslash = strrchr(inst->input_file, '/');    // Forward slash for Unix paths
         char *bslash = strrchr(inst->input_file, '\\');   // Backslash for Windows paths
         char *point = strrchr(inst->input_file, '.');
@@ -133,52 +154,66 @@ void name_instance(instance *inst) {
 
         // Use the last slash/backslash found (whichever is furthest in the string)
         if (fslash && bslash) {
+
             slash_pos = (fslash > bslash) ? (fslash - inst->input_file) : (bslash - inst->input_file);
+        
         } else if (fslash) {
+
             slash_pos = fslash - inst->input_file;
+        
         } else if (bslash) {
+
             slash_pos = bslash - inst->input_file;
+        
         }
 
         if (point) {
+
             point_pos = point - inst->input_file;
+
         }
 
         strncpy_s(inst->name, INST_NAME_LEN, inst->input_file + slash_pos + 1, point_pos - slash_pos - 1);
 
-        } else {
-        
-        // random instance
+    } else { // Random instance
+
         sprintf_s(inst->name, INST_NAME_LEN, "random_n%d_s%d", inst->nnodes, inst->seed);
 
     }
 
 }
 
-void compute_all_costs(instance *inst)
-{
-    for (int i = 0; i < inst->nnodes; i++)
-    {
-        for (int j = 0; j < inst->nnodes; j++)
-        {
-            if (i == j)
-            {
-                inst->costs[i * inst->nnodes + j] = INFINITY; // Self-to-self distance set to INF
-            }
-            else
-            {
+// Compute the distance between every node to every node in the instance
+void compute_all_costs(instance *inst) {
+
+    for (int i = 0; i < inst->nnodes; i++) {
+
+        for (int j = 0; j < inst->nnodes; j++) {
+
+            if (i == j) { // Self-to-self distance set to INF
+
+                inst->costs[i * inst->nnodes + j] = INFINITY;
+
+            } else {
+
                 inst->costs[i * inst->nnodes + j] = dist(inst->coord[i], inst->coord[j]);
+
             }
+
         }
+
     }
+
 }
 
-double cost(const int i, const int j, const instance *inst)
-{
+// Return the distance between two nodes w.r.t. the given instance
+double cost(const int i, const int j, const instance *inst) {
+
     return inst->costs[i * inst->nnodes + j];
+
 }
 
-void print_instance(instance *inst) {
+void print_instance(const instance *inst) {
 
     printf("Name: %s\n", inst->name);
     printf("Seed: %d\n", inst->seed);
@@ -198,7 +233,9 @@ void print_instance(instance *inst) {
         printf("Nodes' coordinates:\n");
 
         for (int i=0; i<inst->nnodes; i++) {
-            printf("Node %d: \t x %lf,\ty %lf\n", i, inst->coord[i].x, inst->coord[i].y);
+
+            printf("Node %5d: \t x %.5lf,\ty %.5lf\n", i, inst->coord[i].x, inst->coord[i].y);
+
         }
         
         printf("\n");
@@ -210,9 +247,13 @@ void print_instance(instance *inst) {
         printf("Edges' cost:\n");
 
         for(int i=0; i<inst->nnodes; i++) {
+
             for(int j=i+1; j<inst->nnodes; j++) {
-                printf("Edge[%d, %d]: %lf\t\t", i, j, inst->costs[i*inst->nnodes + j]);
+
+                printf("Edge[%5d, %5d]: %.5lf\t\t", i, j, inst->costs[i*inst->nnodes + j]);
+
             }
+
         }
 
         printf("\n");
@@ -221,42 +262,56 @@ void print_instance(instance *inst) {
 
 }
 
+// Allocate the memory for the most space-consuming attributes of instance
 void allocate_instance(instance *inst) {
 
-    // allocate memory for nodes' coordinate
+    // Allocate memory for nodes' coordinate
     inst->coord = (coordinate*) calloc(inst->nnodes, sizeof(coordinate));
 
-    // allocate memory for edges' cost
+    // Allocate memory for edges' cost
     inst->costs = (double *) calloc(inst->nnodes * inst->nnodes, sizeof(double));
 
-    // allocate memory for the best solution
+    // Allocate memory for the best solution
     inst->best_solution = (solution *) malloc(sizeof(solution));
 
+    // Check if memory allocation was successful
     if (inst->coord == NULL || inst->costs == NULL || inst->best_solution == NULL) {
-        printf("Cannot allocate memory");
-        exit(EXIT_FAILURE);
+
+        print_error("allocate_instance(): Cannot allocate memory");
+
     }
 
+    // Initialize and allocate the best solution
     initialize_solution(inst->best_solution);
     allocate_solution(inst->best_solution, inst->nnodes);
 
 }
 
+// Free the most space-consuming attributes of instance from memory
 void free_instance(instance *inst) {
 
+    // Deallocate memory for nodes' coordinate
     if (inst->coord != NULL) {
+
         free(inst->coord);
         inst->coord = NULL;
+
     }
 
+    // Deallocate memory for edges' cost
     if (inst->costs != NULL) {
+
         free(inst->costs);
         inst->costs = NULL;
+
     }
     
+    // Deallocate memory for the best solution
     if (inst->best_solution != NULL) {
+
         free_solution(inst->best_solution);
         inst->best_solution = NULL;
+
     }
 
 }

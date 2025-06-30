@@ -39,7 +39,7 @@ typedef struct {
 
     double cost;                        // cost of the solution
     int *visited_nodes;                 // sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
-    char method[METH_NAME_LEN];         // name of method to compute the solution
+    char method[METH_NAME_LEN];         // name of method used to compute the solution
 
 } solution;
 
@@ -51,12 +51,12 @@ typedef struct {
     solution *best_solution;            // best current solution
 
     char name[INST_NAME_LEN];           // name of instance
-    int seed;                           // random seed used to generate random instance
+    int seed;                           // random seed
     char input_file[FILE_NAME_LEN];     // input file 
     char asked_method[METH_NAME_LEN];   // method to compute the solution
-    int param1;                         // parameter for the method
-    int param2;                         // second parameter for the method
-    int param3;                         // third parameter for the method
+    int param1;                         // first parameter used by the method
+    int param2;                         // second parameter used by the method
+    int param3;                         // third parameter used by the method
 
     int verbose;                        // printing level
     double timelimit;                   // numer of seconds to find the solution, if < 0 means no time limit
