@@ -79,7 +79,7 @@ void random_instance_generator(instance *inst) {
         // If asked, print the coordinates
         if (inst->verbose >= GOOD) {
 
-            printf("Node %5d \t x %.5lf,\ty %.5lf\n", i, inst->coord[i].x, inst->coord[i].y);
+            printf("Node %5d \t x %10.6lf,\ty %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
 
         }
 
@@ -97,7 +97,7 @@ void random_instance_generator(instance *inst) {
 void basic_TSPLIB_parser(instance *inst) {
     
     FILE *file;
-    if (fopen_s(&file, inst->input_file, "r")) print_error("basic_TSPLIB_parser(): Error opening file");
+    if (fopen_s(&file, inst->input_file, "r")) print_error("basic_TSPLIB_parser(): Cannot open file");
     
     char line[256]; // To store a line of the file
     inst->nnodes = 0; // Safety measure: avoid using uninitialized value 
@@ -216,14 +216,14 @@ double cost(const int i, const int j, const instance *inst) {
 void print_instance(const instance *inst) {
 
     printf("Name: %s\n", inst->name);
-    printf("Seed: %d\n", inst->seed);
+    printf("Seed: %5d\n", inst->seed);
     printf("Input file %s\n", inst->input_file);
-    printf("Nnodes: %d\n", inst->nnodes);
+    printf("Nnodes: %5d\n", inst->nnodes);
     printf("Asked method: %s\n", inst->asked_method);
 
     printf("\n");
 
-    printf("Timelimit: %f\n", inst->timelimit); 
+    printf("Timelimit: %.5f\n", inst->timelimit); 
     printf("Verbose: %d\n", inst->verbose); 
 
     printf("\n");
@@ -234,7 +234,7 @@ void print_instance(const instance *inst) {
 
         for (int i=0; i<inst->nnodes; i++) {
 
-            printf("Node %5d: \t x %.5lf,\ty %.5lf\n", i, inst->coord[i].x, inst->coord[i].y);
+            printf("Node %5d: \t x %10.6lf,\ty %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
 
         }
         
@@ -250,7 +250,7 @@ void print_instance(const instance *inst) {
 
             for(int j=i+1; j<inst->nnodes; j++) {
 
-                printf("Edge[%5d, %5d]: %.5lf\t\t", i, j, inst->costs[i*inst->nnodes + j]);
+                printf("Edge[%5d, %5d]: %10.6lf\t\t", i, j, inst->costs[i*inst->nnodes + j]);
 
             }
 

@@ -121,7 +121,7 @@ void solve_with_method(instance *inst, solution *sol) {
             
     } else {
 
-        print_error("Unknown method");
+        print_error("solve_with_method(): Unknown method");
 
     }
     
@@ -140,7 +140,7 @@ bool validate_node_visits(const instance *inst, const solution *sol) {
 
         if (sol->visited_nodes[i] < 0 || sol->visited_nodes[i] >= inst->nnodes) {
 
-            fprintf(stderr, "Node %d was not a legal node.\n", i);
+            fprintf(stderr, "Node %5d was not a legal node.\n", i);
             free(visited);
             return false; // Out-of-range node index
 
@@ -154,7 +154,7 @@ bool validate_node_visits(const instance *inst, const solution *sol) {
 
         if (visited[i] != 1) {
 
-            fprintf(stderr, "Node %d was not visited or visited more than once.\n", i);
+            fprintf(stderr, "Node %5d was not visited or visited more than once.\n", i);
             free(visited);
             return false; // A node was missed
 
@@ -199,7 +199,7 @@ bool validate_cost(const instance *inst, const solution *sol) {
 
     if (fabs(computed_cost - sol->cost) > EPSILON) { // Floating-point error tolerance
 
-        fprintf(stderr, "Cost mismatch! Expected: %lf, Computed: %lf\n", sol->cost, computed_cost);
+        fprintf(stderr, "Cost mismatch! Expected: %10.6lf, Computed: %10.6lf\n", sol->cost, computed_cost);
         return false;
     
     }
@@ -213,14 +213,14 @@ void check_sol(const instance *inst, const solution *sol) {
 
     if (!validate_node_visits(inst, sol)) {
 
-        print_error("The solution is not a valid tour\n");
+        print_error("check_sol(): The solution is not a valid tour");
         exit(EXIT_FAILURE);
 
     }
 
     if (!validate_cost(inst, sol)) {
 
-        print_error("The solution cost is not valid\n");
+        print_error("check_sol(): The solution cost is not valid");
 
     }
 
@@ -240,7 +240,7 @@ bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool
 
         if(print && inst->verbose >= ONLY_INCUMBMENT) {
 
-            printf("Incumbment updated\nOld cost: %lf,\tNew cost: %lf\n", sol1->cost, sol2->cost);
+            printf("Incumbment updated\nOld cost: %10.6lf,\tNew cost: %10.6lf\n", sol1->cost, sol2->cost);
 
         }
 
@@ -300,7 +300,7 @@ void plot_solution(const instance *inst, const solution *sol) {
 // Print the solution
 void print_solution(const solution *sol, const int nnodes) {
 
-    printf("Cost: %lf\n", sol->cost);
+    printf("Cost: %10.6lf\n", sol->cost);
     printf("Method: %s\n", sol->method);
 
     printf("\n");

@@ -1,74 +1,95 @@
 #include "vns.h"
 
+// VNS algorithm
 void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps) {
 
     double t_start = get_time_in_milliseconds();
+    bool updated = false;
+    bool is_asked_method = (strcmp(inst->asked_method, VNS) == 0);
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
-
-    solution temp_best_sol; 
-    copy_sol(&temp_best_sol, sol, inst->nnodes);
 
     char method_name[METH_NAME_LEN];
     sprintf_s(method_name, METH_NAME_LEN, "%s_k%d_r%d", VNS, k, reps);
 
     FILE* f;
-    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
         char filename[FILE_NAME_LEN];
         sprintf_s(filename, FILE_NAME_LEN, "results/%s.csv", method_name);
         fopen_s(&f, filename, "w+");
+
     }
+
     int iteration = 0;
 
     double elapsed_time;
     while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
 
         if (inst->verbose >= DEBUG_V){
-            printf("Time left: %f \n", timelimit - elapsed_time);
+
+            printf("Time left: %10.6f \n", timelimit - elapsed_time);
+
         }
 
         // go to local optima
         two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
 
         // update local best solution
-        update_sol(inst, &temp_best_sol, &temp_sol, false);
+        updated = updated || update_sol(inst, sol, &temp_sol, is_asked_method);
         
-        if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
-            fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+            fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
+
         }
 
         // escape local minima
         kick(inst, &temp_sol, k, reps);
 
-        if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
-            fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, temp_best_sol.cost);
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+            fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
+
         }
         
         iteration++;
+
     }
 
-    strncpy_s(temp_best_sol.method, METH_NAME_LEN, method_name, _TRUNCATE);
-    update_sol(inst, sol, &temp_best_sol, true);
-    if (inst->verbose >= ONLY_INCUMBMENT && strcmp(inst->asked_method, VNS) == 0) {
+    if (updated) {
+
+        strncpy_s(sol->method, METH_NAME_LEN, method_name, _TRUNCATE);
+
+    }
+
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
         plot_stats_in_file(method_name);
+
     }
     
     // Close the file if it was opened
-    if (f != NULL){
+    if (f != NULL) {
+
         fclose(f);
+    
     }
 
 }
 
+// Algorithm to modify the solution to escape the current local optima
 void kick(const instance *inst, solution *sol, const int k, const int reps) {
 
     switch (k) {
-        default: // default case uses 3opt move as kick
+
         case 3:
 
             if (inst->verbose >= GOOD) {
-                printf("Kick with 3-opt move, with %d repetitions\n", reps);
+
+                printf("Kick with 3-opt move, with %5d repetitions\n", reps);
+
             }
 
             for (int i = 0; i < reps; i++) {
@@ -77,7 +98,9 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 select_three_indices(inst->nnodes, &idx1, &idx2, &idx3);
 
                 if (inst->verbose >= DEBUG_V) {
-                    printf("Kick with %d, %d, %d\n", idx1, idx2, idx3);
+
+                    printf("Kick with %5d, %5d, %5d\n", idx1, idx2, idx3);
+
                 }
                 
                 // Update the solution cost
@@ -87,8 +110,11 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 shift_segment(sol, inst->nnodes, idx1, idx2, idx3);
                 
                 if (inst->verbose >= GOOD) {
+
                     check_sol(inst, sol);
+
                 }
+
             }
 
             break;
@@ -96,7 +122,9 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
         case 5:
         
             if (inst->verbose >= GOOD) {
-                printf("Kick with 5-opt move, with %d repetitions\n", reps);
+
+                printf("Kick with 5-opt move, with %5d repetitions\n", reps);
+
             }
 
             for (int i = 0; i < reps; i++) {
@@ -105,7 +133,9 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 select_five_indices(inst->nnodes, &idx1, &idx2, &idx3, &idx4, &idx5);
 
                 if (inst->verbose >= DEBUG_V) {
-                    printf("Kick with %d, %d, %d, %d, %d\n", idx1, idx2, idx3,idx4, idx5);
+
+                    printf("Kick with %5d, %5d, %5d, %5d, %5d\n", idx1, idx2, idx3,idx4, idx5);
+
                 }
         
                 // Update the solution cost
@@ -115,35 +145,27 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
                 fixed_five_opt_move(sol, inst->nnodes, idx1, idx2, idx3, idx4, idx5);
                 
                 if (inst->verbose >= GOOD) {
+
                     check_sol(inst, sol);
+                
                 }
+            
             }
 
             break;
+
+        default: 
+
+            print_error("kick(): Unknown kick type");
+
     }
 
 }
 
-void select_three_indices(const int n, int *idx1, int *idx2, int *idx3) {
-
-    *idx1 = rand() % n;
- 
-    do {
-        *idx2 = rand() % n;
-    } while (abs(*idx2 - *idx1) <= 1);
-        
-    do {
-        *idx3 = rand() % n;
-    } while (abs(*idx3 - *idx1) <= 1 || abs(*idx3 - *idx2) <= 1);
-        
-    // Sort the indices
-    if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
-    if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
-    if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
-}
-
+// Rearrange tour segments in the solution
 void fixed_five_opt_move(solution *sol, const int nnodes, int idx1, int idx2, int idx3, int idx4, int idx5) {
 
+    // Compute segmants's size
     int segmentB_size = idx2 - idx1;
     int segmentC_size = idx3 - idx2;
     int segmentD_size = idx4 - idx3;
@@ -172,6 +194,7 @@ void fixed_five_opt_move(solution *sol, const int nnodes, int idx1, int idx2, in
 
 }
 
+// Compute the delta cost after the 5-opt move
 double delta5(const instance *inst, const solution *sol, const int idx1, const int idx2, const int idx3, const int idx4, const int idx5) {
 
     // compute the cost of the three edges that would be removed
@@ -194,24 +217,58 @@ double delta5(const instance *inst, const solution *sol, const int idx1, const i
 
 }
 
-void select_five_indices(const int n, int *idx1, int *idx2, int *idx3, int *idx4, int *idx5) {
+// Select three random different indices in [0, n) and return them sorted
+void select_three_indices(const int n, int *idx1, int *idx2, int *idx3) {
+
     *idx1 = rand() % n;
  
     do {
+
         *idx2 = rand() % n;
-    } while (*idx2 == *idx1);
+
+    } while (abs(*idx2 - *idx1) <= 1);
         
     do {
+
         *idx3 = rand() % n;
-    } while (*idx3 == *idx1 || *idx3 == *idx2);
+
+    } while (abs(*idx3 - *idx1) <= 1 || abs(*idx3 - *idx2) <= 1);
+        
+    // Sort the indices
+    if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
+    if (*idx1 > *idx3) { int temp = *idx1; *idx1 = *idx3; *idx3 = temp; }
+    if (*idx2 > *idx3) { int temp = *idx2; *idx2 = *idx3; *idx3 = temp; }
+
+}
+
+// Select five random different indices in [0, n) and return them sorted
+void select_five_indices(const int n, int *idx1, int *idx2, int *idx3, int *idx4, int *idx5) {
+
+    *idx1 = rand() % n;
+ 
+    do {
+
+        *idx2 = rand() % n;
+
+    } while (abs(*idx2 - *idx1) <= 1);
+        
+    do {
+
+        *idx3 = rand() % n;
+
+    } while (abs(*idx3 - *idx1) <= 1 || abs(*idx3 - *idx2) <= 1);
 
     do {
+
         *idx4 = rand() % n;
-    } while (*idx4 == *idx1 || *idx4 == *idx2 || *idx4 == *idx3);
+
+    } while (abs(*idx4 - *idx1) <= 1 || abs(*idx4 - *idx2) <= 1 || abs(*idx3 - *idx3) <= 1);
 
     do {
+
         *idx5 = rand() % n;
-    } while (*idx5 == *idx1 || *idx5 == *idx2 || *idx5 == *idx3 || *idx5 == *idx4);
+
+    } while (abs(*idx5 - *idx1) <= 1 || abs(*idx5 - *idx2) <= 1 || abs(*idx5 - *idx3) <= 1 || abs(*idx5 - *idx4) <= 1);
         
     // Sort the indices
     if (*idx1 > *idx2) { int temp = *idx1; *idx1 = *idx2; *idx2 = temp; }
@@ -227,4 +284,5 @@ void select_five_indices(const int n, int *idx1, int *idx2, int *idx3, int *idx4
     if (*idx3 > *idx5) { int temp = *idx3; *idx3 = *idx5; *idx5 = temp; }
 
     if (*idx4 > *idx5) { int temp = *idx4; *idx4 = *idx5; *idx5 = temp; }
+
 }

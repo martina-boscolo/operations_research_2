@@ -61,7 +61,7 @@ void shift_segment(solution *sol, const int n, const int idx1, const int idx2, c
     int *segment2 = (int *)malloc(segment2_size * sizeof(int));
     int *segment3 = (int *)malloc(segment3_size * sizeof(int));
 
-    if (segment1 == NULL || segment2 == NULL || segment3 == NULL) print_error("shift_segment(): Cannot allocate memory.");
+    if (segment1 == NULL || segment2 == NULL || segment3 == NULL) print_error("shift_segment(): Cannot allocate memory");
     
     // Copy segments
     for (int j = 0; j < segment1_size; j++) {
@@ -153,7 +153,7 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start) {
 
         if (nearest_index == -1) {
 
-            print_error("No valid nearest neighbor found");
+            print_error("nearest_neighbor(): No valid nearest neighbor found");
 
         }
 
@@ -195,17 +195,11 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
 
         if (inst->verbose >= GOOD) {
 
-            printf("Remaining time %.5lf\n", timelimit-elapsed_time);
+            printf("Remaining time %10.5lf\n", timelimit-elapsed_time);
 
         }
         
         if (elapsed_time >= timelimit) { // Stop if time limit is reached
-
-            if (inst->verbose >= GOOD) {
-
-                printf("Time limit reached.\n");
-
-            }
 
             break;
 
@@ -217,7 +211,7 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
         // Print intermediate results and check the solution
         if (inst->verbose >= GOOD) {
 
-            printf("Start Node: %5d, Cost: %.5lf\n", start, temp_sol.cost);
+            printf("Start Node: %5d, Cost: %10.6lf\n", start, temp_sol.cost);
             check_sol(inst, &temp_sol);
 
         }
@@ -241,7 +235,7 @@ void extra_mileage(const instance *inst, solution *sol) {
 
     // Initialize all nodes as unvisited
     bool *visited = (bool *)calloc(inst->nnodes, sizeof(bool));
-    if (visited == NULL) print_error("extra_mileage(): Cannot allocate memory.");
+    if (visited == NULL) print_error("extra_mileage(): Cannot allocate memory");
 
     int node1 = 0;
     int node2 = 1;
@@ -296,7 +290,7 @@ void extra_mileage(const instance *inst, solution *sol) {
                 double extra_cost = new_edges_cost - old_edge_cost;
 
                 if (extra_cost < min_extra_cost) {
-
+ 
                     min_extra_cost = extra_cost;
                     best_node = node;
                     best_position = pos;
@@ -324,7 +318,7 @@ void extra_mileage(const instance *inst, solution *sol) {
 
         } else {
 
-            print_error("extra_mileage(): No valid node to insert found.");
+            print_error("extra_mileage(): No valid node to insert found");
 
         }
 
@@ -353,9 +347,6 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
     double t_start = get_time_in_milliseconds();
 
-    solution temp_sol; 
-    copy_sol(&temp_sol, sol, inst->nnodes);
-
     int improved = true; // Flag to track improvements
     while (improved && (get_elapsed_time(t_start) < timelimit)) {
 
@@ -371,7 +362,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
                 if (get_elapsed_time(t_start) >= timelimit) break;
                 
-                double delta = delta2(inst, &temp_sol, i, j);
+                double delta = delta2(inst, sol, i, j);
 
                 if (delta < best_delta- EPSILON) {
 
@@ -387,11 +378,17 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
         if (best_delta < - EPSILON) {
 
+            if(print && inst->verbose >= ONLY_INCUMBMENT) {
+
+                printf("Incumbment updated\nOld cost: %10.6lf,\tNew cost: %10.6lf\n", sol->cost, sol->cost + best_delta);
+
+            }
+
             // Reverse the segment between i and j
-            reverse_segment(&temp_sol, best_i, best_j);
+            reverse_segment(sol, best_i, best_j);
             
             // Update the solution cost correctly
-            temp_sol.cost += best_delta;
+            sol->cost += best_delta;
             improved = true; // Indicate improvement found
 
         }
@@ -400,12 +397,14 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
     if (inst->verbose >= GOOD) {
 
-        check_sol(inst, &temp_sol);
+        check_sol(inst, sol);
 
     }
 
-    strncpy_s(temp_sol.method, METH_NAME_LEN, TWO_OPT, _TRUNCATE);
-    update_sol(inst, sol, &temp_sol, print);
-    free_solution(&temp_sol);
+    if (strcmp(inst->asked_method, TWO_OPT) == 0) {
+
+        strncpy_s(sol->method, METH_NAME_LEN, TWO_OPT, _TRUNCATE);
+
+    }
 
 }

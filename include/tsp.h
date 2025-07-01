@@ -6,28 +6,29 @@
 #include <string.h>
 #include <time.h>
 
-// default values for the instance
+// Default values for the instance
 #define DEFAULT_NNODES 150
 #define DEFAULT_SEED 1
 #define DEFAULT_TIMELIMIT 600.0
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
 
-// value limits
+// Value limits
 #define MIN_NNODES 10
 
-// verbose levels
+// Verbose levels
 #define ONLY_INCUMBMENT 10 
 #define LOW 30
 #define GOOD 50
 #define DEBUG_V 100
 
-// useful constants
+// Useful constants
 #define EPSILON 1e-5
 #define METH_NAME_LEN 30
 #define INST_NAME_LEN 50
 #define FILE_NAME_LEN 1000
 
+// Structure to hold coordinate values
 typedef struct {
 
     double x;                           // x coordinate
@@ -35,33 +36,35 @@ typedef struct {
 
 } coordinate;
 
+// Structure to hold solution data
 typedef struct {
 
-    double cost;                        // cost of the solution
-    int *visited_nodes;                 // sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
-    char method[METH_NAME_LEN];         // name of method used to compute the solution
+    double cost;                        // Cost of the solution
+    int *visited_nodes;                 // Sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
+    char method[METH_NAME_LEN];         // Name of method used to compute the solution
 
 } solution;
 
+// Structure to hold problem data and general informations
 typedef struct {
 
-    int nnodes;                         // how many nodes the graph has
+    int nnodes;                         // How many nodes the graph has
     coordinate *coord;                  // (x,y) coordinate of the nodes
-    double *costs;                      // array of distances between nodes
-    solution *best_solution;            // best current solution
+    double *costs;                      // Array of distances between nodes
+    solution *best_solution;            // Best current solution
 
-    char name[INST_NAME_LEN];           // name of instance
-    int seed;                           // random seed
-    char input_file[FILE_NAME_LEN];     // input file 
-    char asked_method[METH_NAME_LEN];   // method to compute the solution
-    int param1;                         // first parameter used by the method
-    int param2;                         // second parameter used by the method
-    int param3;                         // third parameter used by the method
+    char name[INST_NAME_LEN];           // Name of instance
+    int seed;                           // Random seed
+    char input_file[FILE_NAME_LEN];     // Input file 
+    char asked_method[METH_NAME_LEN];   // Method to compute the solution
+    int param1;                         // First parameter used by the method
+    int param2;                         // Second parameter used by the method
+    int param3;                         // Third parameter used by the method
 
-    int verbose;                        // printing level
-    double timelimit;                   // numer of seconds to find the solution, if < 0 means no time limit
-    double t_start;                     // initial time
-    int ncols;                          // number of columns in the model
+    int verbose;                        // Printing level
+    double timelimit;                   // Time in seconds to find the solution, if < 0 means no time limit
+    double t_start;                     // Initial time
+    int ncols;                          // Number of columns in the cplex model
 
 } instance;
 

@@ -1,19 +1,22 @@
 #include "plot.h"
 #include "utilities.h"
 
+// Open a Gnuplot file
 FILE *open_plot(void) {
 
     FILE *plot = _popen("gnuplot -persistent", "w");
 
-    // if cannot open file
-    if (!plot) {
-        printf("Error opening Gnuplot\n");
-        exit(EXIT_FAILURE);
+    if (!plot) { // If cannot open file
+
+        print_error("open_plot(): Cannot opening Gnuplot");
+
     }
 
     return plot;
+
 }
 
+// Save the plot in a png file
 void plot_in_file(FILE *plot, const char *filename) {
 
     // Create the plot directory if does not exists
@@ -24,12 +27,14 @@ void plot_in_file(FILE *plot, const char *filename) {
 
 }
 
+// Add Gnuplot customization
 void add_plot_customization(FILE *plot, const char *customization) {
 
     fprintf(plot, "%s\n", customization);
 
 }
 
+// Plot an edge between the two nodes
 void plot_edge(FILE *plot, const coordinate node1, const coordinate node2) {
 
     // Plot edge using format: "x1 y1\nx2 y2\n\n"
@@ -39,6 +44,7 @@ void plot_edge(FILE *plot, const coordinate node1, const coordinate node2) {
 
 }
 
+// Plot stats of the cost and best solution cost based on number of solutions
 void plot_cost_evolution(FILE *plot, const char* filepath) {
 
     fprintf(plot, "set style data line\n");
@@ -59,6 +65,7 @@ void plot_cost_evolution(FILE *plot, const char* filepath) {
         
 }
 
+// Plot the cost evolution in a base file
 void plot_cost_evolution_base(FILE *plot, const char* filepath) {
 
     fprintf(plot, "set style data line\n");
@@ -85,9 +92,11 @@ void plot_cost_evolution_base(FILE *plot, const char* filepath) {
         
     // Flush to ensure all commands are sent
     fflush(plot);
+
 }
 
-void plot_stats_in_file(const char* filename){
+// Plot stats in a file
+void plot_stats_in_file(const char* filename) {
     
     FILE *plot = open_plot();
     plot_in_file(plot, filename);
@@ -98,8 +107,8 @@ void plot_stats_in_file(const char* filename){
 
 }
 
-
-void plot_stats_in_file_base(const char* filename){
+// Plot stats in a base file
+void plot_stats_in_file_base(const char* filename) {
     
     FILE *plot = open_plot();
     plot_in_file(plot, filename);
@@ -110,7 +119,9 @@ void plot_stats_in_file_base(const char* filename){
 
 }
 
-void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, int nsubtours, int iter) {
+// Plot the subtours in the Gnuplot file
+void plot_subtours(const instance *inst, const int **subtours, const int *subtour_lengths, const int nsubtours, const int iter) {
+    
     FILE *gnuplot = open_plot();
 
     char filename[FILE_NAME_LEN];
@@ -120,28 +131,36 @@ void plot_subtours(const instance *inst, int **subtours, int *subtour_lengths, i
     add_plot_customization(gnuplot, "plot '-' using 1:2 w linespoints pt 7");
 
     for (int k = 0; k < nsubtours; k++) {
+
         for (int i = 0; i < subtour_lengths[k]; i++) {
+
             int from = subtours[k][i];
             int to = subtours[k][(i + 1) % subtour_lengths[k]];
 
             coordinate c1 = inst->coord[from];
             coordinate c2 = inst->coord[to];
             plot_edge(gnuplot, c1, c2);
+
         }
+
     }
 
     input_end(gnuplot);
     free_plot(gnuplot);
+
 }
 
+// Tell Gnuplot that the input data are ended
 void input_end(FILE *plot) {
 
     fprintf(plot, "e\n");  
 
 }
 
+// Close the Gnuplot file
 void free_plot(FILE *plot) {
 
     fflush(plot);
     _pclose(plot);  // Use _pclose for Windows
+
 }
