@@ -363,7 +363,7 @@ void extract_subtours_from_successors(const instance *inst, const int *succ, int
             visited[curr] = 1;
             curr = succ[curr];
 
-            if (curr < 0 || curr >= inst->nnodes) { print_error("extract_subtours_from_successors(): Invalid successor");
+            if (curr < 0 || curr >= inst->nnodes) print_error("extract_subtours_from_successors(): Invalid successor");
 
             if (len > inst->nnodes) print_error("extract_subtours_from_successors(): Infinite loop in successor chain");
 
@@ -376,7 +376,7 @@ void extract_subtours_from_successors(const instance *inst, const int *succ, int
         subtour_lengths[*ncomp] = len;
 
         free(this_subtour);
-        
+
         ncomp++;
 
     }
