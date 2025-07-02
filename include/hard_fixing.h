@@ -6,54 +6,38 @@
 #include "utilities.h"
 #include "tsp_cplex.h"
 
-#define HF "HF"
+#define HARD_FIXING "HF"
 
 /**
- * Hard fixing algorithm
+ * Hard fixing algorithm.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- * @param timelimit Time limit for the algorithm
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution that will contain the best solution between the input one and the best found one (input/output)
+ * @param timelimit The time limit for the algorithm (input)
  */
 void hard_fixing(instance *inst, solution *sol, const double timelimit);
 
 /**
- * Fix p*(inst->nnodes) edges of the solution in the model lp
- * At the end 
- * - fixed_count will contain the number of actual fixed edges,
- * - edge_indices will contain the indeces (obtained with xpos()) of fixed edges
- * - lu will contain 'L' at the first fixed_count cells
- * - bd will contain 1.0 at the first fixed_count cells
+ * Fix some edges of the solution in the model.
+ * NOTE: Only the first fixed_count cells of output arrays will contain feasible values.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- * @param env CPLEX environment
- * @param lp CPLEX LP
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The reference solution (input)
+ * @param env CPLEX environment (input/output)
+ * @param lp CPLEX model (input/output)
+ * @param p The percentage of edges to be fixed (input)
  * 
- * @param p Percentage to fix the edges
- * @param fixed_count Number of fixed edges
- * @param edge_indeces Indeces of fixed edges
- * @param lu Array of which bound is fixed
- * @param bd Array of bounds
+ * @return The number of edges that will be actually fixed 
  */
-void set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, 
-                     const double p, int *fixed_count, int *edge_indices, char *lu, double *bd);
+int set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, const double p);
 
 /**
- * Reset the lower boundsof the edges, whose index is stored in the first fixed_count 
- * cells of edge_indeces in the model lp
- * At the end 
- * - lu will contain 'L' at the first fixed_count cells
- * - bd will contain 0.0 at the first fixed_count cells
+ * Reset the lower bounds of all the edges.
  * 
- * @param env CPLEX environment
- * @param lp CPLEX LP
- * 
- * @param fixed_count Number of fixed edges
- * @param edge_indeces Indeces of fixed edges
- * @param lu Array of which bound is fixed
- * @param bd Array of bounds
+ * @param inst The instance that contains the problem data (input)
+ * @param env CPLEX environment (input/output)
+ * @param lp CPLEX model (input/output)
  */
-void reset_lowerbounds(CPXENVptr env, CPXLPptr lp, const int fixed_count, const int *edge_indices, char *lu, double *bd);
+void reset_lowerbounds(const instance *inst, CPXENVptr env, CPXLPptr lp);
 
 #endif //HARD_FIXING_H

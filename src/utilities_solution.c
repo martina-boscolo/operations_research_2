@@ -87,7 +87,7 @@ void solve_with_method(instance *inst, solution *sol) {
         double elapsed_time = get_elapsed_time(inst->t_start);
         branch_and_cut(inst, sol, (timelimit-elapsed_time));
             
-    } else if (strcmp(inst->asked_method, HF) == 0) {
+    } else if (strcmp(inst->asked_method, HARD_FIXING) == 0) {
         
         printf("Solving with Hard fixing method.\n");
 
@@ -101,7 +101,7 @@ void solve_with_method(instance *inst, solution *sol) {
         double elapsed_time = get_elapsed_time(inst->t_start);
         hard_fixing(inst, sol, (timelimit-elapsed_time));
             
-    } else if (strcmp(inst->asked_method, LB) == 0) {
+    } else if (strcmp(inst->asked_method, LOCAL_BRANCHING) == 0) {
         
         printf("Solving with Local Branching method.\n");
 

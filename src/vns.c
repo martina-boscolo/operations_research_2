@@ -37,7 +37,8 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
 
         // update local best solution
-        updated = updated || update_sol(inst, sol, &temp_sol, is_asked_method);
+        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+        updated = updated || val;
         
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 

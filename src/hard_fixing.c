@@ -1,20 +1,18 @@
 #include "hard_fixing.h"
 
+// Hard fixing algorithm
 void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
-
-    // do we really need this?
-    //int max_depth = (inst->param2 > 0) ? inst->param2 : 20;   
+    bool updated = false;
+    bool is_asked_method = (strcmp(inst->asked_method, HARD_FIXING) == 0);
     
+    // Set parameters for 
     inst->param2 = 1; 
     inst->param3 = 1; 
 
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
-
-    solution temp_best_sol;
-    copy_sol(&temp_best_sol, sol, inst->nnodes);
 
     // Open CPLEX model
     CPXENVptr env;
@@ -29,31 +27,14 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
     int ncomp;
     
-    // Instantiate memory for bounds
-    int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
-    char *lu = (char *)malloc(inst->nnodes * sizeof(char));
-    double *bd = (double *)malloc(inst->nnodes * sizeof(double));
-    int fixed_count;
-
-    if (succ == NULL || comp == NULL || xstar == NULL || edge_indices == NULL || lu == NULL || bd == NULL) {
-        if (edge_indices) free(edge_indices);
-        if (lu) free(lu);
-        if (bd) free(bd);
-        if (succ) free(succ);
-        if (comp) free(comp);
-        if (xstar) free(xstar);
-        free_CPLEX(&env, &lp);
-        free_solution(&temp_best_sol);
-        free_solution(&temp_sol);
-        print_error("Impossible to allocate memory.");
-    }
+    if (succ == NULL || comp == NULL || xstar == NULL) print_error("hard_fixing(): Cannot allocate memory");
    
     int iter = 0;
 
     const double percentages[] = {0.4, 0.5, 0.6, 0.8};
     const int num_options = 4;
 
-    double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 1.0; //0.8
+    double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 0.8;
 
     // Parameters for tree depth control
     int starting_depth = 0;  // Default starting tree depth
@@ -61,25 +42,29 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int depth_increment = 5;  // Increase depth by this amount each iteration
     int current_depth = starting_depth;  // Track current depth
     
-    warm_up(inst, &temp_best_sol, env, lp);
+    warm_up(inst, sol, env, lp);
 
     double residual_time;
+    
+    // Count for actual fixed edges
+    int fixed_count;
 
-    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0 ){ // && current_depth <= max_depth) {
+    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
-        if (inst->verbose >= LOW)
-        {
-            printf("\n\nHard fixing percentage = %.2f%%\n", percentage * 100);
-            printf("Current tree depth limit: %d\n", current_depth);
+        if (inst->verbose >= LOW) {
+
+            printf("Hard fixing percentage = %10.6f%%\n", percentage * 100);
+            printf("Current tree depth limit: %5d\n", current_depth);
+
         }
         
         // Fix edges in the model
-        set_lowerbounds(inst, &temp_best_sol, env, lp, percentage, &fixed_count, edge_indices, lu, bd);
+        fixed_count = set_lowerbounds(inst, sol, env, lp, percentage);
 
-        if (inst->verbose >= GOOD)
-        {
-            printf("Iteration %d: Fixed %d out of %d edges (%.2f%%)\n",
-                   iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
+        if (inst->verbose >= GOOD) {
+
+            printf("Iteration %5d: Fixed %5d out of %5d edges (%10.6f%%)\n", iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
+
         }
 
         // Set time limit (still needed as a safety measure)
@@ -92,107 +77,142 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         CPXsetintparam(env, CPX_PARAM_TRELIM, current_depth);
         
         // Solve with CPLEX
-        int status = get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
+        get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
         
-        if (inst->verbose >= LOW)
-        {
-            printf("Hard fixing iteration %d, tree depth: %d --->", 
-                   iter, current_depth);
-            if (status)
-                printf("Unable to find solution\n\n\n");
-            else
-                printf("Found solution\n\n\n");
+        if (inst->verbose >= LOW) {
+
+            printf("Iteration %5d, tree depth %5d, ", iter, current_depth);
+
         }
 
         // Reset edges bounds
-        reset_lowerbounds(env, lp, fixed_count, edge_indices, lu, bd);
+        reset_lowerbounds(inst, env, lp);
 
-        if (status == 0)
-        {
-            build_solution_from_CPLEX(inst, &temp_sol, succ);
-            update_sol(inst, &temp_best_sol, &temp_sol, true);
+        build_solution_from_CPLEX(inst, &temp_sol, succ);
+
+        if (inst->verbose >= LOW) {
+
+            printf("solution cost %10.6lf, incumbment %10.6lf\n", temp_sol.cost, sol->cost);
+
         }
+
+        bool var = update_sol(inst, sol, &temp_sol, true);
+        updated = updated || var;
+        
         iter++;
 
-        if (inst->param1 == 1)
-        {
+        if (inst->param1 == 1) {
+
             // Randomly change the fixing percentage
             percentage = percentages[rand() % num_options];
+
         }
-        
+
         // Increase the depth for the next iteration
-        current_depth += depth_increment;
+        if (!var) {
+
+            current_depth += depth_increment;
+
+        }
+
     }
 
-    strncpy_s(temp_best_sol.method, METH_NAME_LEN, "HardFixing", _TRUNCATE);
-    update_sol(inst, sol, &temp_best_sol, false);
+    if (updated) {
+
+        strncpy_s(sol->method, METH_NAME_LEN, HARD_FIXING, _TRUNCATE);
+
+    }
     
-    if (inst->verbose >= GOOD)
-    {
-        plot_solution(inst, &temp_best_sol);
+    if (inst->verbose >= GOOD && is_asked_method) {
+
+        plot_solution(inst, sol);
+
+    }
+
+    // Free allocated memory
+    free(xstar);
+    free(comp);
+    free(succ);
+
+    free_CPLEX(&env, &lp);
+
+    free_solution(&temp_sol);
+
+}
+
+// Fix some edges of the solution in the model
+int set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, const double p) {
+
+    // Allocate memory for the constraints
+    int *edge_indices = (int *)malloc(inst->nnodes * sizeof(int));
+    char *lu = (char *)malloc(inst->nnodes * sizeof(char));
+    double *bd = (double *)malloc(inst->nnodes * sizeof(double));
+    if(edge_indices == NULL || lu == NULL || bd == NULL) print_error("set_lowerbounds(): Cannot allocate memory");
+
+    int fixed_count = 0;
+        
+    for (int i = 0; i < inst->nnodes; i++) {
+
+        int edge_idx = xpos(sol->visited_nodes[i], sol->visited_nodes[i+1], inst);
+
+        double rand_val = random01();
+
+        if (rand_val < p) {
+
+            // To fix an edge you need to fix the lower bound equal to 1.0 (the value of the upper bound)
+            edge_indices[fixed_count] = edge_idx;
+            lu[fixed_count] = 'L';
+            bd[fixed_count] = 1.0;
+            fixed_count++;
+
+        }
+
+    }
+
+    // Fix edges in one batch operation
+    if (fixed_count > 0) {
+
+        if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd)) print_error("hard_fixing(): Error in setting bounds");
+        
     }
 
     // Free allocated memory
     free(edge_indices);
     free(lu);
     free(bd);
-    free(xstar);
-    free(comp);
-    free(succ);
-    free_CPLEX(&env, &lp);
-    free_solution(&temp_best_sol);
-    free_solution(&temp_sol);
+
+    return fixed_count;
 
 }
 
-void set_lowerbounds(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, 
-                     const double p, int *fixed_count, int *edge_indices, char *lu, double *bd) 
-{
+void reset_lowerbounds(const instance *inst, CPXENVptr env, CPXLPptr lp) {
 
-    *fixed_count = 0;
+    int *edge_indices = (int *)malloc(inst->ncols * sizeof(int));
+    char *lu = (char *) malloc(inst->ncols * sizeof(char));
+    double *bd = (double *) malloc(inst->ncols * sizeof(double));
+    
+    for (int i=0; i<inst->ncols; i++) {
+
+        // To reset an edge you need to fix the lower bound equal to 0.0
+        edge_indices[i] = i;
+        lu[i] = 'L';
+        bd[i] = 0.0;
+
+    }
+
+    if (CPXchgbds(env, lp, inst->ncols, edge_indices, lu, bd)) print_error("hard_fixing(): Error in resetting bounds");
         
-    for (int i = 0; i < inst->nnodes; i++)
-    {
-        int next_idx = (i + 1) % inst->nnodes;
-        int edge_idx = xpos(sol->visited_nodes[i], sol->visited_nodes[next_idx], inst);
+    // Check if the bounds are reset correctly
+    if (inst->verbose >= GOOD) {
 
-        double rand_val = thread_safe_rand_01();
-        if (rand_val < p)
-        {
-            edge_indices[*fixed_count] = edge_idx;
-            lu[*fixed_count] = 'L';
-            bd[*fixed_count] = 1.0;
-            (*fixed_count)++;
+        if(CPXgetlb(env, lp, bd, 0, inst->ncols-1)) print_error("CPXgetlb(): Cannot get the lowerbounds");
+
+        for (int i=0; i<inst->ncols; i++) {
+
+            if (bd[i] != 0.0) print_error("reset_lowerbounds(): Error in reset lowerbounds");
+
         }
+
     }
-
-    // Fix edges in one batch operation
-    if (*fixed_count > 0)
-    {
-        if (CPXchgbds(env, lp, *fixed_count, edge_indices, lu, bd))
-        {
-            print_error("hard_fixing(): Error in setting bounds");
-        }
-    }
-
-}
-
-void reset_lowerbounds(CPXENVptr env, CPXLPptr lp, const int fixed_count, const int *edge_indices, char *lu, double *bd) {
-
-    if (fixed_count > 0)
-    {
-        // to do : fix all the variables to 0 not only the one who changed 
-        for (int i = 0; i < fixed_count; i++)
-        {
-            //lu[i] = 'L';
-            bd[i] = 0.0;
-        }
-
-        if (CPXchgbds(env, lp, fixed_count, edge_indices, lu, bd))
-        {
-            print_error("hard_fixing(): Error in resetting bounds");
-        }
-    }
-    // add a check to see if the bounds are reset correctly
 
 }

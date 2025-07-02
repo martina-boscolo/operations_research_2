@@ -12,7 +12,8 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     // Go to local minima, for first iterations the tabu list is useless
     two_opt(inst, &temp_sol, timelimit, false);
-    updated = updated || update_sol(inst, sol, &temp_sol, is_asked_method);
+    bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+    updated = updated || val;
         
     // Initialize tabu parameters
     tabu_params params;
@@ -46,7 +47,8 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         }
         
         // Update best solution if needed
-        updated = updated || update_sol(inst, sol, &temp_sol, true);
+        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+        updated = updated || val;
 
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
             fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost, sol->cost);
@@ -127,6 +129,7 @@ int compute_tenure(const tabu_params *params) {
             // More pronounced sinusoidal with wider amplitude
             double frequency = 0.05; // Slower oscillation
             double amplitude = params->max_tenure - params->min_tenure;
+            
             return params->min_tenure + (int)(amplitude * (0.5 * (1 + sin(frequency * params->current_iter))));
 
     }
@@ -191,7 +194,7 @@ int is_tabu_list_full(const tabu_params *params, const int nnodes) {
     }
 
     // Consider the list "full" if more than 95% of nodes are tabu
-    return ( count > (nnodes * 0.95));
+    return (count > (nnodes * 0.95));
 
 }
 

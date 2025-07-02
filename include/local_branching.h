@@ -5,39 +5,34 @@
 #include "utilities.h"
 #include "tsp_cplex.h"
 
-#define LB "LB"
+#define LOCAL_BRANCHING "LB"
+
 /**
- * Local branching algorithm
+ * Local branching algorithm.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
- * @param timelimit Time limit for the algorithm
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The solution that will contain the best solution between the input one and the best found one (input/output)
+ * @param timelimit The time limit for the algorithm (input)
  */
 void local_branching(instance *inst, solution *sol, const double timelimit);
 
 /**
- * Set the local branching constraint in the CPLEX model
- * 
- * @param env CPLEX environment
- * @param lp CPLEX LP
- * @param constraint_index Index of the constraint to be removed
- */
-void remove_local_branching_constraint(CPXENVptr env, CPXLPptr lp, const int constraint_index) ;
-
-/**
- * Set the local branching constraint in the CPLEX model
+ * Set the local branching constraint in the CPLEX model.
  * 
  * @param inst The instance pointer of the problem
  * @param sol The solution pointer of the instance
- * @param env CPLEX environment
- * @param lp CPLEX LP
- * @param k Neighborhood size
- * @param indices Array of indices for the constraint
- * @param values Array of values for the constraint
+ * @param env CPLEX environment (input/output)
+ * @param lp CPLEX model (input/output)
+ * @param k The neighborhood size (input)
  */
-int add_local_branching_constraint(const instance *inst, const solution *sol, 
-                                  CPXENVptr env, CPXLPptr lp, const int k,
-                                  int *indices, double *values) ;
-                                  
+void add_local_branching_constraint(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp, const int k);
+
+/**
+ * Remove the local branching constraint in the CPLEX model.
+ * 
+ * @param env CPLEX environment (input/output)
+ * @param lp CPLEX model (input/output)
+ */
+void remove_local_branching_constraint(CPXENVptr env, CPXLPptr lp) ;
 
 #endif // LOCAL_BRANCHING_H

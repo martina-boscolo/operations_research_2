@@ -14,7 +14,7 @@
  * 
  * @param inst The instance that contains the problem data (input)
  * @param env CPLEX environment (output)
- * @param lp CPLEX LP (output)
+ * @param lp CPLEX model (output)
  */
 void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
@@ -25,7 +25,7 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution to use as warm up (input)
  * @param env CPLEX environment (input/output)
- * @param lp CPLEX LP (input/output)
+ * @param lp CPLEX model (input/output)
  */
 void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp);
 
@@ -35,7 +35,7 @@ void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr 
  * 
  * @param inst The instance that contains the problem data (input)
  * @param env CPLEX environment (input/output)
- * @param lp CPLEX LP (input/output)
+ * @param lp CPLEX model (input/output)
  * @param xstar The array that will contain the optimal coefficient for each edge (output)
  * @param succ The array that will contain the solution as successors (output)
  * @param comp The array that will contain the component associated for each nodes (output)
@@ -83,7 +83,7 @@ int xpos(const int i, const int j, const instance *inst);
  * 
  * @param inst The instance that contains the problem data (input)
  * @param env CPLEX environment (input/output)
- * @param lp CPLEX LP (input/output)
+ * @param lp CPLEX model (input/output)
  */
 void build_model_CPLEX(instance *inst, CPXENVptr env, CPXLPptr lp);
 
@@ -123,7 +123,7 @@ void build_CPLEXsol_from_solution(const instance *inst, const solution *sol, dou
  * Free memory associated with CPLEX
  * 
  * @param env CPLEX environment (output)
- * @param lp CPLEX LP (output)
+ * @param lp CPLEX model (output)
  */
 void free_CPLEX(CPXENVptr *env, CPXLPptr *lp);
 

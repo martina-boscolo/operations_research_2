@@ -26,7 +26,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit);
  * 
  * @param inst The instance that contains the problem data (input)
  * @param env CPLEX environment (input/output)
- * @param lp CPLEX LP (input/output)
+ * @param lp CPLEX model (input/output)
  * @param comp The array that contains the component associated for each nodes (input)
  * @param ncomp The number of components in the solution (input)
  * @param iter The iteration number (input)
@@ -87,7 +87,8 @@ void update_comp(int i, const int new_comp, const int *succ, int *comp);
 
 /**
  * Function to extract subtours from the successors array.
- * NOTE: This function assumes that the arrays are correctly allocated.
+ * NOTE: This function assumes that the arrays are correctly allocated: 
+ *       for subtours only pointers to arrays must be allocated, as these will be allocated in the function.
  * NOTE: only the first ncomp arrays of subtours will be allocated.
  * 
  * @param inst The instance that contains the problem data (input)

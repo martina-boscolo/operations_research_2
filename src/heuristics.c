@@ -171,7 +171,9 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start) {
     sol->cost += cost(sol->visited_nodes[len - 1], start, inst);
 
     if (inst->verbose >= GOOD) {
+
         check_sol(inst, sol);
+
     }
 
     strncpy_s(sol->method, METH_NAME_LEN, NEAREST_NEIGHBOR, _TRUNCATE);
@@ -182,12 +184,13 @@ void nearest_neighbor(const instance *inst, solution *sol, const int start) {
 void multi_start_nn(const instance *inst, solution *sol, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
+    bool updated = false;
+    bool is_asked_method = (strcmp(inst->asked_method, NN_TWOOPT) == 0);
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
 
     double elapsed_time;
-    bool updated = false;
 
     for (int start = 0; start < inst->nnodes; start++) {
 
@@ -216,7 +219,8 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
 
         }
 
-        updated = updated || update_sol(inst, sol, &temp_sol, true);
+        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+        updated = updated || val;
 
     }
 
@@ -346,6 +350,8 @@ void extra_mileage(const instance *inst, solution *sol) {
 void two_opt(const instance *inst, solution *sol, const double timelimit, bool print) {
 
     double t_start = get_time_in_milliseconds();
+    bool updated = false;
+    bool is_asked_method = (strcmp(inst->asked_method, TWO_OPT) == 0);
 
     int improved = true; // Flag to track improvements
     while (improved && (get_elapsed_time(t_start) < timelimit)) {
@@ -390,6 +396,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
             // Update the solution cost correctly
             sol->cost += best_delta;
             improved = true; // Indicate improvement found
+            updated = true;
 
         }
         
@@ -401,7 +408,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
     }
 
-    if (strcmp(inst->asked_method, TWO_OPT) == 0) {
+    if (updated && is_asked_method) {
 
         strncpy_s(sol->method, METH_NAME_LEN, TWO_OPT, _TRUNCATE);
 

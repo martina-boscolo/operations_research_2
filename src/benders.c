@@ -64,7 +64,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
                 int *subtour_lengths = (int *)malloc(inst->nnodes * sizeof(int));
                 if (subtours == NULL || subtour_lengths == NULL) print_error("benders_loop(): Cannot allocate memory");
 
-                extract_subtours_from_successors(inst, succ, &subtours, &subtour_lengths, &ncomp);
+                extract_subtours_from_successors(inst, succ, subtours, subtour_lengths, &ncomp);
                 plot_subtours(inst, subtours, subtour_lengths, ncomp, iter);
 
                 for (int k=0; k<ncomp; k++) {
@@ -85,7 +85,8 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
             add_SECs_to_model(inst, env, lp, comp, ncomp, iter);
 
             patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
-            updated = updated || update_sol(inst, sol, &temp_sol, true);
+            bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+            updated = updated || val;
 
             // If asked plot the patch
             if (inst->verbose >= GOOD) {
@@ -101,10 +102,11 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     if (ncomp == 1) {
         build_solution_from_CPLEX(inst, &temp_sol, succ);
-        updated = updated || update_sol(inst, sol, &temp_sol, true);
+        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
+        updated = updated || val;
     }
     
-    if (updated && is_asked_method) {
+    if (updated) {
 
         sprintf_s(sol->method, METH_NAME_LEN, BENDERS);
 
@@ -377,7 +379,7 @@ void extract_subtours_from_successors(const instance *inst, const int *succ, int
 
         free(this_subtour);
 
-        ncomp++;
+        (*ncomp)++;
 
     }
 
