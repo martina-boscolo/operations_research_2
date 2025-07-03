@@ -47,7 +47,7 @@ void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const i
 void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, int ncomp, const double timelimit);
 
 /**
- * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,succ_j), (j,succ_i)
+ * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,succ_j), (j,succ_i).
  *
  * @param i The first index (input)
  * @param j The second index (input)
@@ -57,7 +57,7 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
 double delta_dir(const int i, const int j, const instance *inst, const int *succ);
 
 /**
- * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,j), (succ_j,succ_i)
+ * Compute the delta cost removing edges (i, succ_i), (j,succ_j) and adding the edges (i,j), (succ_j,succ_i).
  *
  * @param i The first index (input)
  * @param j The second index (input)
@@ -67,7 +67,7 @@ double delta_dir(const int i, const int j, const instance *inst, const int *succ
 double delta_rev(const int i, const int j, const instance *inst, const int *succ);
 
 /**
- * Reverse the order of the subtour that contains node i in succ 
+ * Reverse the order of the subtour that contains node i in succ.
  * 
  * @param i The node in the subtour (input)
  * @param succ The solution as successors (input/output)
@@ -89,7 +89,7 @@ void update_comp(int i, const int new_comp, const int *succ, int *comp);
  * Function to extract subtours from the successors array.
  * NOTE: This function assumes that the arrays are correctly allocated: 
  *       for subtours only pointers to arrays must be allocated, as these will be allocated in the function.
- * NOTE: only the first ncomp arrays of subtours will be allocated.
+ * NOTE: Only the first ncomp arrays of subtours will be allocated.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param succ The solution as successors (input)

@@ -10,7 +10,7 @@
 #define CONS_NAME_LEN 100
 
 /**
- * Initialize the CPLEX enviroment and build the base model of TSP (w/o SEC's)
+ * Initialize the CPLEX enviroment and build the base model of TSP (w/o SEC's).
  * 
  * @param inst The instance that contains the problem data (input)
  * @param env CPLEX environment (output)
@@ -20,7 +20,7 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 
 /**
  * Use the solution as warm up for the branching tree.
- * NOTE: This function assumes that the solution is feasible 
+ * NOTE: This function assumes that the solution is feasible.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution to use as warm up (input)
@@ -30,7 +30,7 @@ void initialize_CPLEX(instance *inst, CPXENVptr *env, CPXLPptr *lp);
 void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr lp);
 
 /**
- * Obtain the optimal solution of lp w.r.t. instance and lp, store it in xstar, succ, comp, ncomp.
+ * Obtain the optimal solution of lp w.r.t. instance and lp.
  * NOTE: This function assumes that the arrays are correctly allocated.
  * 
  * @param inst The instance that contains the problem data (input)

@@ -253,7 +253,7 @@ static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG 
 }
 
 // Add the SECs in the pool
-int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const int *comp, const int ncomp, const int tree_node) {
+void add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const int *comp, const int ncomp, const int tree_node) {
     
     // Set values for SEC's
     int izero = 0;
@@ -305,12 +305,10 @@ int add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const 
 
     }
 
-    return 0;
-
 }
 
 // Post the patched solution
-int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *succ, int *comp, int ncomp, const double timelimit) {
+void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *succ, int *comp, int ncomp, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
 
@@ -339,7 +337,7 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
 
         free_solution(&sol);
 
-        return 0;
+        return;
 
     }
 
@@ -377,8 +375,6 @@ int post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *suc
     free(xheu);
     free_solution(&sol);
 
-    return 0;
-
 }
 
 // Add the violated SEC from a fractional solution
@@ -391,7 +387,7 @@ static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pas
     // Set values for SEC's
     char sense = 'L';
     int izero = 0;
-    double rhs = (double)(cutcount - 1);  // SEC: sum(x_ij) <= |S| - 1
+    double rhs = (double) (cutcount - 1);  // SEC: sum(x_ij) <= |S| - 1
 
     int *index = (int *) malloc(sizeof(int) * cutcount * (cutcount - 1) / 2);
     double *coef = (double *) malloc(sizeof(double) * cutcount * (cutcount - 1) / 2);
@@ -418,8 +414,7 @@ static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pas
         int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep
         int local = 0; // Global cut (valid for the entire problem)
 
-        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local))
-            print_error("CPXcallbackaddusercuts(): Error");
+        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)) print_error("CPXcallbackaddusercuts(): Error");
 
     }
 
