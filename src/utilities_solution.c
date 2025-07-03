@@ -35,7 +35,9 @@ void solve_with_method(instance *inst, solution *sol) {
 
         printf("Solving with Nearest Neighbor method.\n");
 
-        multi_start_nn(inst, sol, timelimit); 
+        nearest_neighbor(inst, sol, rand() % inst->nnodes);
+        //two_opt(inst, sol, rand() % inst->nnodes, true);
+        // multi_start_nn(inst, sol, timelimit); 
 
     } else if (strcmp(inst->asked_method, EXTRA_MILEAGE) == 0) {
 
@@ -43,7 +45,7 @@ void solve_with_method(instance *inst, solution *sol) {
         printf("Solving with Extra Mileage method.\n");
 
         extra_mileage(inst, sol);
-        two_opt(inst, sol, timelimit - get_elapsed_time(inst->t_start), true);
+        //two_opt(inst, sol, timelimit - get_elapsed_time(inst->t_start), true);
 
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 

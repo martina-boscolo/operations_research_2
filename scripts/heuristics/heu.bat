@@ -2,13 +2,13 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=11
-set SEED_END=20
+set SEED_START=1
+set SEED_END=10
 set NODES=1000
 set TIMELIMIT=60
 
 REM Define specific parameter values
-set METHOD=TS VNS
+set METHOD=NN EM
 
 REM Empty the logs folder if it exists, otherwise create it
 if exist logs (
@@ -30,7 +30,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
 )
 
 REM Create CSV header with parameter combinations
-echo 3,NN,TS,VNS > metaheur_comp.csv
+echo 2,NN,EM > heu.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
@@ -41,7 +41,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
         )
         set "line=!line!,!cost!"
     )
-    echo !line! >> metaheur_comp.csv
+    echo !line! >> heu.csv
 )
 
-echo All tasks completed! Metaheuristics comparison CSV successfully generated.
+echo All tasks completed! Heuristic comparison CSV successfully generated.

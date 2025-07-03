@@ -1,0 +1,9 @@
+
+logs
+./logs
+./results
+./plot
+
+#keeping csv stats files for the report (they are only few lines)
+#keeping the pdf files for the report
+
