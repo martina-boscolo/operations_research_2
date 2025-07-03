@@ -354,7 +354,9 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
     bool is_asked_method = (strcmp(inst->asked_method, TWO_OPT) == 0);
 
     int improved = true; // Flag to track improvements
-    while (improved && (get_elapsed_time(t_start) < timelimit)) {
+    double residual_time;
+
+    while (improved && ((residual_time = timelimit - get_elapsed_time(t_start)) > 0)) {
 
         double best_delta = INFINITY;
         int best_i = -1, best_j = -1;
@@ -386,7 +388,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
             if(print && inst->verbose >= ONLY_INCUMBMENT) {
 
-                printf("Incumbment updated\nOld cost: %10.6lf,\tNew cost: %10.6lf\n", sol->cost, sol->cost + best_delta);
+                printf(" * Old cost %10.6lf, New cost %10.6lf, Residual time %10.6lf\n", sol->cost, sol->cost + best_delta, residual_time);
 
             }
 

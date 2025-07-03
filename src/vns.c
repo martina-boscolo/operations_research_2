@@ -24,24 +24,31 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
 
     int iteration = 0;
 
-    double elapsed_time;
-    while ((elapsed_time = get_elapsed_time(t_start)) < timelimit) {
-
-        if (inst->verbose >= DEBUG_V){
-
-            printf("Time left: %10.6f \n", timelimit - elapsed_time);
-
-        }
+    double residual_time;
+    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
         // go to local optima
-        two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
+        two_opt(inst, &temp_sol, residual_time, false);
 
         // update local best solution
-        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-        updated = updated || val;
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, is_asked_method);
+        updated = updated || u;
         
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Residual time %10.6lf\n", 
+                iteration, old_cost, temp_sol.cost, residual_time);
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
 
         }

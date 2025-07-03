@@ -7,7 +7,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     bool updated = false;
     bool is_asked_method = (strcmp(inst->asked_method, HARD_FIXING) == 0);
     
-    // Set parameters for 
+    // Set parameters for B&C
     inst->param2 = 1; 
     inst->param3 = 1; 
 
@@ -26,11 +26,11 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int *comp = (int *)malloc(inst->nnodes * sizeof(int));
     double *xstar = (double *)malloc(inst->ncols * sizeof(double));
     int ncomp;
-    
     if (succ == NULL || comp == NULL || xstar == NULL) print_error("hard_fixing(): Cannot allocate memory");
    
     int iter = 0;
 
+    // Set the percentages of nodes to fix
     const double percentages[] = {0.4, 0.5, 0.6, 0.8};
     const int num_options = 4;
 
@@ -39,7 +39,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     // Parameters for tree depth control
     int starting_depth = 0;  // Default starting tree depth
     
-    int depth_increment = 5;  // Increase depth by this amount each iteration
+    int depth_increment = 5;  // Increasing depth step
     int current_depth = starting_depth;  // Track current depth
     
     warm_up(inst, sol, env, lp);
@@ -50,20 +50,13 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int fixed_count;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
-
-        if (inst->verbose >= LOW) {
-
-            printf("Hard fixing percentage = %10.6f%%\n", percentage * 100);
-            printf("Current tree depth limit: %5d\n", current_depth);
-
-        }
         
         // Fix edges in the model
         fixed_count = set_lowerbounds(inst, sol, env, lp, percentage);
 
         if (inst->verbose >= GOOD) {
 
-            printf("Iteration %5d: Fixed %5d out of %5d edges (%10.6f%%)\n", iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
+            printf("\tFixed %5d out of %5d edges (%10.6f%%)\n", iter, fixed_count, inst->nnodes, 100.0 * fixed_count / inst->nnodes);
 
         }
 
@@ -90,14 +83,26 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
         build_solution_from_CPLEX(inst, &temp_sol, succ);
 
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, false);
+        updated = updated || u;
+        
         if (inst->verbose >= LOW) {
 
-            printf("solution cost %10.6lf, incumbment %10.6lf\n", temp_sol.cost, sol->cost);
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Hard fixing percentage %10.6f%%, tree depth %5d, Residual time %10.6lf\n", 
+                iter, old_cost, temp_sol.cost, percentage * 100, current_depth, residual_time);
 
         }
-
-        bool var = update_sol(inst, sol, &temp_sol, true);
-        updated = updated || var;
         
         iter++;
 
@@ -108,8 +113,8 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
         }
 
-        // Increase the depth for the next iteration
-        if (!var) {
+        // Increase depth for the next iteration if no improvements
+        if (!u) {
 
             current_depth += depth_increment;
 

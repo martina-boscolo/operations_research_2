@@ -46,9 +46,11 @@ void warm_up(const instance *inst, const solution *sol, CPXENVptr env, CPXLPptr 
 int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp, double *xstar, int *succ, int *comp, int *ncomp);
 
 /**
- * Return if CPLEX found a feasible solution.
+ * Check if CPLEX found a feasible solution.
  * 
  * @param status CPLEX status (input)
+ * 
+ * @return true if CPLEX found a feasible solution, false otherwise
  */
 bool has_feasible_solution(const int status);
 

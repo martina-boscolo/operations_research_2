@@ -40,12 +40,6 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
-        if (inst->verbose >= LOW) {
-
-            printf("Local branching iteration %5d with k = %5d\n", iter, k);
-
-        }
-        
         // Add new local branching constraint based on current best solution
         add_local_branching_constraint(inst, sol, env, lp, k);
 
@@ -60,11 +54,29 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
         build_solution_from_CPLEX(inst, &temp_sol, succ);
 
-        bool var = update_sol(inst, sol, &temp_sol, is_asked_method);
-        updated = updated || var;
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, false);
+        updated = updated || u;
+        
+        if (inst->verbose >= LOW) {
+
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, k %5d, Residual time %10.6lf\n", 
+                iter, old_cost, temp_sol.cost, k, residual_time);
+
+        }
         
         // If no improvements change the number of fixed edges
-        if (!var) { 
+        if (!u) { 
 
             k = (int)(k * 1.1);
 
@@ -150,7 +162,8 @@ void add_local_branching_constraint(const instance *inst, const solution *sol, C
 
     double rhs = inst->nnodes - k;
 
-    if (CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, indices, values, NULL, NULL)) print_error("add_local_branching_constraint(): Failed to add local branching constraint");
+    if (CPXaddrows(env, lp, 0, 1, nnz, &rhs, &sense, &izero, indices, values, NULL, NULL)) 
+        print_error("add_local_branching_constraint(): Failed to add local branching constraint");
 
     // Free allocated memory
     free(in_solution);

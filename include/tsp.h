@@ -13,7 +13,7 @@
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
 
-// Value limits
+// Value limit
 #define MIN_NNODES 10
 
 // Verbose levels
@@ -40,7 +40,8 @@ typedef struct {
 typedef struct {
 
     double cost;                        // Cost of the solution
-    int *visited_nodes;                 // Sequence of visited nodes NOTE: to complete the cycle first and last nodes must be the same node
+    int *visited_nodes;                 // Sequence of visited nodes 
+                                        // NOTE: to complete the cycle first and last nodes must be the same node
     char method[METH_NAME_LEN];         // Name of method used to compute the solution
 
 } solution;

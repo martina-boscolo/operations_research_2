@@ -60,8 +60,8 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit) {
     if (ncomp != 1) print_error("branch_and_cut(): The solution has more than one connected component");
     
     build_solution_from_CPLEX(inst, &temp_sol, succ);
-    bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-    updated = updated || val;
+    bool u = update_sol(inst, sol, &temp_sol, is_asked_method);
+    updated = updated || u;
 
     if (updated) {
 
@@ -148,22 +148,26 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
     CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
     double incumbent = CPX_INFBOUND;
     CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_BEST_SOL, &incumbent);
-
+       
     // Log information if verbose is set
     if (inst->verbose >= GOOD) {
 
+        printf("Node %5d, Thread %5d, ", mynode, mythread);
+
         if (incumbent >= CPX_INFBOUND / 2) {
 
-            printf(" ... callback at node %5d thread %5d, NO incumbent yet, candidate value %10.6lf\n", mynode, mythread, objval);
+            printf("NO incumbent yet");
         
         } else {
 
-            printf(" ... callback at node %5d thread %5d, incumbent %10.6lf, candidate value %10.6lf\n", mynode, mythread, incumbent, objval);
+            printf("Incumbent %10.6lf", incumbent);
         
         }
 
+        printf(", candidate value %10.6lf\n", objval);
+
     }
-    
+     
     // Thread-local memory for subtour detection
     int nnodes = inst->nnodes;
     int* succ = (int*) malloc(nnodes * sizeof(int));
@@ -193,7 +197,7 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
         }
 
     }
-    
+
     // Free memory
     free(xstar);
     free(succ);
@@ -208,27 +212,25 @@ static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG 
 
     instance* inst = (instance*) userhandle;
 
+    // Get thread info
+    int mythread = -1;
+    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &mythread);
+    int mynode = -1;
+    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &mynode);
+    int mydepth = -1;
+    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODEDEPTH, &mydepth);
+    double incumbent = CPX_INFBOUND;
+    CPXcallbackgetinfodbl(context, CPXCALLBACKINFO_BEST_SOL, &incumbent);
+
     // Skip some callback invocations for performance optimization
     
-    // Get thread info
-    int threadid = -1;
-    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_THREADID, &threadid);
-    int depth = -1;
-    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODEDEPTH, &depth);
-    int nodes = -1;
-    CPXcallbackgetinfoint(context, CPXCALLBACKINFO_NODECOUNT, &nodes);
-
     // Option 1: Skip based on node depth
-    if (depth > 10 || (nodes > 1000 && nodes % 50 != 0)) {
-        return 0;  // Skip this callback invocation
-    }
+    if (mydepth > 10 || (mynode > 1000 && mynode % 50 != 0)) return 0;
     
     // Option 2: Skip based on node count
-    if ((nodes < 100 && nodes % 5 != 0) || (nodes >= 100 && nodes % 20 != 0)) {
-        // Skip most nodes, process more frequently early in search
-        return 0;
-    }
-    
+    // Skip most nodes, process more frequently early in search
+    if ((mynode < 100 && mynode % 5 != 0) || (mynode >= 100 && mynode % 20 != 0)) return 0;
+
     // Get the relaxation solution
     double *xstar = (double *)calloc(inst->ncols, sizeof(double));
     if (xstar == NULL) print_error("relaxation_callback(): Cannot allocate memory");
@@ -237,9 +239,22 @@ static int CPXPUBLIC relaxation_callback(CPXCALLBACKCONTEXTptr context, CPXLONG 
     
     if (CPXcallbackgetrelaxationpoint(context, xstar, 0, inst->ncols - 1, &objval)) print_error("CPXcallbackgetrelaxationpoint(): Error");
     
+    // Log information if verbose is set
     if (inst->verbose >= GOOD) {
 
-        printf("Relaxation callback: Relaxation solution value %10.6lf\n", objval);
+        printf("Node %5d, Thread %5d, ", mynode, mythread);
+
+        if (incumbent >= CPX_INFBOUND / 2) {
+
+            printf("NO incumbent yet");
+        
+        } else {
+
+            printf("Incumbent %10.6lf", incumbent);
+        
+        }
+
+        printf(", candidate value %10.6lf\n", objval);
 
     }
     
@@ -289,7 +304,7 @@ void add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const
         
         if (inst->verbose >= DEBUG_V) {
 
-            printf("   --> Node %5d: Added SEC for component %5d with %5d nodes\n", tree_node, k, count);
+            printf("Node %5d, Added SEC for component %5d with %5d nodes\n", tree_node, k, count);
 
         }
 
@@ -301,7 +316,7 @@ void add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const
     
     if (cuts_added > 0 && inst->verbose >= GOOD) {
 
-        printf("   --> Node %5d: Added %5d SEC cuts\n", tree_node, cuts_added);
+        printf("Node %5d, Added %5d SEC cuts\n", tree_node, cuts_added);
 
     }
 
@@ -327,11 +342,11 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
     build_solution_from_CPLEX(inst, &sol, succ);
 
     // Check if the solution we found is better than the incumbent
-    if (sol.cost >= incumbent && incumbent < CPX_INFBOUND) {
+    if (incumbent < CPX_INFBOUND && sol.cost >= incumbent) {
 
         if (inst->verbose >= GOOD) {
 
-            printf("   --> Node %5d: Heuristic solution (%10.6lf) not better than incumbent (%10.6lf), skipping\n", mynode, sol.cost, incumbent);
+            printf("   Node %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
         
         }
 
@@ -351,22 +366,12 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 
     for (int j = 0; j < inst->ncols; j++) ind[j] = j;
 
-    if (CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK))
+    if (CPXcallbackpostheursoln(context, inst->ncols, ind, xheu, sol.cost, CPXCALLBACKSOLUTION_NOCHECK)) 
         print_error("CPXcallbackpostheursoln(): Error");
     
     if (inst->verbose >= GOOD) {
 
-        printf("   --> Node %5d: Post heuristic solution with cost %10.6lf", mynode, sol.cost);
-
-        if (incumbent < CPX_INFBOUND) {
-
-            printf(" (incumbent: %10.6lf)\n", incumbent );
-
-        } else {
-
-            printf(" (first feasible solution)\n");
-
-        }
+        printf(" * Node %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
 
     }
     
@@ -379,6 +384,8 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 
 // Add the violated SEC from a fractional solution
 static int add_violated_sec(int cutcount, int *cutlist, void *pass_param) {
+
+    if (cutcount <= 1) return 0;
 
     cut_callback_data *data = (cut_callback_data *) pass_param;
     const instance *inst = data->inst;
@@ -414,7 +421,8 @@ static int add_violated_sec(int cutcount, int *cutlist, void *pass_param) {
         int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep
         int local = 0; // Global cut (valid for the entire problem)
 
-        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)) print_error("CPXcallbackaddusercuts(): Error");
+        if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)) 
+            print_error("CPXcallbackaddusercuts(): Error");
 
     }
 
@@ -427,7 +435,7 @@ static int add_violated_sec(int cutcount, int *cutlist, void *pass_param) {
 }
 
 // Extract the SEC's violated by a fractional solution and add them to the user's cuts
-int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr context, double *xstar) {
+void add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr context, double *xstar) {
 
     // Maximum number of edges
     int max_edges = inst->ncols;
@@ -464,7 +472,8 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
     int *comps = NULL;
     int *compscount = NULL;
 
-    if (CCcut_connect_components(inst->nnodes, nedges, elist, elist_val, &ncomp, &compscount, &comps)) print_error("CCcut_connect_components(): Error");
+    if (CCcut_connect_components(inst->nnodes, nedges, elist, elist_val, &ncomp, &compscount, &comps)) 
+        print_error("CCcut_connect_components(): Error");
 
     if (inst->verbose >= GOOD) {
 
@@ -477,7 +486,8 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
         // Fully connected: find violated cuts
         cut_callback_data data = { context, inst };
 
-        if (CCcut_violated_cuts(inst->nnodes, nedges, elist, elist_val, 2.0 - 1e-5, add_violated_sec, &data)) print_error("CCcut_violated_cuts(): Error");
+        if (CCcut_violated_cuts(inst->nnodes, nedges, elist, elist_val, 2.0 - 1e-5, add_violated_sec, &data)) 
+            print_error("CCcut_violated_cuts(): Error");
 
     } else {
 
@@ -495,6 +505,7 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
             }
 
             int *nodes_in_comp = (int *) malloc(compscount[c] * sizeof(int));
+            if (nodes_in_comp == NULL) print_error("add_violated_cuts_to_model(): Cannot allocate memory");
             
             // Correctly copy nodes from this component
             for (int j = 0; j < compscount[c]; j++) {
@@ -537,12 +548,14 @@ int add_violated_cuts_to_model(const instance *inst, CPXCALLBACKCONTEXTptr conte
             int purgeable = CPX_USECUT_FILTER; // Let CPLEX decide which cuts to keep
             int local = 0; // Global cut (valid for the entire problem)
 
-            if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)) print_error("CPXcallbackaddusercuts(): Error in multi-component SEC");
+            if (CPXcallbackaddusercuts(context, 1, nnz, &rhs, &sense, &izero, index, coef, &purgeable, &local)) 
+                print_error("CPXcallbackaddusercuts(): Error in multi-component SEC");
 
             // Free allocated memory
             free(index);
             free(coef);
             free(nodes_in_comp);
+
         }
 
     }

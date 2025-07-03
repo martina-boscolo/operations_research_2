@@ -43,7 +43,7 @@ void install_callback(instance *inst, CPXENVptr env, CPXLPptr lp);
 /**
  * Callback for the branching tree.
  * 
- * @param context The context of node of branching tree (input)
+ * @param context The context of node of branching tree (input/output)
  * @param contextid The context in which the callback is invoked (input)
  * @param userhandle The instance that contains the problem data (input)
  */
@@ -53,7 +53,7 @@ static int CPXPUBLIC callback_branch_and_cut(CPXCALLBACKCONTEXTptr context, CPXL
  * Lazy callback: when a candidate is found check if it is feasible;
  * if not, reject it and add the correspondent SECs in the pool.
  * 
- * @param context The context of node of branching tree (input)
+ * @param context The context of node of branching tree (input/output)
  * @param contextid The context in which the callback is invoked (input)
  * @param userhandle The instance that contains the problem data (input)
  * 
@@ -64,7 +64,7 @@ static int CPXPUBLIC lazy_callback(CPXCALLBACKCONTEXTptr context, CPXLONG contex
 /**
  * Relaxation callback: add fractional SEC's.
  * 
- * @param context The context of node of branching tree (input)
+ * @param context The context of node of branching tree (input/output)
  * @param contextid The context in which the callback is invoked (input)
  * @param userhandle The instance that contains the problem data (input)
  * 
@@ -87,7 +87,7 @@ void add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const
  * If an integer non-feasible solution is found use patch heuristic and post it.
  * 
  * @param inst The instance that contains the problem data (input)
- * @param context The context of node of branching tree (input)
+ * @param context The context of node of branching tree (input/output)
  * @param succ The solution as successors (input/output)
  * @param comp The array with component associated for each nodes (input/output)
  * @param ncomp The number of components in the solution (input)
@@ -98,8 +98,8 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 /**
  * Add the violated SEC from a fractional solution to the user's cuts.
  * 
- * @param cutcount The number of nodes in the subtour that violates the constraint
- * @param cutlist Array containing the indices of nodes in the violating subtour
+ * @param cutcount The number of nodes in the subtour that violates the constraint (input)
+ * @param cutlist Array containing the indices of nodes in the violating subtour (input)
  * @param pass_param The instance data and the context of node of branching tree (input)
  * 
  * @return 0 if the SEC is added correctly

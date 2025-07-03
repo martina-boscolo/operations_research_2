@@ -75,7 +75,6 @@ bool validate_cost(const instance *inst, const solution *sol);
 
 /**
  * Check the feasibility of the solution.
- * NOTE: If the solution is not feasible exit.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution to check (input)
@@ -84,7 +83,7 @@ void check_sol(const instance *inst, const solution *sol);
 
 /**
  * Check if the second solution is better than the first one, if so update the first solution.
- * NOTE: Assumes that both solutions are valid tours, with correct costs.
+ * NOTE: This function assumes that both solutions are valid tours, with correct costs.
  * 
  * @param inst The instance that contains the problem data (input)
  * @param sol1 The first solution to update (input/output)

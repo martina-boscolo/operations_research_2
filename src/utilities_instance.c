@@ -79,7 +79,7 @@ void random_instance_generator(instance *inst) {
         // If asked, print the coordinates
         if (inst->verbose >= GOOD) {
 
-            printf("Node %5d \t x %10.6lf,\ty %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
+            printf("Node %5d, x %10.6lf, y %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
 
         }
 
@@ -234,7 +234,7 @@ void print_instance(const instance *inst) {
 
         for (int i=0; i<inst->nnodes; i++) {
 
-            printf("Node %5d: \t x %10.6lf,\ty %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
+            printf("Node %5d, x %10.6lf, y %10.6lf\n", i, inst->coord[i].x, inst->coord[i].y);
 
         }
         

@@ -40,8 +40,8 @@ void random_instance_generator(instance *inst);
 
 /**
  * Parse a TSPLIB format file to extract only node coordinates.
- * NOTE: Assume a standard TSPLIB format where DIMENSION appears before NODE_COORD_SECTION.
- * NOTE: The function assumes that the input file is already set in the instance structure.
+ * NOTE: This function assumes a standard TSPLIB format where DIMENSION appears before NODE_COORD_SECTION.
+ * NOTE: This function assumes that the input file is already set in the instance structure.
  * NOTE: This function allocates the memory for the instance.
  * 
  * @param inst The instance to fill with the data (input/output)

@@ -42,7 +42,8 @@ void solve_with_method(instance *inst, solution *sol) {
         // this is just to test, would make more sense inside multi start
         printf("Solving with Extra Mileage method.\n");
 
-        extra_mileage(inst, sol); 
+        extra_mileage(inst, sol);
+        two_opt(inst, sol, timelimit - get_elapsed_time(inst->t_start), true);
 
     } else if (strcmp(inst->asked_method, VNS) == 0) {
 
@@ -58,7 +59,7 @@ void solve_with_method(instance *inst, solution *sol) {
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
 
-        printf("Solving with TABU_SEARCH method.\n");
+        printf("Solving with Tabu Search method.\n");
 
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
 
@@ -89,7 +90,7 @@ void solve_with_method(instance *inst, solution *sol) {
             
     } else if (strcmp(inst->asked_method, HARD_FIXING) == 0) {
         
-        printf("Solving with Hard fixing method.\n");
+        printf("Solving with Hard Fixing method.\n");
 
         // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
@@ -240,7 +241,7 @@ bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool
 
         if(print && inst->verbose >= ONLY_INCUMBMENT) {
 
-            printf("Incumbment updated\nOld cost: %10.6lf,\tNew cost: %10.6lf\n", sol1->cost, sol2->cost);
+            printf(" * Old cost %10.6lf, New cost %10.6lf\n", sol1->cost, sol2->cost);
 
         }
 

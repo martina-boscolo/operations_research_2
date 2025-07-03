@@ -6,17 +6,18 @@
 
 #include <float.h>
 #include <math.h>
+#include <stdbool.h>
 
 #define TABU_SEARCH "TS"
 
 // Enum for tenure types
 typedef enum {
 
-    FIXED_MIN,
-    FIXED_MAX,
-    RANDOM,
-    LINEAR,
-    SINUSOIDAL
+    FIXED_MIN,              // Fixed tenure value to min
+    FIXED_MAX,              // Fixed tenure value to max
+    RANDOM,                 // Random tenure value with occasional spikes
+    LINEAR,                 // Sawtooth pattern: linear increase followed by reset
+    SINUSOIDAL              // Sinusoidal tenure value
 
 } TenureType;
 
@@ -73,8 +74,10 @@ void free_tabu_params(tabu_params *params);
  *  
  * @param params The tabu search parameters (input)
  * @param node The node to check (input)
+ * 
+ * @return true if the node is tabu, false otherwise
  */
-int is_tabu(const tabu_params *params, const int node);
+bool is_tabu(const tabu_params *params, const int node);
 
 /**
  * Update tabu status for a given node.
@@ -89,8 +92,10 @@ void update_tabu_status(tabu_params *params, const int node);
  *  
  * @param params The tabu search parameters (input)
  * @param nnodes The number of nodes (input)
+ * 
+ * @return true if the tabu list is full, false otherwise
  */
-int is_tabu_list_full(const tabu_params *params, const int nnodes);
+bool is_tabu_list_full(const tabu_params *params, const int nnodes);
 
 /**
  * Reset the tabu list if full.

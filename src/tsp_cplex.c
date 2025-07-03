@@ -69,7 +69,7 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
 
     if (inst->verbose >= DEBUG_V) {
 
-        printf("status = %5d\n", status);
+        printf("Status = %5d\n", status);
 
     }
     
@@ -90,7 +90,7 @@ int get_optimal_solution_CPLEX(const instance *inst, CPXENVptr env, CPXLPptr lp,
 
         for (int i = 0; i < inst->nnodes; i++) {
 
-            printf("Node %5d -> Successor: %5d, Component: %5d\n", i + 1, succ[i] + 1, comp[i]);
+            printf("Node %5d, Successor: %5d, Component: %5d\n", i + 1, succ[i] + 1, comp[i]);
 
         }
 

@@ -59,13 +59,6 @@ double get_time_in_milliseconds();
 double random01(void);
 
 /**
- * Draw a random value between 0 and 1 in a thread-safe way.
- * 
- * @return The random value
- */
-double thread_safe_rand_01();
-
-/**
  * Compute the Euclidean distance between two points.
  * 
  * @param point1 The first point (input)

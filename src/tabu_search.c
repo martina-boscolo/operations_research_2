@@ -34,8 +34,10 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     }
 
+    double residual_time;
+
     // Main loop
-    while (get_elapsed_time(t_start) < timelimit) {
+    while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
         reset_tabu_list_if_full(&params, inst);
 
@@ -47,14 +49,31 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         }
         
         // Update best solution if needed
-        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-        updated = updated || val;
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, false);
+        updated = updated || u;
 
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Residual time %10.6lf\n", 
+                params.current_iter, old_cost, temp_sol.cost, residual_time);
+
             fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost, sol->cost);
+
         }
         
         params.current_iter++;
+        
     }
 
     if (updated) {
@@ -164,7 +183,7 @@ void free_tabu_params(tabu_params *params) {
 }
 
 // Check if a given node is tabu
-int is_tabu(const tabu_params *params, const int node) {
+bool is_tabu(const tabu_params *params, const int node) {
 
     return params->tabu_list[node] != -1 && 
            params->current_iter - params->tabu_list[node] <= compute_tenure(params);
@@ -179,7 +198,7 @@ void update_tabu_status(tabu_params *params, const int node) {
 }
 
 // Check if the tabu list is almost full
-int is_tabu_list_full(const tabu_params *params, const int nnodes) {
+bool is_tabu_list_full(const tabu_params *params, const int nnodes) {
 
     int count = 0;
 

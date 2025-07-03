@@ -78,7 +78,8 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         printf("-timelimit <time>         The time limit in seconds, must be positive\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
-        printf("                          Available methods: ");
+        printf("                          Available methods: %s, %s, %s, %s, %s, %s, %s, %s",
+             NEAREST_NEIGHBOR, EXTRA_MILEAGE, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HARD_FIXING, LOCAL_BRANCHING);
         printf("-param1 <param>           The first parameter for the method\n");
         printf("-param2 <param>           The second parameter for the method\n");
         printf("-param3 <param>           The third parameter for the method\n");
@@ -130,36 +131,6 @@ double get_time_in_milliseconds() {
 double random01(void) {
 
     return ((double) rand() / RAND_MAX);
-
-}
-
-// Thread-local storage for random seed
-__declspec(thread) unsigned int tls_seed = 0;
-
-// Thread-safe random function that returns a value between 0 and 1
-double thread_safe_rand_01() {
-
-    if (tls_seed == 0) {
-
-        // Initialize seed once per thread
-        tls_seed = (unsigned int)(time(NULL) ^ (uintptr_t)&tls_seed);
-        
-    }
-
-    int random_value = rand_r(&tls_seed);
-
-    // Divide by 0x7FFF (maximum value returned by rand_r in your implementation)
-    return (double)random_value / 0x7FFF;
-
-}
-
-// rand_r is not part of the MSVC standard, so we define it
-int rand_r(unsigned int *seed) {
-
-    // Simple implementation of rand_r (linear congruential generator)
-    *seed = *seed * 1103515245 + 12345;
-
-    return (*seed >> 16) & 0x7FFF;
 
 }
 

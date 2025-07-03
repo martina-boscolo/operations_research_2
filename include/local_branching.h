@@ -19,8 +19,8 @@ void local_branching(instance *inst, solution *sol, const double timelimit);
 /**
  * Set the local branching constraint in the CPLEX model.
  * 
- * @param inst The instance pointer of the problem
- * @param sol The solution pointer of the instance
+ * @param inst The instance that contains the problem data (input)
+ * @param sol The reference solution (input)
  * @param env CPLEX environment (input/output)
  * @param lp CPLEX model (input/output)
  * @param k The neighborhood size (input)

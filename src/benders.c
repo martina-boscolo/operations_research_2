@@ -48,45 +48,36 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
         // Obtain optimal solution, and check if time limit is reached 
         get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
 
+        // Obtain lower bound
         if (CPXgetbestobjval(env, lp, &z)) print_error("CPXgetobjval(): Error");
 
-        // If required print the iteration statistics
-        if (inst->verbose >= ONLY_INCUMBMENT) {
+        // If required plot the subtours
+        if (inst->verbose >= GOOD) {
 
-            printf("Iteration %5d, Lower bound %10.6f, ncomp %5d, time %10.6f\n", iter, z, ncomp, get_time_in_milliseconds() - t_start);
-            fflush(NULL);
-            fprintf(f, "%d,%f,%f\n", iter, z, get_time_in_milliseconds() - t_start);
+            int **subtours = (int **)malloc(inst->nnodes * sizeof(int *));
+            int *subtour_lengths = (int *)malloc(inst->nnodes * sizeof(int));
+            if (subtours == NULL || subtour_lengths == NULL) print_error("benders_loop(): Cannot allocate memory");
 
-            // If required plot the subtours
-            if (inst->verbose >= GOOD) {
+            extract_subtours_from_successors(inst, succ, subtours, subtour_lengths, &ncomp);
+            plot_subtours(inst, subtours, subtour_lengths, ncomp, iter);
 
-                int **subtours = (int **)malloc(inst->nnodes * sizeof(int *));
-                int *subtour_lengths = (int *)malloc(inst->nnodes * sizeof(int));
-                if (subtours == NULL || subtour_lengths == NULL) print_error("benders_loop(): Cannot allocate memory");
+            for (int k=0; k<ncomp; k++) {
 
-                extract_subtours_from_successors(inst, succ, subtours, subtour_lengths, &ncomp);
-                plot_subtours(inst, subtours, subtour_lengths, ncomp, iter);
+                free(subtours[k]);
 
-                for (int k=0; k<ncomp; k++) {
-
-                    free(subtours[k]);
-
-                }
-
-                free(subtours);
-                free(subtour_lengths);
             }
+
+            free(subtours);
+            free(subtour_lengths);
 
         }
 
-        // If the solution is unfeasible add the correspondent SECs and use patch heuristic
+        // If the solution is unfeasible add the correspondent SEC's and use patch heuristic
         if (ncomp > 1) {
 
             add_SECs_to_model(inst, env, lp, comp, ncomp, iter);
 
             patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
-            bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-            updated = updated || val;
 
             // If asked plot the patch
             if (inst->verbose >= GOOD) {
@@ -96,15 +87,39 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
             }
 
+        } else { // Otherwise build the solution struct 
+
+            build_solution_from_CPLEX(inst, &temp_sol, succ);
+
         }
 
-    } while (ncomp > 1);
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, false);
+        updated = updated || u;
 
-    if (ncomp == 1) {
-        build_solution_from_CPLEX(inst, &temp_sol, succ);
-        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-        updated = updated || val;
-    }
+        
+        // If required print the iteration statistics
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Lower bound %10.6f, ncomp %5d, Remaining time time %10.6f\n", 
+                        iter, old_cost, temp_sol.cost, z, ncomp, timelimit - get_elapsed_time(t_start));
+            fflush(NULL);
+            fprintf(f, "%d,%f,%f\n", iter, z, get_time_in_milliseconds() - t_start);
+
+        }
+
+
+    } while (ncomp > 1);
     
     if (updated) {
 
@@ -123,7 +138,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     free_solution(&temp_sol);
 
-    if (inst->verbose >= ONLY_INCUMBMENT) {
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
         plot_stats_in_file_base("benders");
 
@@ -147,13 +162,11 @@ void add_SECs_to_model(const instance *inst, CPXENVptr env, CPXLPptr lp, const i
 
     char **cname = (char **) calloc(1, sizeof(char*));
     if (cname == NULL) print_error("add_SECs_to_model(): Cannot allocate memory");
+
     cname[0] = (char *) calloc(CONS_NAME_LEN, sizeof(char));
-    
     int *index = (int *) malloc(inst->ncols * sizeof(int));
     double *value = (double *) malloc(inst->ncols * sizeof(double)); 
-
-	if (cname[0]==NULL || index==NULL || value==NULL) 
-		print_error("Impossible to allocate memory, add_SECs_to_model()");
+	if (cname[0]==NULL || index==NULL || value==NULL) print_error("add_SECs_to_model(): Cannot allocate memory");
 
     int nnz;
     double rhs;
@@ -265,6 +278,7 @@ void patch_heuristic(const instance *inst, solution *sol, int *succ, int *comp, 
             int succ_i = succ[i];
             succ[i] = succ[j];
             succ[j] = succ_i;
+
         }
 
         // Update component

@@ -10,7 +10,7 @@
 /**
  * Open a Gnuplot file.
  * 
- * @return The Gnuplot file pointer
+ * @return The Gnuplot file pointer (onutput)
  */
 FILE *open_plot(void);
 
