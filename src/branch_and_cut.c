@@ -309,16 +309,16 @@ void add_SECs_to_pool(const instance *inst, CPXCALLBACKCONTEXTptr context, const
         }
 
     }
-
-    // Free allocated memory
-    free(value);
-    free(index);
     
     if (cuts_added > 0 && inst->verbose >= GOOD) {
 
         printf("Node %5d, Added %5d SEC cuts\n", tree_node, cuts_added);
 
     }
+
+    // Free allocated memory
+    free(value);
+    free(index);
 
 }
 
@@ -383,9 +383,7 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 }
 
 // Add the violated SEC from a fractional solution
-static int add_violated_sec(int cutcount, int *cutlist, void *pass_param) {
-
-    if (cutcount <= 1) return 0;
+static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pass_param) {
 
     cut_callback_data *data = (cut_callback_data *) pass_param;
     const instance *inst = data->inst;

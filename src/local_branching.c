@@ -7,6 +7,10 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
     bool updated = false;
     bool is_asked_method = (strcmp(inst->asked_method, LOCAL_BRANCHING) == 0);
 
+    // Set parameters for Branch and Cut
+    inst->param2 = 1;
+    inst->param3 = 1;
+
     // Initialize temporary solutions
     solution temp_sol;
     copy_sol(&temp_sol, sol, inst->nnodes);
@@ -35,10 +39,10 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
    
     double residual_time;
 
-    // Warm up the model with initial solution
-    warm_up(inst, sol, env, lp);
-
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
+
+        // Warm up the model with best current solution
+        warm_up(inst, sol, env, lp);
 
         // Add new local branching constraint based on current best solution
         add_local_branching_constraint(inst, sol, env, lp, k);

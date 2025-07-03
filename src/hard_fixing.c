@@ -42,14 +42,15 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     int depth_increment = 5;  // Increasing depth step
     int current_depth = starting_depth;  // Track current depth
     
-    warm_up(inst, sol, env, lp);
-
     double residual_time;
     
     // Count for actual fixed edges
     int fixed_count;
 
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
+        
+        // Warm up the model with best current solution
+        warm_up(inst, sol, env, lp);
         
         // Fix edges in the model
         fixed_count = set_lowerbounds(inst, sol, env, lp, percentage);

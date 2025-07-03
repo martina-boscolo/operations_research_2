@@ -92,12 +92,26 @@ void solve_with_method(instance *inst, solution *sol) {
         
         printf("Solving with Hard Fixing method.\n");
 
+        // Reset parameters
+        int param1 = inst->param1;
+        int param2 = inst->param2;
+        int param3 = inst->param3;
+
+        inst->param1 = DEFAULT_PARAMETER;
+        inst->param2 = DEFAULT_PARAMETER;
+        inst->param3 = DEFAULT_PARAMETER;
+
         // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
         double timelimit1 = timelimit * 0.1;
         tabu_search(inst, sol, timelimit1);
         // Ensure two-opt solution as warm-up
         two_opt(inst, sol, timelimit1, false);
+
+        // Restore parameters
+        inst->param1 = param1;
+        inst->param2 = param2;
+        inst->param3 = param3;
 
         double elapsed_time = get_elapsed_time(inst->t_start);
         hard_fixing(inst, sol, (timelimit-elapsed_time));
@@ -106,9 +120,14 @@ void solve_with_method(instance *inst, solution *sol) {
         
         printf("Solving with Local Branching method.\n");
 
-        // Set parameters for Branch and Cut
-        inst->param2 = 1;
-        inst->param3 = 1;
+        // Reset parameters
+        int param1 = inst->param1;
+        int param2 = inst->param2;
+        int param3 = inst->param3;
+
+        inst->param1 = DEFAULT_PARAMETER;
+        inst->param2 = DEFAULT_PARAMETER;
+        inst->param3 = DEFAULT_PARAMETER;
 
         // Warm-up always
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
@@ -116,6 +135,11 @@ void solve_with_method(instance *inst, solution *sol) {
         tabu_search(inst, sol, timelimit1);
         // Ensure two-opt solution as warm-up
         two_opt(inst, sol, timelimit1, false);
+
+        // Restore parameters
+        inst->param1 = param1;
+        inst->param2 = param2;
+        inst->param3 = param3;
 
         double elapsed_time = get_elapsed_time(inst->t_start);
         local_branching(inst, sol, (timelimit-elapsed_time));

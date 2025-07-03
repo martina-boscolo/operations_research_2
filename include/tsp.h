@@ -12,6 +12,7 @@
 #define DEFAULT_TIMELIMIT 600.0
 #define DEFAULT_VERBOSE 50
 #define EMPTY_STRING '\0'
+#define DEFAULT_PARAMETER -1
 
 // Value limit
 #define MIN_NNODES 10
