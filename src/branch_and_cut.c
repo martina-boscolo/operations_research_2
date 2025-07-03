@@ -378,7 +378,7 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 }
 
 // Add the violated SEC from a fractional solution
-static int add_violated_sec(double cutval, int cutcount, int *cutlist, void *pass_param) {
+static int add_violated_sec(int cutcount, int *cutlist, void *pass_param) {
 
     cut_callback_data *data = (cut_callback_data *) pass_param;
     const instance *inst = data->inst;
