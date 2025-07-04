@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=1
-set SEED_END=10
+set SEED_START=31
+set SEED_END=40
 set NODES=300
 set TIMELIMIT=60
 
@@ -36,43 +36,43 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
 )
 
 REM Create CSV with headers for each parameter combination
-echo 5,Base,Only Warm-up,Only Frac-SECs,Only Post-heu,All > bc_stats_300.csv
+echo 5,Base,Only Warm-up,Only Frac-SECs,Only Post-heu,All > bc_stats.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     set "line=%%s"
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_0_p2_0_p3_0.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_0_p2_0_p3_0.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_1_p2_0_p3_0.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_1_p2_0_p3_0.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_0.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_0.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_0_p2_0_p3_1.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_0_p2_0_p3_1.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_1.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_1.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    echo !line! >> bc_stats_300.csv
+    echo !line! >> bc_stats.csv
 )
 
 echo All tasks completed! CSV successfully generated.

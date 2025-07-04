@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=11
-set SEED_END=20
+set SEED_START=31
+set SEED_END=40
 set NODES=300
 set TIMELIMIT=60
 
@@ -39,25 +39,25 @@ REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     set "line=%%s"
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_0.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_0.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_0.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_0.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_1.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_0_p2_1_p3_1.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"
     )
 
-    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BranchAndCut" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_1.log') do (
+    for /f "tokens=5 delims=;" %%a in ('findstr /C:"$STAT;BC" logs\BC_n%NODES%_seed%%s_p1_1_p2_1_p3_1.log') do (
         set "time=%%a"
         if "!time:~-1!"==";" set "time=!time:~0,-1!"
         set "line=!line!,!time!"

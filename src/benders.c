@@ -27,7 +27,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     // Save results in a file, if required
     FILE *f = NULL;
-    if (inst->verbose >= ONLY_INCUMBMENT) {
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
         char filename[FILE_NAME_LEN];
         sprintf_s(filename, FILE_NAME_LEN, "results/benders.csv");
@@ -52,7 +52,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
         if (CPXgetbestobjval(env, lp, &z)) print_error("CPXgetobjval(): Error");
 
         // If required plot the subtours
-        if (inst->verbose >= GOOD) {
+        if (inst->verbose >= GOOD  && is_asked_method) {
 
             int **subtours = (int **)malloc(inst->nnodes * sizeof(int *));
             int *subtour_lengths = (int *)malloc(inst->nnodes * sizeof(int));
@@ -80,7 +80,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
             patch_heuristic(inst, &temp_sol, succ, comp, ncomp, timelimit - get_elapsed_time(t_start));
 
             // If asked plot the patch
-            if (inst->verbose >= GOOD) {
+            if (inst->verbose >= GOOD && is_asked_method) {
 
                 sprintf_s(temp_sol.method, METH_NAME_LEN, "PatchHeuristic_iter%d", iter);
                 plot_solution(inst, &temp_sol);
@@ -134,7 +134,6 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     // Free and close CPLEX model
     free_CPLEX(&env, &lp);
-    fclose(f);
 
     free_solution(&temp_sol);
 
