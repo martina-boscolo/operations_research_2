@@ -47,6 +47,20 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     // Count for actual fixed edges
     int fixed_count;
 
+    // CSV file setup for plotting
+    char filename[FILE_NAME_LEN];
+    sprintf_s(filename, FILE_NAME_LEN, "HF_p%d", inst->param1);
+
+    FILE *f = NULL;
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        char filename_results[FILE_NAME_LEN];
+        sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
+
+        if (fopen_s(&f, filename_results, "w+")) print_error("hard_fixing(): Cannot open file");
+
+    }
+
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
         
         // Warm up the model with best current solution
@@ -73,9 +87,9 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         // Solve with CPLEX
         get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
         
-        if (inst->verbose >= LOW) {
+        if (inst->verbose == LOW) {
 
-            printf("Iteration %5d, tree depth %5d, ", iter, current_depth);
+            printf("Iteration %5d, tree depth %5d\n", iter, current_depth);
 
         }
 
@@ -88,7 +102,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
-        if (inst->verbose >= LOW) {
+        if (inst->verbose >=  GOOD) {
 
             if (u) {
 
@@ -102,6 +116,13 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
             printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Hard fixing percentage %10.6f%%, tree depth %5d, Residual time %10.6lf\n", 
                 iter, old_cost, temp_sol.cost, percentage * 100, current_depth, residual_time);
+
+        }
+
+        // Save to CSV 
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && f != NULL) {
+
+            fprintf(f, "%d,%f,%f\n", iter, temp_sol.cost, sol->cost);
 
         }
         
@@ -125,7 +146,20 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
     if (updated) {
 
-        strncpy_s(sol->method, METH_NAME_LEN, HARD_FIXING, _TRUNCATE);
+        sprintf_s(sol->method, METH_NAME_LEN, filename);
+
+    }
+
+    // Close the file if it was opened
+    if (f != NULL) {
+
+        fclose(f);
+
+    }
+
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        plot_stats_in_file(filename);
 
     }
     
