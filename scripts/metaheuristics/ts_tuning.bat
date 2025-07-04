@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=1
-set SEED_END=10
+set SEED_START=11
+set SEED_END=20
 set PARAM_START=0
 set PARAM_END=4
 set NODES=1000
@@ -22,7 +22,7 @@ echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for /l %%p in (%PARAM_START%,1,%PARAM_END%) do (
         echo Running with seed=%%s, param=%%p...
-        ..\..\build\Release\tsp.exe -method TS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p -verbose 10 > logs\TS_n%NODES%_seed%%s_param%%p.log
+        ..\..\build\Release\tsp.exe -method TS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%p -verbose 0 > logs\TS_n%NODES%_seed%%s_param%%p.log
     )
 )
 
@@ -41,7 +41,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     echo !line! >> ts_stats.csv
 )
 
-echo All tasks completed! CSV successfully generated.
+echo All tasks completed! TS stats CSV successfully generated.
 
 
 
