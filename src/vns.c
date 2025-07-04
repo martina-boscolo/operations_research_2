@@ -13,7 +13,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
     char method_name[METH_NAME_LEN];
     sprintf_s(method_name, METH_NAME_LEN, "%s_k%d_r%d", VNS, k, reps);
 
-    FILE* f;
+    FILE* f = NULL;
     if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
         char filename[FILE_NAME_LEN];
@@ -32,13 +32,13 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
 
         // update local best solution
         double old_cost = sol->cost;
-        bool u = update_sol(inst, sol, &temp_sol, is_asked_method);
+        bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && u) {
 
-            printf(" * Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Residual time %10.6lf\n", 
-                iteration, old_cost, temp_sol.cost, residual_time);
+            printf(" * Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Kick %d, Repetitions %5d, Residual time %10.6lf\n", 
+                iteration, old_cost, temp_sol.cost, inst->param1, inst->param2, residual_time);
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
 
         }
@@ -55,24 +55,24 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         iteration++;
 
     }
-
+    
     if (updated) {
 
         strncpy_s(sol->method, METH_NAME_LEN, method_name, _TRUNCATE);
 
     }
-
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
-
-        plot_stats_in_file(method_name);
-
-    }
-    
+        
     // Close the file if it was opened
     if (f != NULL) {
 
         fclose(f);
     
+    }
+    
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        plot_stats_in_file(method_name);
+
     }
 
 }
@@ -83,12 +83,6 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
     switch (k) {
 
         case 3:
-
-            if (inst->verbose >= GOOD) {
-
-                printf("Kick with 3-opt move, with %5d repetitions\n", reps);
-
-            }
 
             for (int i = 0; i < reps; i++) {
 
@@ -118,12 +112,6 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
             break;
 
         case 5:
-        
-            if (inst->verbose >= GOOD) {
-
-                printf("Kick with 5-opt move, with %5d repetitions\n", reps);
-
-            }
 
             for (int i = 0; i < reps; i++) {
 
@@ -260,7 +248,7 @@ void select_five_indices(const int n, int *idx1, int *idx2, int *idx3, int *idx4
 
         *idx4 = rand() % n;
 
-    } while (abs(*idx4 - *idx1) <= 1 || abs(*idx4 - *idx2) <= 1 || abs(*idx3 - *idx3) <= 1);
+    } while (abs(*idx4 - *idx1) <= 1 || abs(*idx4 - *idx2) <= 1 || abs(*idx4 - *idx3) <= 1);
 
     do {
 

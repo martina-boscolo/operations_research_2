@@ -45,7 +45,9 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         move_to_best_neighbor(inst, &temp_sol, &params);
 
         if (inst->verbose >= GOOD) {
+
             check_sol(inst, &temp_sol);
+            
         }
         
         // Update best solution if needed

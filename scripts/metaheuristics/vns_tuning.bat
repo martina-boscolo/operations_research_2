@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=1
-set SEED_END=10
+set SEED_START=11
+set SEED_END=20
 set NODES=1000
 set TIMELIMIT=60
 
@@ -27,7 +27,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for %%k in (%K%) do (
         for %%r in (%R%) do (
             echo Running with seed=%%s, param1=%%k, param2=%%r...
-            ..\..\build\Release\tsp.exe -method VNS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%k -param2 %%r -verbose 10 > logs\VNS_n%NODES%_seed%%s_k%%k_r%%r.log
+            ..\..\build\Release\tsp.exe -method VNS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 %%k -param2 %%r -verbose 0 > logs\VNS_n%NODES%_seed%%s_k%%k_r%%r.log
         )
     )
 )

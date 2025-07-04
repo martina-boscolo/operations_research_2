@@ -6,9 +6,9 @@
 
 #define VNS "VNS"
 
-#define DEAULT_K 3 
-#define DEFAULT_REPS 3
-#define POSSIBLE_THREE_OPT_MOVES 4
+// Default values: best performer
+#define DEAULT_K 3      // Default kick type
+#define DEFAULT_REPS 1  // Default repetition number
 
 /**
  * VNS algorithm.

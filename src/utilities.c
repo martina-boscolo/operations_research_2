@@ -36,11 +36,11 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         if (strcmp(argv[i], "-file") == 0 || strcmp(argv[i], "-f") == 0)                                        // input file
             { strncpy_s(inst->input_file, FILE_NAME_LEN, argv[++i], _TRUNCATE); continue; }
         if (strcmp(argv[i], "-n") == 0)                                                                         // number of nodes
-            { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; } continue; }          
+            { inst->nnodes = atoi(argv[++i]); if (inst->nnodes < MIN_NNODES) { need_help = 1; break; } continue; }          
         if (strcmp(argv[i], "-seed") == 0)                                                                      // random seed
             { inst->seed = atoi(argv[++i]); continue; }              
         if (strcmp(argv[i], "-timelimit") == 0)                                                                 // time limit
-            { inst->timelimit = atof(argv[++i]); if (inst->timelimit < 1.0) { need_help = 1; } continue; }    
+            { inst->timelimit = atof(argv[++i]); if (inst->timelimit < 1.0) { need_help = 1; break; } continue; }    
         if (strcmp(argv[i], "-verbose") == 0)                                                                   // verbosity level
             { inst->verbose = atoi(argv[++i]); continue; }
         if (strcmp(argv[i], "-method") == 0)                                                                    // method to solve tsp
