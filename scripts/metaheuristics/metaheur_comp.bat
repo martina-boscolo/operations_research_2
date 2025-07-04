@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=11
-set SEED_END=20
+set SEED_START=21
+set SEED_END=30
 set NODES=1000
 set TIMELIMIT=60
 
@@ -25,12 +25,12 @@ echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for %%m in (%METHOD%) do (
         echo Running with method=%%m, seed=%%s...
-        ..\..\build\Release\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 10 > logs\%%m_n%NODES%_seed%%s.log
+        ..\..\build\Release\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 0 > logs\%%m_n%NODES%_seed%%s.log
     )
 )
 
 REM Create CSV header with parameter combinations
-echo 3,NN,TS,VNS > metaheur_comp.csv
+echo 3,TS,VNS > metaheur_comp.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
