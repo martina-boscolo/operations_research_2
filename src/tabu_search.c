@@ -12,8 +12,8 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     // Go to local minima, for first iterations the tabu list is useless
     two_opt(inst, &temp_sol, timelimit, false);
-    bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-    updated = updated || val;
+    bool u = update_sol(inst, sol, &temp_sol, is_asked_method);
+    updated = updated || u;
         
     // Initialize tabu parameters
     tabu_params params;
@@ -24,7 +24,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
     char filename[FILE_NAME_LEN];
     sprintf_s(filename, FILE_NAME_LEN, "TS_p%d", inst->param1);
 
-    FILE *f;
+    FILE *f = NULL;
     if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
         char filename_results[FILE_NAME_LEN];
@@ -50,7 +50,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         
         // Update best solution if needed
         double old_cost = sol->cost;
-        bool u = update_sol(inst, sol, &temp_sol, false);
+        u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
 
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && u) {
@@ -72,16 +72,16 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     }
 
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
-
-        plot_stats_in_file(filename);
-
-    }
-
     // Close the file if it was opened
     if (f != NULL) {
 
         fclose(f);
+
+    }
+
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        plot_stats_in_file(filename);
 
     }
 

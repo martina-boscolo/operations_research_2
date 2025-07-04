@@ -26,7 +26,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
     double z = 0.0;
 
     // Save results in a file, if required
-    FILE *f;
+    FILE *f = NULL;
     if (inst->verbose >= ONLY_INCUMBMENT) {
 
         char filename[FILE_NAME_LEN];
@@ -138,12 +138,6 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     free_solution(&temp_sol);
 
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
-
-        plot_stats_in_file_base("benders");
-
-    }
-
     // Close the file if it was opened
     if (f != NULL) {
 
@@ -151,6 +145,12 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     }
     
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        plot_stats_in_file_base("benders");
+
+    }
+
 }
 
 // For each connected component add the correspondent SEC to the lp model

@@ -52,7 +52,6 @@ double get_time_in_milliseconds();
 
 /**
  * Draw a random value between 0 and 1.
- * NOTE: This function is not thread-safe.
  * 
  * @return The random value
  */

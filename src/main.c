@@ -35,7 +35,8 @@ int main(int argc, const char *argv[]) {
 
     // Print execution statistics
     printf("$STAT;%s;%d;%lf;%lf;", inst.best_solution->method, inst.seed, inst.best_solution->cost, get_elapsed_time(inst.t_start));
-
+    fflush(NULL);
+    
     // Free the instance and its solution
     free_instance(&inst);
  
