@@ -16,7 +16,7 @@
 // Heuristics in the file
 #define NEAREST_NEIGHBOR "NN"
 #define TWO_OPT "TWO_OPT"
-#define NN_TWOOPT "NN_2OPT"
+#define MULTI_START_NN "MS_NN"
 #define EXTRA_MILEAGE "EM"
 
 //----------------------------------- heuristic utilities ------------------------------------

@@ -78,8 +78,8 @@ void parse_command_line(const int argc, const char *argv[], instance *inst) {
         printf("-timelimit <time>         The time limit in seconds, must be positive\n");
         printf("-verbose <level>          The verbosity level of the debugging printing\n");
         printf("-method <method>          The method used to solve the problem\n");
-        printf("                          Available methods: %s, %s, %s, %s, %s, %s, %s, %s",
-             NEAREST_NEIGHBOR, EXTRA_MILEAGE, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HARD_FIXING, LOCAL_BRANCHING);
+        printf("                          Available methods: %s, %s, %s, %s, %s, %s, %s, %s, %s", NEAREST_NEIGHBOR, 
+            MULTI_START_NN, EXTRA_MILEAGE, VNS, TABU_SEARCH, BENDERS, BRANCH_AND_CUT, HARD_FIXING, LOCAL_BRANCHING);
         printf("-param1 <param>           The first parameter for the method\n");
         printf("-param2 <param>           The second parameter for the method\n");
         printf("-param3 <param>           The third parameter for the method\n");

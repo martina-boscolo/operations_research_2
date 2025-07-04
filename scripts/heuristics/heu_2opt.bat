@@ -25,12 +25,12 @@ echo Executing...
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     for %%m in (%METHOD%) do (
         echo Running with method=%%m, seed=%%s...
-        ..\..\build\Release\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 0 > logs\%%m_n%NODES%_seed%%s.log
+        ..\..\build\Release\tsp.exe -method %%m -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 0 -param1 1 > logs\%%m_n%NODES%_seed%%s.log
     )
 )
 
 REM Create CSV header with parameter combinations
-echo 2,NN,EM > heu.csv
+echo 2,NN,EM > heu_2opt.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
@@ -41,7 +41,7 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
         )
         set "line=!line!,!cost!"
     )
-    echo !line! >> heu.csv
+    echo !line! >> heu_2opt.csv
 )
 
-echo All tasks completed! Heuristic comparison CSV successfully generated.
+echo All tasks completed! Refined heuristic comparison CSV successfully generated.

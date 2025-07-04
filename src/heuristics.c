@@ -185,48 +185,59 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
 
     double t_start = get_time_in_milliseconds();
     bool updated = false;
-    bool is_asked_method = (strcmp(inst->asked_method, NN_TWOOPT) == 0);
+    bool is_asked_method = (strcmp(inst->asked_method, MULTI_START_NN) == 0);
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
 
-    double elapsed_time;
+    double residual_time;
 
     for (int start = 0; start < inst->nnodes; start++) {
 
-        elapsed_time = get_elapsed_time(t_start);
+        residual_time = timelimit - get_elapsed_time(t_start);
 
-        if (inst->verbose >= GOOD) {
-
-            printf("Remaining time %10.5lf\n", timelimit-elapsed_time);
-
-        }
-        
-        if (elapsed_time >= timelimit) { // Stop if time limit is reached
+        if (residual_time < 0) { // Stop if time limit is reached
 
             break;
 
         }
 
         nearest_neighbor(inst, &temp_sol, start);
-        two_opt(inst, &temp_sol, (timelimit-elapsed_time), false);
+
+        // Refinement if asked
+        if (inst->param1 == 1) {
+
+            two_opt(inst, &temp_sol, residual_time, false);
+
+        }
+
+        double old_cost = sol->cost;
+        bool u = update_sol(inst, sol, &temp_sol, false);
+        updated = updated || u;
 
         // Print intermediate results and check the solution
         if (inst->verbose >= GOOD) {
 
-            printf("Start Node: %5d, Cost: %10.6lf\n", start, temp_sol.cost);
+            if (u) {
+
+                printf(" * ");
+
+            } else {
+
+                printf("   ");
+
+            }
+
+            printf("Start Node %5d, Incumbment %10.6lf, Current solution cost %10.6lf, Residual time %10.6lf\n", start, old_cost, temp_sol.cost, residual_time);
             check_sol(inst, &temp_sol);
 
         }
-
-        bool val = update_sol(inst, sol, &temp_sol, is_asked_method);
-        updated = updated || val;
 
     }
 
     if (updated) {
 
-        strncpy_s(sol->method, METH_NAME_LEN, NN_TWOOPT, _TRUNCATE);
+        strncpy_s(sol->method, METH_NAME_LEN, MULTI_START_NN, _TRUNCATE);
 
     }
 
