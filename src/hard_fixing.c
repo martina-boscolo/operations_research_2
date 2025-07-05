@@ -34,7 +34,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     const double percentages[] = {0.4, 0.5, 0.6, 0.8};
     const int num_options = 4;
 
-    double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0: 0.8;
+    double percentage = (inst->param1 > 1) ? ((double)inst->param1)/100.0 : percentages[rand() % num_options];
 
     // Parameters for tree depth control
     int starting_depth = 0;  // Default starting tree depth
@@ -86,12 +86,6 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         
         // Solve with CPLEX
         get_optimal_solution_CPLEX(inst, env, lp, xstar, succ, comp, &ncomp);
-        
-        if (inst->verbose == LOW) {
-
-            printf("Iteration %5d, tree depth %5d\n", iter, current_depth);
-
-        }
 
         // Reset edges bounds
         reset_lowerbounds(inst, env, lp);
@@ -102,7 +96,7 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
         bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
-        if (inst->verbose >=  GOOD) {
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
             if (u) {
 
@@ -116,11 +110,6 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
 
             printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Hard fixing percentage %10.6f%%, tree depth %5d, Residual time %10.6lf\n", 
                 iter, old_cost, temp_sol.cost, percentage * 100, current_depth, residual_time);
-
-        }
-
-        // Save to CSV 
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && f != NULL) {
 
             fprintf(f, "%d,%f,%f\n", iter, temp_sol.cost, sol->cost);
 
@@ -160,12 +149,6 @@ void hard_fixing(instance *inst, solution *sol, const double timelimit) {
     if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
         plot_stats_in_file(filename);
-
-    }
-    
-    if (inst->verbose >= GOOD && is_asked_method) {
-
-        plot_solution(inst, sol);
 
     }
 

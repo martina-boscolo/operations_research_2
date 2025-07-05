@@ -27,7 +27,7 @@ void solve_with_method(instance *inst, solution *sol) {
 
     initialize_solution(sol);
     allocate_solution(sol, inst->nnodes);
-    _mkdir("./results"); //, 0777);
+    _mkdir("./results");
 
     double timelimit = inst->timelimit - get_elapsed_time(inst->t_start);
 
@@ -69,11 +69,8 @@ void solve_with_method(instance *inst, solution *sol) {
 
         nearest_neighbor(inst, sol, rand() % inst->nnodes);
 
-        if (inst->param1 != 3 && inst->param1 != 5) { inst->param1 = DEAULT_K; }
-        if (inst->param2 < 1) { inst->param2 = DEFAULT_REPS; }
-
         double elapsed_time = get_elapsed_time(inst->t_start);
-        vns(inst, sol, (timelimit-elapsed_time), inst->param1, inst->param2);
+        vns(inst, sol, (timelimit-elapsed_time));
         
     } else if (strcmp(inst->asked_method, TABU_SEARCH) == 0) {
 

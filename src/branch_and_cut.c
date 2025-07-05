@@ -68,13 +68,7 @@ void branch_and_cut(instance *inst, solution *sol, const double timelimit) {
         strncpy_s(sol->method, METH_NAME_LEN, BRANCH_AND_CUT, _TRUNCATE);
 
     }
-
-    if (inst->verbose >= GOOD && is_asked_method) {
-
-        plot_solution(inst, sol);
-
-    }
-            
+      
     // Free allocated memory
     free(xstar);
     free(comp);

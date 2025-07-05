@@ -6,11 +6,7 @@ FILE *open_plot(void) {
 
     FILE *plot = _popen("gnuplot -persistent", "w");
 
-    if (!plot) { // If cannot open file
-
-        print_error("open_plot(): Cannot opening Gnuplot");
-
-    }
+    if (!plot) print_error("open_plot(): Cannot opening Gnuplot");
 
     return plot;
 
@@ -20,7 +16,7 @@ FILE *open_plot(void) {
 void plot_in_file(FILE *plot, const char *filename) {
 
     // Create the plot directory if does not exists
-    _mkdir("./plot"); //, 0777); 
+    _mkdir("./plot");
     
     fprintf(plot, "set terminal png size 800, 600\n");
     fprintf(plot, "set output './plot/%s.png'\n", filename);
@@ -58,7 +54,6 @@ void plot_cost_evolution(FILE *plot, const char* filepath) {
     fprintf(plot,
         "plot '%s' using 1:2 title \"Current Cost\" lw 1, "
         "'%s' using 1:3 title \"Best Cost\" lw 2 lc \"blue\", "
-        "B_slope * x + B_intercept with lines title \"Current Linear Fit\", "
         "'%s' using (column(1)):(abs(column(2) - B_min_y) < 1e-4 ? column(2) : 1/0) "
         "with points pt 7 lc \"red\" title \"Min Current: \" . gprintf(\"%%.2f\", B_min_y)\n",
         filepath, filepath, filepath);
@@ -161,6 +156,6 @@ void input_end(FILE *plot) {
 void free_plot(FILE *plot) {
 
     fflush(plot);
-    _pclose(plot);  // Use _pclose for Windows
+    _pclose(plot);
 
 }

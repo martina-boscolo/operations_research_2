@@ -1,7 +1,7 @@
 #include "vns.h"
 
 // VNS algorithm
-void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps) {
+void vns(const instance *inst, solution *sol, const double timelimit) {
 
     double t_start = get_time_in_milliseconds();
     bool updated = false;
@@ -9,6 +9,10 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
 
     solution temp_sol; 
     copy_sol(&temp_sol, sol, inst->nnodes);
+
+    int k, reps;
+    if (inst->param1 != 3 && inst->param1 != 5) { k = DEAULT_K; }
+    if (inst->param2 < 1) { reps = DEFAULT_REPS; }
 
     char method_name[METH_NAME_LEN];
     sprintf_s(method_name, METH_NAME_LEN, "%s_k%d_r%d", VNS, k, reps);
@@ -38,7 +42,7 @@ void vns(const instance *inst, solution *sol, const double timelimit, const int 
         if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && u) {
 
             printf(" * Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Kick %d, Repetitions %5d, Residual time %10.6lf\n", 
-                iteration, old_cost, temp_sol.cost, inst->param1, inst->param2, residual_time);
+                iteration, old_cost, temp_sol.cost, k, reps, residual_time);
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
 
         }
@@ -82,6 +86,7 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
 
     switch (k) {
 
+        default: 
         case 3:
 
             for (int i = 0; i < reps; i++) {
@@ -139,10 +144,6 @@ void kick(const instance *inst, solution *sol, const int k, const int reps) {
             }
 
             break;
-
-        default: 
-
-            print_error("kick(): Unknown kick type");
 
     }
 

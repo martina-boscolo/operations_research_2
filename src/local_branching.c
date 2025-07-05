@@ -33,8 +33,8 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
     int iter = 0;
     
     // Neighborhood size (k parameter)
-    // If param1 is set and greater than 1, use it as k; otherwise use 20% of nodes as default
-    int default_k = (inst->param1 > 1) ? inst->param1 : (int)(0.2 * inst->nnodes);
+    // If param1 is set and greater than 1, use it as k; otherwise use 2% of nodes as default
+    int default_k = (inst->param1 > 1) ? inst->param1 : (int) ceil(0.02 * inst->nnodes);
     int k = default_k;
    
     double residual_time;
@@ -56,7 +56,9 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
 
         if (inst->verbose >= GOOD) {
-            printf("Starting iteration %d with k=%d, residual_time=%.2f\n", iter, k, residual_time);
+
+            printf("\n\n\nStarting iteration %d with k=%d, residual_time=%.2f\n", iter, k, residual_time);
+
         }
 
         // Warm up the model with best current solution
@@ -80,7 +82,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
         bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
-        if (inst->verbose >= LOW) {
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
 
             if (u) {
 
@@ -95,11 +97,6 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
             printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, k %5d, Residual time %10.6lf\n", 
                 iter, old_cost, temp_sol.cost, k, residual_time);
 
-        }
-
-        // Save to CSV file for plotting 
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && f != NULL) {
-
             fprintf(f, "%d,%f,%f\n", iter, temp_sol.cost, sol->cost);
 
         }
@@ -107,11 +104,11 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
         // If no improvements change the number of fixed edges
         if (!u) { 
 
-            k = (int)(k * 1.1);
+            k = (int) ceil(k * 1.1);
 
             if (k > inst->nnodes) {
 
-                k = (int)(0.5 * inst->nnodes); // Reset k if too large
+                k = (int) ceil(0.5 * inst->nnodes); // Reset k if too large
            
             }
 
@@ -143,13 +140,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
         plot_stats_in_file(filename);
 
     }
-    
-    if (inst->verbose >= GOOD && is_asked_method) {
-
-        plot_solution(inst, sol);
-
-    }
-
+ 
     // Free allocated memory
     free(xstar);
     free(comp);

@@ -98,6 +98,7 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 /**
  * Add the violated SEC from a fractional solution to the user's cuts.
  * 
+ * @param cutval The violation value of the cut (input)
  * @param cutcount The number of nodes in the subtour that violates the constraint (input)
  * @param cutlist Array containing the indices of nodes in the violating subtour (input)
  * @param pass_param The instance data and the context of node of branching tree (input)

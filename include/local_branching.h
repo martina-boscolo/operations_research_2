@@ -1,9 +1,12 @@
 #ifndef LOCAL_BRANCHING_H
 #define LOCAL_BRANCHING_H
+
 #include "tsp.h"
 #include "utilities_solution.h"
 #include "utilities.h"
 #include "tsp_cplex.h"
+
+#include <math.h>
 
 #define LOCAL_BRANCHING "LB"
 

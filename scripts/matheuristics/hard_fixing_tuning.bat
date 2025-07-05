@@ -2,14 +2,14 @@
 setlocal enabledelayedexpansion
 
 REM Define constants
-set SEED_START=11
-set SEED_END=15
+set SEED_START=51
+set SEED_END=60
 
 REM Fixed set of parameter values to test
 set PARAM_VALUES=1 40 50 60 80 
 
 set NODES=1000
-set TIMELIMIT=120
+set TIMELIMIT=180
 
 REM Empty the logs folder if it exists, otherwise create it
 if exist logs (

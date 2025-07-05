@@ -17,10 +17,8 @@
  * @param inst The instance that contains the problem data (input)
  * @param sol The solution that will contain the best solution between the input one and the best found one (input/output)
  * @param timelimit The time limit for the algorithm (input)
- * @param k The type of kick (input)
- * @param reps The number of k-opt moves that are performed as kick (input)
  */
-void vns(const instance *inst, solution *sol, const double timelimit, const int k, const int reps);
+void vns(const instance *inst, solution *sol, const double timelimit);
 
 /**
  * Algorithm to modify the solution to escape the current local optima.
