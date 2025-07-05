@@ -39,7 +39,25 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
    
     double residual_time;
 
+    // CSV file setup for plotting
+    char filename[FILE_NAME_LEN];
+    sprintf_s(filename, FILE_NAME_LEN, "LB_p%d", inst->param1);
+
+    FILE *f = NULL;
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        char filename_results[FILE_NAME_LEN];
+        sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
+
+        if (fopen_s(&f, filename_results, "w+")) print_error("local_branching(): Cannot open file");
+
+    }
+
     while ((residual_time = timelimit - get_elapsed_time(t_start)) > 0) {
+
+        if (inst->verbose >= GOOD) {
+            printf("Starting iteration %d with k=%d, residual_time=%.2f\n", iter, k, residual_time);
+        }
 
         // Warm up the model with best current solution
         warm_up(inst, sol, env, lp);
@@ -78,6 +96,13 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
                 iter, old_cost, temp_sol.cost, k, residual_time);
 
         }
+
+        // Save to CSV file for plotting 
+        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && f != NULL) {
+
+            fprintf(f, "%d,%f,%f\n", iter, temp_sol.cost, sol->cost);
+
+        }
         
         // If no improvements change the number of fixed edges
         if (!u) { 
@@ -87,7 +112,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
             if (k > inst->nnodes) {
 
                 k = (int)(0.5 * inst->nnodes); // Reset k if too large
-
+           
             }
 
         } else { // otherwise reset it
@@ -102,7 +127,20 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
     if (updated) {
 
-        strncpy_s(sol->method, METH_NAME_LEN, LOCAL_BRANCHING, _TRUNCATE);
+        sprintf_s(sol->method, METH_NAME_LEN, filename);
+
+    }
+
+    // Close the file if it was opened
+    if (f != NULL) {
+
+        fclose(f);
+
+    }
+
+    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+
+        plot_stats_in_file(filename);
 
     }
     
