@@ -31,6 +31,10 @@ tsp.exe [options]
 
 ## Usage and Command Line Parameters
 
+```
+./Release/tsp.exe -method <method> -n <nodes> -seed <seed> -timelimit <seconds> -verbose <level> -param1 <value1> -param2 <value2> -param3 <value3>
+```
+
 ### Input/Output Options
 - **`-file|-f <file_path>`** - Specify input file containing TSP instance data
 - **`-n <number>`** - Set number of nodes for random instance generation (minimum required)
