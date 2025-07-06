@@ -50,7 +50,7 @@ Use `-method <method_name>` to specify the solving algorithm:
 #### Heuristic Methods
 - **`NN`** - Nearest Neighbor algorithm
   - `-param1 1` - Enable 2-opt refinement
-- **`MSNN`** - Multi-start Nearest Neighbor
+- **`MS_NN`** - Multi-start Nearest Neighbor
 - **`EM`** - Extra Mileage heuristic
   - `-param1 1` - Enable 2-opt refinement
 
