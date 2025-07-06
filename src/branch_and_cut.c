@@ -340,7 +340,7 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
 
         if (inst->verbose >= GOOD) {
 
-            printf("   Node %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
+            printf("   Node %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
         
         }
 
@@ -365,7 +365,7 @@ void post_heuristic(const instance *inst, CPXCALLBACKCONTEXTptr context, int *su
     
     if (inst->verbose >= GOOD) {
 
-        printf(" * Node %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
+        printf(" * Node %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf\n", mynode, incumbent, sol.cost);
 
     }
     

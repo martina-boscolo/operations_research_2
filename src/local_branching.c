@@ -44,7 +44,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
     sprintf_s(filename, FILE_NAME_LEN, "LB_p%d", inst->param1);
 
     FILE *f = NULL;
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         char filename_results[FILE_NAME_LEN];
         sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
@@ -82,7 +82,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
         bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+        if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
             if (u) {
 
@@ -94,7 +94,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
             }
 
-            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, k %5d, Residual time %10.6lf\n", 
+            printf("Iteration %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf, k %5d, Residual time %10.6lf\n", 
                 iter, old_cost, temp_sol.cost, k, residual_time);
 
             fprintf(f, "%d,%f,%f\n", iter, temp_sol.cost, sol->cost);
@@ -135,7 +135,7 @@ void local_branching(instance *inst, solution *sol, const double timelimit) {
 
     }
 
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         plot_stats_in_file(filename);
 

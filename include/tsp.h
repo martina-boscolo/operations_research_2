@@ -18,7 +18,7 @@
 #define MIN_NNODES 10
 
 // Verbose levels
-#define ONLY_INCUMBMENT 10 
+#define ONLY_INCUMBENT 10 
 #define LOW 30
 #define GOOD 50
 #define DEBUG_V 100

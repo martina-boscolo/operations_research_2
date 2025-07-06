@@ -18,7 +18,7 @@ void vns(const instance *inst, solution *sol, const double timelimit) {
     sprintf_s(method_name, METH_NAME_LEN, "%s_k%d_r%d", VNS, k, reps);
 
     FILE* f = NULL;
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         char filename[FILE_NAME_LEN];
         sprintf_s(filename, FILE_NAME_LEN, "results/%s.csv", method_name);
@@ -39,10 +39,15 @@ void vns(const instance *inst, solution *sol, const double timelimit) {
         bool u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
         
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && u) {
+        if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
-            printf(" * Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Kick %d, Repetitions %5d, Residual time %10.6lf\n", 
-                iteration, old_cost, temp_sol.cost, k, reps, residual_time);
+            if (u) {
+
+                printf(" * Iteration %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf, Kick %d, Repetitions %5d, Residual time %10.6lf\n", 
+                    iteration, old_cost, temp_sol.cost, k, reps, residual_time);
+
+            }
+
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
 
         }
@@ -50,7 +55,7 @@ void vns(const instance *inst, solution *sol, const double timelimit) {
         // escape local minima
         kick(inst, &temp_sol, k, reps);
 
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+        if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
             fprintf(f, "%d,%f,%f\n", iteration, temp_sol.cost, sol->cost);
 
@@ -73,7 +78,7 @@ void vns(const instance *inst, solution *sol, const double timelimit) {
     
     }
     
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         plot_stats_in_file(method_name);
 

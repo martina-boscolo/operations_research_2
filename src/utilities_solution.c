@@ -278,7 +278,7 @@ bool update_sol(const instance *inst, solution *sol1, const solution *sol2, bool
 
     if (sol2->cost < (sol1->cost - EPSILON)) { // Floating-point error tolerance
 
-        if(print && inst->verbose >= ONLY_INCUMBMENT) {
+        if(print && inst->verbose >= ONLY_INCUMBENT) {
 
             printf(" * Old cost %10.6lf, New cost %10.6lf\n", sol1->cost, sol2->cost);
 

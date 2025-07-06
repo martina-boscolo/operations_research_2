@@ -25,7 +25,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
     sprintf_s(filename, FILE_NAME_LEN, "TS_p%d", inst->param1);
 
     FILE *f = NULL;
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         char filename_results[FILE_NAME_LEN];
         sprintf_s(filename_results, FILE_NAME_LEN, "results/%s.csv", filename);
@@ -55,11 +55,15 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
         u = update_sol(inst, sol, &temp_sol, false);
         updated = updated || u;
 
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method && u) {
+        if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
-            printf(" * Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Residual time %10.6lf\n", 
-                params.current_iter, old_cost, temp_sol.cost, residual_time);
+            if (u) {
 
+                printf(" * Iteration %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf, Residual time %10.6lf\n", 
+                    params.current_iter, old_cost, temp_sol.cost, residual_time);
+
+            }
+            
             fprintf(f, "%d,%f,%f\n", params.current_iter, temp_sol.cost, sol->cost);
 
         }
@@ -81,7 +85,7 @@ void tabu_search(const instance *inst, solution *sol, const double timelimit) {
 
     }
 
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         plot_stats_in_file(filename);
 

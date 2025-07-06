@@ -228,7 +228,7 @@ void multi_start_nn(const instance *inst, solution *sol, const double timelimit)
 
             }
 
-            printf("Start Node %5d, Incumbment %10.6lf, Current solution cost %10.6lf, Residual time %10.6lf\n", start, old_cost, temp_sol.cost, residual_time);
+            printf("Start Node %5d, Incumbent %10.6lf, Current solution cost %10.6lf, Residual time %10.6lf\n", start, old_cost, temp_sol.cost, residual_time);
             check_sol(inst, &temp_sol);
 
         }
@@ -397,7 +397,7 @@ void two_opt(const instance *inst, solution *sol, const double timelimit, bool p
 
         if (best_delta < - EPSILON) {
 
-            if(print && inst->verbose >= ONLY_INCUMBMENT) {
+            if(print && inst->verbose >= ONLY_INCUMBENT) {
 
                 printf(" * Old cost %10.6lf, New cost %10.6lf, Residual time %10.6lf\n", sol->cost, sol->cost + best_delta, residual_time);
 

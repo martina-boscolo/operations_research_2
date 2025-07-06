@@ -27,7 +27,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     // Save results in a file, if required
     FILE *f = NULL;
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         char filename[FILE_NAME_LEN];
         sprintf_s(filename, FILE_NAME_LEN, "results/benders.csv");
@@ -99,7 +99,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
         
         // If required print the iteration statistics
-        if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+        if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
             if (u) {
 
@@ -111,7 +111,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
             }
 
-            printf("Iteration %5d, Incumbment %10.6lf, Heuristic solution cost %10.6lf, Lower bound %10.6f, ncomp %5d, Remaining time time %10.6f\n", 
+            printf("Iteration %5d, Incumbent %10.6lf, Heuristic solution cost %10.6lf, Lower bound %10.6f, ncomp %5d, Remaining time time %10.6f\n", 
                         iter, old_cost, temp_sol.cost, z, ncomp, timelimit - get_elapsed_time(t_start));
             fflush(NULL);
             fprintf(f, "%d,%f,%f\n", iter, z, get_time_in_milliseconds() - t_start);
@@ -144,7 +144,7 @@ void benders_loop(instance *inst, solution *sol, const double timelimit) {
 
     }
     
-    if (inst->verbose >= ONLY_INCUMBMENT && is_asked_method) {
+    if (inst->verbose >= ONLY_INCUMBENT && is_asked_method) {
 
         plot_stats_in_file_base("benders");
 
