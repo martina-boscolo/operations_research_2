@@ -5,7 +5,7 @@ REM Define constants
 set SEED_START=41
 set SEED_END=50
 set NODES=300
-set TIMELIMIT=60
+set TIMELIMIT=180
 
 REM Empty the logs folder if it exists, otherwise create it
 if exist logs (
