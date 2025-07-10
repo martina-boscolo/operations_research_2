@@ -27,15 +27,12 @@ for /l %%s in (%SEED_START%,1,%SEED_END%) do (
     echo Running LB with seed=%%s, param1=20
     ..\..\build\Release\tsp.exe -method LB -n %NODES% -seed %%s -timelimit %TIMELIMIT% -param1 20 -verbose 0 > logs\LB_n%NODES%_seed%%s.log
 
-    echo Running TS with seed=%%s
-    ..\..\build\Release\tsp.exe -method TS -n %NODES% -seed %%s -timelimit %TIMELIMIT% -verbose 0 > logs\TS_n%NODES%_seed%%s.log
-
 )
 
-set METHOD=HF LB TS
+set METHOD=HF LB
 
 REM Create CSV with headers for each parameter value
-echo 3,HF,LB,TS > matheu_comp.csv
+echo 2,HF,LB > matheu_comp.csv
 
 REM Extract data and populate CSV
 for /l %%s in (%SEED_START%,1,%SEED_END%) do (
