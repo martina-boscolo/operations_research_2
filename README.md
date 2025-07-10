@@ -1,14 +1,18 @@
 # Operations Research 2
+
 This repository contains the project completed for the Operations Research 2 course. 
 The project focuses on investigating various strategies for solving the well-known Travelling Salesman Problem (TSP), from heuristic techniques that provide approximate solutions to exact optimization using the CPLEX MIP solver.
 
 ### Development Environment
+
 The project has been developed and tested with the following tools on Windows + VSCode:
+
 - gcc (MinGW\.org GCC-6.3.0-1) 6.3.0
 - GNU Make 3.82.90
 - gnuplot 6.0 patchlevel 2
 
 You can verify the versions of each tool by running the following commands:
+
 ```
 gcc --version
 mingw32-make --version
@@ -16,6 +20,7 @@ gnuplot --version
 ```
 
 ### Build instructions using CMake
+
 ```
 mkdir build
 cd build
@@ -24,6 +29,7 @@ cmake --build . --config Release
 ```
 
 ### Run from Release directory
+
 ```
 cd Release
 tsp.exe [options]
@@ -36,28 +42,34 @@ tsp.exe [options]
 ```
 
 ### Input/Output Options
+
 - **`-file|-f <file_path>`** - Specify input file containing TSP instance data
 - **`-n <number>`** - Set number of nodes for random instance generation (minimum required)
 
 ### General Configuration
+
 - **`-seed <number>`** - Set random seed for reproducible results
 - **`-timelimit <seconds>`** - Set time limit in seconds 
 - **`-verbose <level>`** - Set verbosity level for debug output
 
 ### Solution Methods
+
 Use `-method <method_name>` to specify the solving algorithm:
 
 #### Heuristic Methods
+
 - **`NN`** - Nearest Neighbor algorithm
   - `-param1 1` - Enable 2-opt refinement
 - **`MS_NN`** - Multi-start Nearest Neighbor
+  - `-param1 1` - Enable 2-opt refinement
 - **`EM`** - Extra Mileage heuristic
   - `-param1 1` - Enable 2-opt refinement
 
 #### Metaheuristic Methods
+
 - **`VNS`** - Variable Neighborhood Search
-  - `-param1 <k_value>` - Neighborhood size parameter (3 or 5)
-  - `-param2 <r_value>` - Search intensity parameter (1, 3, or 5)
+  - `-param1 <k_value>` - Neighborhood size parameter (3, 5)
+  - `-param2 <r_value>` - Search intensity parameter (>= 1)
 - **`TS`** - Tabu Search
   - `-param1 <tenure_type>` - Tenure strategy (0-4):
     - `0` - Fixed minimum tenure
@@ -67,22 +79,24 @@ Use `-method <method_name>` to specify the solving algorithm:
     - `4` - Sinusoidal pattern
 
 #### Exact Methods
-- **`B`** - Basic Branch and Bound
+
+- **`BL`** - Benders' loop
 - **`BC`** - Branch and Cut
   - `-param1 <0|1>` - Enable warm-up heuristic (0=disabled, 1=enabled)
   - `-param2 <0|1>` - Enable fractional SECs (0=disabled, 1=enabled)
   - `-param3 <0|1>` - Enable post-optimization heuristic (0=disabled, 1=enabled)
-- **`BENDERS`** - Benders decomposition
 
 #### Matheuristic Methods
+
 - **`HF`** - Hard Fixing
   - `-param1 <strategy>` - Fixing strategy:
-    - `1` - Random percentage selection (40, 50, 60, 80)
-    - `20-80` - Fixed percentage values 
+    - `1` - Random percentage selection among (40, 50, 60, 80)
+    - Fixed percentage values (> 1)
 - **`LB`** - Local Branching
-  - `-param1 <k_value>` - Neighborhood size (10, 20, 30, 40)
+  - `-param1 <k_value>` - Neighborhood size
 
 #### Examples
+
 ```
 ./Release/tsp.exe -method MS_NN -n 1000  -timelimit 60 -verbose 30
 ```

@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <ilcplex/cplex.h>
 
-#define BENDERS "B"
+#define BENDERS "BL"
 
 /**
  * Benders loop algorithm.
