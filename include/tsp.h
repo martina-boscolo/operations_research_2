@@ -14,8 +14,10 @@
 #define EMPTY_STRING '\0'
 #define DEFAULT_PARAMETER -1
 
-// Value limit
-#define MIN_NNODES 10
+// Values limit
+#define MIN_NNODES 10                   // Minimum number of nodes
+#define MAX_XCOORD 10000                // Maximum value for x coordinates for a random instance
+#define MAX_YCOORD 10000                // Maximum value for x coordinates for a random instance
 
 // Verbose levels
 #define ONLY_INCUMBENT 10 

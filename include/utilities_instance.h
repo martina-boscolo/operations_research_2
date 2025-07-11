@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Maximum value for x and y coordinates for a random instance
-#define MAX_XCOORD 10000
-#define MAX_YCOORD 10000
-
 /**
  * Initialize the instance with default values.
  * NOTE: This function doesn't allocate the memory.
