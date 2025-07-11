@@ -84,10 +84,12 @@ Use `-method <method_name>` to specify the solving algorithm:
 
 - **`HF`** - Hard Fixing
   - `-param1 <strategy>` - Fixing strategy:
-    - `1` - Random percentage selection among (40, 50, 60, 80)
-    - Fixed percentage values (> 1)
+    - `0` - Random percentage selection among (40, 50, 60, 80)
+    - `>1` - Specified percentage
 - **`LB`** - Local Branching
   - `-param1 <k_value>` - Neighborhood size
+    - `0` - Fix 2% of nodes;
+    - `>1` - Use specified percentage
 
 #### Examples
 
