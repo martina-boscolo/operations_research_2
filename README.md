@@ -1,4 +1,4 @@
-# Operations Research 2
+# Algorithms for Traveling Salesman Problem
 
 This repository contains the project completed for the Operations Research 2 course. 
 The project focuses on investigating various strategies for solving the well-known Travelling Salesman Problem (TSP), from heuristic techniques that provide approximate solutions to exact optimization using the CPLEX MIP solver.
