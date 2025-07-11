@@ -10,6 +10,7 @@ The project has been developed and tested with the following tools on Windows + 
 - gcc (MinGW\.org GCC-6.3.0-1) 6.3.0
 - GNU Make 3.82.90
 - gnuplot 6.0 patchlevel 2
+- IBM(R) ILOG(R) CPLEX(R) Interactive Optimizer 22.1.2.0
 
 
 ### Build instructions using CMake
