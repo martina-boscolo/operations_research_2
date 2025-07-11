@@ -11,13 +11,6 @@ The project has been developed and tested with the following tools on Windows + 
 - GNU Make 3.82.90
 - gnuplot 6.0 patchlevel 2
 
-You can verify the versions of each tool by running the following commands:
-
-```
-gcc --version
-mingw32-make --version
-gnuplot --version
-```
 
 ### Build instructions using CMake
 
